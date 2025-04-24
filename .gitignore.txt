@@ -1,0 +1,21 @@
+# Simulation files
+*.vcd
+*.vvp
+*.out
+
+# Tool-specific directories
+work/
+sim/
+synth/
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Vendor-specific files (adjust as needed)
+*.mpf  # ModelSim
+*.wlf  # ModelSim
+*.qpf  # Quartus
+*.qsf  # Quartus
+*.xpr  # Vivado
