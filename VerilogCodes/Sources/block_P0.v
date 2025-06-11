@@ -15,6 +15,6 @@ module block_P0(
     wire [11:0] sum;
     assign sum = in1 + in2 + in3 + in4 + in5 + in6 + in7 + in8 + in9;
     
-    assign p0_result = sum/9;
+    assign p0_result = sum / 9;
     
     endmodule
