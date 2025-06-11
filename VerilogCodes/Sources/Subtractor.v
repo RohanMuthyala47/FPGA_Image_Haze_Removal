@@ -9,16 +9,15 @@
 //endmodule
 
 module Subtractor(
-    input [15:0] a,      // Q0.16 format input
-    output [15:0] diff   // Q0.16 format output
+    input [15:0] a,
+    output [15:0] diff
 );
-    parameter signed [16:0] One = 17'd65535;        // 1.0 in Q0.16 (use 17-bit to prevent overflow)
-    parameter [15:0] T0_min = 16'd16384;            // 0.25 in Q0.16 (minimum clamp)
+    parameter signed [16:0] One = 17'd65535; // 1.0 in Q0.16
+    parameter [15:0] T0_min = 16'd16384;     // 0.25 in Q0.16
     
-    // Use signed arithmetic to handle negative results properly
-    wire signed [16:0] temp_diff = One - {1'b0, a}; // Extend 'a' to 17-bit unsigned
+    wire signed [16:0] temp_diff = One - {1'b0, a};
     
-    assign diff = (temp_diff <= $signed({1'b0, T0_min})) ? T0_min :    // If result <= 0.25, clamp to 0.25
-                  temp_diff[15:0];                                     // Otherwise, take lower 16 bits
+    assign diff = (temp_diff <= $signed({1'b0, T0_min})) ? T0_min :
+                  temp_diff[15:0];
     
 endmodule
