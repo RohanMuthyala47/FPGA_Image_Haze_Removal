@@ -15,10 +15,10 @@ module SRSC (
     input  wire [15:0] transmission,
     input  wire        i_trans_valid,
     
-    output reg [7:0]   J_R,
-    output reg [7:0]   J_G,
-    output reg [7:0]   J_B,
-    output reg         o_valid
+    output wire [7:0]   J_R,
+    output wire [7:0]   J_G,
+    output wire [7:0]   J_B,
+    output wire         o_valid
 );
 
     //Compute (Ic - Ac)
@@ -40,7 +40,7 @@ module SRSC (
     reg add_or_sub_R_reg1, add_or_sub_G_reg1, add_or_sub_B_reg1;
     reg stage_8_valid;
 
-    //compute (Ic-Ac)*(1/T)
+    //Compute (Ic-Ac)*(1/T)
     wire [15:0] Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
     
     //Pipeline Registers for stage 9
@@ -48,6 +48,9 @@ module SRSC (
     reg add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
     reg[15:0] Mult_Red_Reg, Mult_Green_Reg, Mult_Blue_Reg;
     reg stage_9_valid;
+    
+    //Compute Ac +/- (|I-A|/t)
+    wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
     
     
     //Update stage 7 pipeline registers
@@ -68,6 +71,8 @@ module SRSC (
             IB_minus_AB_reg <= 0;
             
             inverse_transmission_reg <= 0;
+            
+            stage_7_valid <= 0;
         end
         else
         begin
@@ -102,6 +107,8 @@ module SRSC (
             add_or_sub_R_reg1 <= 0;
             add_or_sub_G_reg1 <= 0;
             add_or_sub_B_reg1 <= 0;
+            
+            stage_8_valid <= 0;
         end
         else
         begin
@@ -134,6 +141,8 @@ module SRSC (
             Mult_Red_Reg <= 0;
             Mult_Green_Reg <= 0;
             Mult_Blue_Reg <= 0;
+            
+            stage_9_valid <= 0;
         end
         else
         begin
@@ -142,8 +151,8 @@ module SRSC (
             A_B_reg2 <= A_B_reg1;
             
             add_or_sub_R_reg2 <= add_or_sub_R_reg1;
-            add_or_sub_G_reg2 <= add_or_sub_R_reg1;
-            add_or_sub_B_reg2 <= add_or_sub_R_reg1;
+            add_or_sub_G_reg2 <= add_or_sub_G_reg1;
+            add_or_sub_B_reg2 <= add_or_sub_B_reg1;
             
             Mult_Red_Reg <= Diff_R_times_T;
             Mult_Green_Reg <= Diff_G_times_T;
@@ -153,6 +162,7 @@ module SRSC (
         end
     end
     
+    assign o_valid = stage_9_valid;
     
 ////////////////////////////////////////////////////////////////
 //BLOCK DECLARATIONS
@@ -213,5 +223,34 @@ module SRSC (
         
         .result(Diff_B_times_T)
     );
-
+    
+    //Adder blocks to compute Ac +/- (|I-A|/t)
+    Adder_SRSC Add_Red(
+            .a(A_R_reg2),
+            .b(Mult_Red_Reg),
+            
+            .add_or_sub(add_or_sub_R_reg2),
+            
+            .out(J_R)
+        );
+        
+    Adder_SRSC Add_Green(
+            .a(A_G_reg2),
+            .b(Mult_Green_Reg),
+            
+            .add_or_sub(add_or_sub_G_reg2),
+            
+            .out(J_G)
+        );
+        
+    Adder_SRSC Add_Blue(
+            .a(A_B_reg2),
+            .b(Mult_Blue_Reg),
+            
+            .add_or_sub(add_or_sub_B_reg2),
+            
+            .out(J_B)
+        );
+        
+    
  endmodule
