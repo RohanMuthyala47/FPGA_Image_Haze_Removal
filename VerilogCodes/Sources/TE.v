@@ -81,7 +81,7 @@ module TE(
                       inv_ar2_2,inv_ag2_2,inv_ab2_2,
                       inv_ar3_3,inv_ag3_3,inv_ab3_3; 
                    
-     reg stage_5_valid;
+    reg stage_5_valid;
     always @(posedge clk)
     begin
         if(rst)
@@ -140,7 +140,7 @@ module TE(
 
     wire [15:0]subtract_out;
 
-    //stage 8
+    //stage 7
     always @(posedge clk)
     begin
         if(rst) begin
