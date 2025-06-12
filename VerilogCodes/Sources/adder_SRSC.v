@@ -1,9 +1,15 @@
 module Adder_SRSC(
-    input [24:0]x,
-    input [15:0]y,
+    input [7:0] a,
+    input [15:0] b,
+    
+    input add_or_sub,
 
-    output [24:0]out_add
+    output [7:0] out
     );
     
-    assign out_add=x+{9'b000000000,y};
+    wire [7:0] sum;
+    
+    assign sum = add_or_sub ? (a + b) : (a - b);
+    assign out = sum >> 8;
+    
 endmodule
