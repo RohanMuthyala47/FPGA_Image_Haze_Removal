@@ -1,4 +1,5 @@
 // Atmospheric Light Estimation Module
+`define Image_Size (512 * 512)
 module ALE(
     input         clk,
     input         rst,
@@ -23,14 +24,32 @@ module ALE(
     output [15:0] Inv_A_G,
     output [15:0] Inv_A_B,          // Inverse Atmospheric Light Values
     
-    output        output_is_valid   // Output data valid signal
+    output        output_is_valid,  // Output data valid signal
+    output        done              // Entire image has been processed
 );
+
+    reg [17:0] pixel_counter;
+    reg done_reg;
     
     // Minimum of 9 - R/G/B channels (output wires)
     wire [7:0] minimum_red, minimum_green, minimum_blue;
     
     // Pipeline Registers (Stage 1)
     reg [7:0] minimum_red_P, minimum_green_P, minimum_blue_P;
+    
+    // Keep track of the number of pixels processed through the module
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            pixel_counter <= 0;
+            done_reg <= 0;
+        end
+        else if (input_is_valid && !done_reg) begin
+            pixel_counter <= pixel_counter + 1;
+            if (pixel_counter == (`Image_Size - 1)) begin
+                done_reg <= 1; // All pixels have been processed through the ALE module
+            end
+        end
+    end
     
     always @(posedge clk) begin
         if(rst) begin
@@ -53,8 +72,8 @@ module ALE(
     wire [7:0] Dark_channel_Red, Dark_channel_Green, Dark_channel_Blue;
     
     // Pipeline Registers (Stage 2)
-    reg [7:0]  Dark_channel_P;
-    reg [7:0]  AR_P, AG_P, AB_P;
+    reg [7:0]   Dark_channel_P;
+    reg [7:0]   AR_P, AG_P, AB_P;
     reg [15:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
     
     assign Dark_channel_Red = (Dark_channel > Dark_channel_P) ? (minimum_red_P * 7) >> 3 : AR_P;
@@ -110,6 +129,8 @@ module ALE(
     assign Inv_A_B = Inv_AB_P;
     
     assign output_is_valid = Stage_2_valid;
+    
+    assign done = done_reg;
 
 /////////////////////////////////////////////////////////////////////////////////
 // BLOCK DECLARATIONS
