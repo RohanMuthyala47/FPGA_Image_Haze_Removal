@@ -1,189 +1,180 @@
-module ALE (
-    input wire clk,
-    input wire rst,
-    input wire input_valid,    
-   
-    input wire [23:0] output_pixel_1,
-    input wire [23:0] output_pixel_2,
-    input wire [23:0] output_pixel_3,
-    input wire [23:0] output_pixel_4,
-    input wire [23:0] output_pixel_5,
-    input wire [23:0] output_pixel_6,
-    input wire [23:0] output_pixel_7,
-    input wire [23:0] output_pixel_8,
-    input wire [23:0] output_pixel_9,
+// Atmospheric Light Estimation Module
+module ALE(
+    input         clk,
+    input         rst,
     
-    output reg [7:0] o_a_r,
-    output reg [7:0] o_a_g,
-    output reg [7:0] o_a_b,
-    output reg [15:0] o_inv_a_r,
-    output reg [15:0] o_inv_a_g,
-    output reg [15:0] o_inv_a_b,
-    output reg o_valid
+    input         input_is_valid,   // Input data valid signal
+    
+    input [23:0]  input_pixel_1,
+    input [23:0]  input_pixel_2,
+    input [23:0]  input_pixel_3,
+    input [23:0]  input_pixel_4,
+    input [23:0]  input_pixel_5,
+    input [23:0]  input_pixel_6,
+    input [23:0]  input_pixel_7,
+    input [23:0]  input_pixel_8,
+    input [23:0]  input_pixel_9,    // 3x3 window input
+    
+    output [7:0]  A_R,
+    output [7:0]  A_G,
+    output [7:0]  A_B,              // Atmospheric Light Values
+    
+    output [15:0] Inv_A_R,
+    output [15:0] Inv_A_G,
+    output [15:0] Inv_A_B,          // Inverse Atmospheric Light Values
+    
+    output        output_is_valid   // Output data valid signal
 );
-
-    // Define pipeline registers
-    reg input_valid_r1, input_valid_r2, input_valid_r3;
     
-    // Extract RGB components for each pixel
-    wire [7:0] p1_r, p1_g, p1_b;
-    wire [7:0] p2_r, p2_g, p2_b;
-    wire [7:0] p3_r, p3_g, p3_b;
-    wire [7:0] p4_r, p4_g, p4_b;
-    wire [7:0] p5_r, p5_g, p5_b;
-    wire [7:0] p6_r, p6_g, p6_b;
-    wire [7:0] p7_r, p7_g, p7_b;
-    wire [7:0] p8_r, p8_g, p8_b;
-    wire [7:0] p9_r, p9_g, p9_b;
+    // Minimum of 9 - R/G/B channels (output wires)
+    wire [7:0] minimum_red, minimum_green, minimum_blue;
     
-    assign p1_r = output_pixel_1[23:16];
-    assign p1_g = output_pixel_1[15:8];
-    assign p1_b = output_pixel_1[7:0];
+    // Pipeline Registers (Stage 1)
+    reg [7:0] minimum_red_P, minimum_green_P, minimum_blue_P;
     
-    assign p2_r = output_pixel_2[23:16];
-    assign p2_g = output_pixel_2[15:8];
-    assign p2_b = output_pixel_2[7:0];
-    
-    assign p3_r = output_pixel_3[23:16];
-    assign p3_g = output_pixel_3[15:8];
-    assign p3_b = output_pixel_3[7:0];
-    
-    assign p4_r = output_pixel_4[23:16];
-    assign p4_g = output_pixel_4[15:8];
-    assign p4_b = output_pixel_4[7:0];
-    
-    assign p5_r = output_pixel_5[23:16];
-    assign p5_g = output_pixel_5[15:8];
-    assign p5_b = output_pixel_5[7:0];
-    
-    assign p6_r = output_pixel_6[23:16];
-    assign p6_g = output_pixel_6[15:8];
-    assign p6_b = output_pixel_6[7:0];
-    
-    assign p7_r = output_pixel_7[23:16];
-    assign p7_g = output_pixel_7[15:8];
-    assign p7_b = output_pixel_7[7:0];
-    
-    assign p8_r = output_pixel_8[23:16];
-    assign p8_g = output_pixel_8[15:8];
-    assign p8_b = output_pixel_8[7:0];
-    
-    assign p9_r = output_pixel_9[23:16];
-    assign p9_g = output_pixel_9[15:8];
-    assign p9_b = output_pixel_9[7:0];
-    
-    // Stage 1: Min_9 operation for each color channel
-    reg [7:0] min_r_p1;
-    reg [7:0] min_g_p1;
-    reg [7:0] min_b_p1;
-    
-    // Min_9 combinational logic for red channel
-    wire [7:0] min_r_1 = (p1_r < p2_r) ? p1_r : p2_r;
-    wire [7:0] min_r_2 = (p3_r < p4_r) ? p3_r : p4_r;
-    wire [7:0] min_r_3 = (p5_r < p6_r) ? p5_r : p6_r;
-    wire [7:0] min_r_4 = (p7_r < p8_r) ? p7_r : p8_r;
-    wire [7:0] min_r_5 = (min_r_1 < min_r_2) ? min_r_1 : min_r_2;
-    wire [7:0] min_r_6 = (min_r_3 < min_r_4) ? min_r_3 : min_r_4;
-    wire [7:0] min_r_7 = (min_r_5 < min_r_6) ? min_r_5 : min_r_6;
-    wire [7:0] min_r = (min_r_7 < p9_r) ? min_r_7 : p9_r;
-    
-    // Min_9 combinational logic for green channel
-    wire [7:0] min_g_1 = (p1_g < p2_g) ? p1_g : p2_g;
-    wire [7:0] min_g_2 = (p3_g < p4_g) ? p3_g : p4_g;
-    wire [7:0] min_g_3 = (p5_g < p6_g) ? p5_g : p6_g;
-    wire [7:0] min_g_4 = (p7_g < p8_g) ? p7_g : p8_g;
-    wire [7:0] min_g_5 = (min_g_1 < min_g_2) ? min_g_1 : min_g_2;
-    wire [7:0] min_g_6 = (min_g_3 < min_g_4) ? min_g_3 : min_g_4;
-    wire [7:0] min_g_7 = (min_g_5 < min_g_6) ? min_g_5 : min_g_6;
-    wire [7:0] min_g = (min_g_7 < p9_g) ? min_g_7 : p9_g;
-    
-    // Min_9 combinational logic for blue channel
-    wire [7:0] min_b_1 = (p1_b < p2_b) ? p1_b : p2_b;
-    wire [7:0] min_b_2 = (p3_b < p4_b) ? p3_b : p4_b;
-    wire [7:0] min_b_3 = (p5_b < p6_b) ? p5_b : p6_b;
-    wire [7:0] min_b_4 = (p7_b < p8_b) ? p7_b : p8_b;
-    wire [7:0] min_b_5 = (min_b_1 < min_b_2) ? min_b_1 : min_b_2;
-    wire [7:0] min_b_6 = (min_b_3 < min_b_4) ? min_b_3 : min_b_4;
-    wire [7:0] min_b_7 = (min_b_5 < min_b_6) ? min_b_5 : min_b_6;
-    wire [7:0] min_b = (min_b_7 < p9_b) ? min_b_7 : p9_b;
-    
-    // Stage 2: Min_3 operation across color channels
-    reg [7:0] dark_channel_p2;
-    wire [7:0] min_rg = (min_r < min_g) ? min_r : min_g;
-    wire [7:0] dark_channel = (min_rg < min_b) ? min_rg : min_b;
-    
-    // For tracking coordinates of maximum dark channel value
-    reg [7:0] max_dark_val;
-    reg [7:0] max_r, max_g, max_b;
-    
-    // Stage 3: Compare and update maximum
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            // Reset all registers
-            input_valid_r1 <= 1'b0;
-            input_valid_r2 <= 1'b0;
-            input_valid_r3 <= 1'b0;
-            min_r_p1 <= 8'h00;
-            min_g_p1 <= 8'h00;
-            min_b_p1 <= 8'h00;
-            dark_channel_p2 <= 8'h00;
-            max_dark_val <= 8'h00;
-            max_r <= 8'h00;
-            max_g <= 8'h00;
-            max_b <= 8'h00;
-            o_a_r <= 8'h00;
-            o_a_g <= 8'h00;
-            o_a_b <= 8'h00;
-            o_inv_a_r <= 16'h0000;
-            o_inv_a_g <= 16'h0000;
-            o_inv_a_b <= 16'h0000;
-            o_valid <= 1'b0;
-        end else begin
-            // Pipeline stage 1: Min_9 operation
-            min_r_p1 <= min_r;
-            min_g_p1 <= min_g;
-            min_b_p1 <= min_b;
-            input_valid_r1 <= input_valid;
-            
-            // Pipeline stage 2: Min_3 operation
-            dark_channel_p2 <= dark_channel;
-            input_valid_r2 <= input_valid_r1;
-            
-            // Pipeline stage 3: Compare with current maximum
-            input_valid_r3 <= input_valid_r2;
-            
-            // Update maximum if current dark channel value is greater
-            if (input_valid_r2 && dark_channel_p2 > max_dark_val) begin
-                max_dark_val <= dark_channel_p2;
-                // Store the corresponding RGB values
-                max_r <= p5_r; // Center pixel of the 3x3 window
-                max_g <= p5_g;
-                max_b <= p5_b;
-            end
-            
-            // Output stage
-            o_valid <= input_valid_r3;
-            
-            o_a_r <= (max_r * 7) >> 3; 
-            o_a_g <= (max_g * 7) >> 3;
-            o_a_b <= (max_b * 7) >> 3;
-
+    always @(posedge clk) begin
+        if(rst) begin
+            minimum_red_P <= 8'd0;
+            minimum_green_P <= 8'd0;
+            minimum_blue_P <= 8'd0;
+        end
+        else begin
+            minimum_red_P <= minimum_red;
+            minimum_green_P <= minimum_green;
+            minimum_blue_P <= minimum_blue;
         end
     end
     
-//    ATM_LUT Inverse_Red(
-//        .in_val(o_a_r),
-//        .out_val(o_inv_a_r)
-//    );
+    wire [7:0] Dark_channel;
     
-//        ATM_LUT Inverse_Green(
-//        .in_val(o_a_g),
-//        .out_val(o_inv_a_g)
-//    );
+    // LUT outputs
+    wire [15:0] LUT_Inv_AR, LUT_Inv_AG, LUT_Inv_AB;
     
-//        ATM_LUT Inverse_Blue(
-//        .in_val(o_a_b),
-//        .out_val(o_inv_a_b)
-//    );
+    wire [7:0] Dark_channel_Red, Dark_channel_Green, Dark_channel_Blue;
+    
+    // Pipeline Registers (Stage 2)
+    reg [7:0]  Dark_channel_P;
+    reg [7:0]  AR_P, AG_P, AB_P;
+    reg [15:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
+    
+    assign Dark_channel_Red = (Dark_channel > Dark_channel_P) ? (minimum_red_P * 7) >> 3 : AR_P;
+    assign Dark_channel_Green = (Dark_channel > Dark_channel_P) ? (minimum_green_P * 7) >> 3 : AG_P;
+    assign Dark_channel_Blue = (Dark_channel > Dark_channel_P) ? (minimum_blue_P * 7) >> 3 : AB_P;
+    
+    always @(posedge clk) begin
+        if(rst) begin
+            Dark_channel_P <= 8'd0;
+            
+            AR_P <= 8'd0;
+            AG_P <= 8'd0;
+            AB_P <= 8'd0;
+            
+            Inv_AR_P <= 16'd0;
+            Inv_AG_P <= 16'd0;
+            Inv_AB_P <= 16'd0;
+        end
+        else begin
+            Dark_channel_P <= (Dark_channel > Dark_channel_P) ? Dark_channel : Dark_channel_P;
+            
+            AR_P <= Dark_channel_Red;
+            AG_P <= Dark_channel_Green;
+            AB_P <= Dark_channel_Blue;
+            
+            Inv_AR_P <= LUT_Inv_AR;
+            Inv_AG_P <= LUT_Inv_AG;
+            Inv_AB_P <= LUT_Inv_AB;
+        end
+    end
+    
+    // Delay the valid signal by 2 clock cycles
+    reg Stage_1_valid, Stage_2_valid;
+    always @(posedge clk)
+    begin
+        if(rst) begin
+            Stage_1_valid <= 0;
+            Stage_2_valid <= 0;
+        end
+        else begin
+            Stage_1_valid <= input_is_valid;
+            Stage_2_valid <= Stage_1_valid;
+        end
+    end
+    
+    // Output wire assignments
+    assign A_R = AR_P;
+    assign A_G = AG_P;
+    assign A_B = AB_P;
+    
+    assign Inv_A_R = Inv_AR_P;
+    assign Inv_A_G = Inv_AG_P;
+    assign Inv_A_B = Inv_AB_P;
+    
+    assign output_is_valid = Stage_2_valid;
+
+/////////////////////////////////////////////////////////////////////////////////
+// BLOCK DECLARATIONS
+/////////////////////////////////////////////////////////////////////////////////
+
+    // Find the minimum of each color channel inputs
+    ALE_Minimum_9 Red (
+        .input_pixel_1(input_pixel_1[23:16]),
+        .input_pixel_2(input_pixel_2[23:16]),
+        .input_pixel_3(input_pixel_3[23:16]),
+        .input_pixel_4(input_pixel_4[23:16]),
+        .input_pixel_5(input_pixel_5[23:16]),
+        .input_pixel_6(input_pixel_6[23:16]),
+        .input_pixel_7(input_pixel_7[23:16]),
+        .input_pixel_8(input_pixel_8[23:16]),
+        .input_pixel_9(input_pixel_9[23:16]),
+        .minimum_pixel(minimum_red)
+    );
+    
+    ALE_Minimum_9 Green (
+        .input_pixel_1(input_pixel_1[15:8]),
+        .input_pixel_2(input_pixel_2[15:8]),
+        .input_pixel_3(input_pixel_3[15:8]),
+        .input_pixel_4(input_pixel_4[15:8]),
+        .input_pixel_5(input_pixel_5[15:8]),
+        .input_pixel_6(input_pixel_6[15:8]),
+        .input_pixel_7(input_pixel_7[15:8]),
+        .input_pixel_8(input_pixel_8[15:8]),
+        .input_pixel_9(input_pixel_9[15:8]),
+        .minimum_pixel(minimum_green)
+    );
+    
+    ALE_Minimum_9 Blue (
+        .input_pixel_1(input_pixel_1[7:0]),
+        .input_pixel_2(input_pixel_2[7:0]),
+        .input_pixel_3(input_pixel_3[7:0]),
+        .input_pixel_4(input_pixel_4[7:0]),
+        .input_pixel_5(input_pixel_5[7:0]),
+        .input_pixel_6(input_pixel_6[7:0]),
+        .input_pixel_7(input_pixel_7[7:0]),
+        .input_pixel_8(input_pixel_8[7:0]),
+        .input_pixel_9(input_pixel_9[7:0]),
+        .minimum_pixel(minimum_blue)
+    );
+    
+    // Calculate minimum among the three channels to get dark channel
+    ALE_Minimum_3 Dark_Channel(
+        .a(minimum_red_P), .b(minimum_green_P), .c(minimum_blue_P),
+        .minimum(Dark_channel)
+    );
+    
+    // Look-Up Tables to output the reciprocal of the atmospheric light value in Q0.16 format
+    ATM_LUT Inverse_Red(
+        .in_val(Dark_channel_Red),
+        .out_val(LUT_Inv_AR)
+    );
+    
+    ATM_LUT Inverse_Green(
+        .in_val(Dark_channel_Green),
+        .out_val(LUT_Inv_AG)
+    );
+    
+    ATM_LUT Inverse_Blue(
+        .in_val(Dark_channel_Blue),
+        .out_val(LUT_Inv_AB)
+    );
     
 endmodule
