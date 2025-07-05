@@ -15,10 +15,10 @@ module SRSC (
     input  wire [15:0] transmission,
     input  wire        i_trans_valid,
     
-    output wire [7:0]   J_R,
-    output wire [7:0]   J_G,
-    output wire [7:0]   J_B,
-    output wire         o_valid
+    output wire [7:0]  J_R,
+    output wire [7:0]  J_G,
+    output wire [7:0]  J_B,
+    output wire        o_valid
 );
 
     //Compute (Ic - Ac)
