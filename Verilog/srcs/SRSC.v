@@ -5,12 +5,12 @@ module SRSC (
     input  wire [7:0]  I_R,
     input  wire [7:0]  I_G, 
     input  wire [7:0]  I_B,
-    input wire input_is_valid,
+    input wire         input_is_valid,
     
     input  wire [7:0]  A_R,
     input  wire [7:0]  A_G,
     input  wire [7:0]  A_B,
-    input wire ale_in_valid,
+    input wire         ale_in_valid,
    
     input  wire [15:0] transmission,
     input  wire        i_trans_valid,
@@ -23,31 +23,31 @@ module SRSC (
 
     //Compute (Ic - Ac)
     wire [7:0] IR_minus_AR, IG_minus_AG, IB_minus_AB;
-    wire add_or_sub_R, add_or_sub_G, add_or_sub_B;
+    wire       add_or_sub_R, add_or_sub_G, add_or_sub_B;
         
     //Inverted transmission value
     wire [15:0] inverse_transmission;
     
     //Pipeline Registers for stage 7
-    reg [7:0] A_R_reg, A_G_reg, A_B_reg;
-    reg [7:0] IR_minus_AR_reg, IG_minus_AG_reg, IB_minus_AB_reg;
-    reg add_or_sub_R_reg, add_or_sub_G_reg, add_or_sub_B_reg;
+    reg [7:0]  A_R_reg, A_G_reg, A_B_reg;
+    reg [7:0]  IR_minus_AR_reg, IG_minus_AG_reg, IB_minus_AB_reg;
+    reg        add_or_sub_R_reg, add_or_sub_G_reg, add_or_sub_B_reg;
     reg [15:0] inverse_transmission_reg;
-    reg stage_7_valid;
+    reg        stage_7_valid;
     
     //Pipeline Registers for stage 8
     reg [7:0] A_R_reg1, A_G_reg1, A_B_reg1;
-    reg add_or_sub_R_reg1, add_or_sub_G_reg1, add_or_sub_B_reg1;
-    reg stage_8_valid;
+    reg       add_or_sub_R_reg1, add_or_sub_G_reg1, add_or_sub_B_reg1;
+    reg       stage_8_valid;
 
     //Compute (Ic-Ac)*(1/T)
     wire [15:0] Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
     
     //Pipeline Registers for stage 9
     reg [7:0] A_R_reg2, A_G_reg2, A_B_reg2;
-    reg add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
+    reg       add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
     reg[15:0] Mult_Red_Reg, Mult_Green_Reg, Mult_Blue_Reg;
-    reg stage_9_valid;
+    reg       stage_9_valid;
     
     //Compute Ac +/- (|I-A|/t)
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
