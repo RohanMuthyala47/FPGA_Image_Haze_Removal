@@ -1,202 +1,150 @@
-`timescale 1ns/1ps
 module WindowGenerator(
-    input wire r_clk, r_rst,
-    input wire [23:0] input_pixel_data,
-    input wire input_is_valid,
+    input             clk,
+    input             rst,
     
-    output wire [71:0] red_window_out,
-    output wire [71:0] green_window_out,
-    output wire [71:0] blue_window_out,
-    output wire output_is_valid, 
-    output reg interrupt
+    input [23:0]      input_pixel_1,
+    input [23:0]      input_pixel_2,
+    input [23:0]      input_pixel_3,
+    input             input_is_valid,
+
+    output reg [23:0] output_pixel_1,
+    output reg [23:0] output_pixel_2,
+    output reg [23:0] output_pixel_3,
+    output reg [23:0] output_pixel_4,
+    output reg [23:0] output_pixel_5,
+    output reg [23:0] output_pixel_6,
+    output reg [23:0] output_pixel_7,
+    output reg [23:0] output_pixel_8,
+    output reg [23:0] output_pixel_9,
+    output            output_is_valid
 );
-parameter Pixel_Size = 24; //rgb pixel
-parameter Row_Size = 512; //line buffer size
-reg [12:0] image_pixel_count; // counts total pixels read of image
-reg [1:0] current_write_buffer; // monitors which line buffer is currently being written to
-reg [8:0] write_pixel_count; // counts how many pixels have been written to a line buffer so far
-reg [7:0] red_window[8:0]; // red window output
-reg [7:0] green_window[8:0]; //green window output
-reg [7:0] blue_window[8:0]; //blue window output
-reg start_window_gen; //control signal to begin window generation
-wire [71:0]lb0_out,lb1_out,lb2_out,lb3_out; //output data from line buffers
-//valid control signals for line buffers
-wire LB0_data_valid,LB1_data_valid,LB2_data_valid,LB3_data_valid;
-reg [3:0]rd_line_buffers; //indicates which buffers must be read from
-//updates number of pixels written to a buffer
-always @(posedge r_clk)
-begin
-    if(r_rst)
-        write_pixel_count <= 0;
-    else if(input_is_valid)
-        write_pixel_count <= write_pixel_count + 1;
-end
-//switches the line buffer which has to be written to, as well the line buffers being read from
-always @(posedge r_clk)
-begin
-    if(r_rst)
-        begin
-            current_write_buffer <= 2'b00;
-            rd_line_buffers <= 4'b0000;
-        end
-    else if(write_pixel_count == 511)
-        begin
-            current_write_buffer <= (current_write_buffer == 2'b11 ? 2'b00 : current_write_buffer + 1);
-            case(rd_line_buffers)
-            4'b1110: rd_line_buffers <= 'b0111;
-            4'b0111: rd_line_buffers <= 'b1011;
-            4'b1011: rd_line_buffers <= 'b1101;
-            4'b1101: rd_line_buffers <= 'b1110;
-            default: rd_line_buffers <= 4'b0000;
-            endcase
-        end
-end
-//updates total pixels read from image
-always @(posedge r_clk)
-begin
-    if(r_rst)
-        image_pixel_count <= 'b0;
-    else if(input_is_valid)
-        image_pixel_count <= image_pixel_count + 1;
-end
-//asserts window generation control signal when three line buffers are full
-always @(posedge r_clk)
-begin
-    if(r_rst || image_pixel_count < 1536)
-        begin
-            start_window_gen <= 'b0;
-            interrupt <= 0;
-        end
-    else if(image_pixel_count == 1536)
-        begin
-            start_window_gen <= 'b1;
-            rd_line_buffers <= 'b1110;
-            interrupt <= 1;
-        end
-    else
-        begin
-            start_window_gen <= 'b1;
-            interrupt <= 1;
-        end
-end
-// assign the line buffer valid inputs
-assign LB0_data_valid = input_is_valid & ~current_write_buffer[0] & ~current_write_buffer[1];
-assign LB1_data_valid = input_is_valid & ~current_write_buffer[0] &  current_write_buffer[1];
-assign LB2_data_valid = input_is_valid &  current_write_buffer[0] & ~current_write_buffer[1];
-assign LB3_data_valid = input_is_valid &  current_write_buffer[0] &  current_write_buffer[1];
-//window generation
-always @(posedge r_clk)
-begin
-    if(start_window_gen)
+
+    localparam Rows = 512, Columns = 512;
+    
+    reg [7:0]  PixelCounter;
+    reg [23:0] p1, p2, p3, p4, p5, p6, p7, p8, p9;
+    
+    reg [9:0] Row_counter, Column_counter;
+    
+    always @(posedge clk)
     begin
-        case(current_write_buffer)
-        2'b11:
-            begin
-                red_window[0] <= lb0_out[71:64]; red_window[1] <= lb0_out[47:40]; red_window[2] <= lb0_out[23:16];
-                red_window[3] <= lb1_out[71:64]; red_window[4] <= lb1_out[47:40]; red_window[5] <= lb1_out[23:16];
-                red_window[6] <= lb2_out[71:64]; red_window[7] <= lb2_out[47:40]; red_window[8] <= lb2_out[23:16];
-            
-                green_window[0] <= lb0_out[63:56]; green_window[1] <= lb0_out[39:32]; green_window[2] <= lb0_out[15:8];
-                green_window[3] <= lb1_out[63:56]; green_window[4] <= lb1_out[39:32]; green_window[5] <= lb1_out[15:8];
-                green_window[6] <= lb2_out[63:56]; green_window[7] <= lb2_out[39:32]; green_window[8] <= lb2_out[15:8];
-            
-                blue_window[0] <= lb0_out[55:48]; blue_window[1] <= lb0_out[31:24]; blue_window[2] <= lb0_out[7:0];
-                blue_window[3] <= lb1_out[55:48]; blue_window[4] <= lb1_out[31:24]; blue_window[5] <= lb1_out[7:0];
-                blue_window[6] <= lb2_out[55:48]; blue_window[7] <= lb2_out[31:24]; blue_window[8] <= lb2_out[7:0];
+        if(rst)
+            PixelCounter <= 0;
+        else
+        begin
+            if(input_is_valid) begin
+                PixelCounter <= (PixelCounter == 2) ? PixelCounter : PixelCounter + 1;
             end
-        
-        2'b10:
-            begin
-                red_window[0] <= lb3_out[71:64]; red_window[1] <= lb3_out[47:40]; red_window[2] <= lb3_out[23:16];
-                red_window[3] <= lb0_out[71:64]; red_window[4] <= lb0_out[47:40]; red_window[5] <= lb0_out[23:16];
-                red_window[6] <= lb1_out[71:64]; red_window[7] <= lb1_out[47:40]; red_window[8] <= lb1_out[23:16];                    
-                
-                green_window[0] <= lb3_out[63:56]; green_window[1] <= lb3_out[39:32]; green_window[2] <= lb3_out[15:8];
-                green_window[3] <= lb0_out[63:56]; green_window[4] <= lb0_out[39:32]; green_window[5] <= lb0_out[15:8];
-                green_window[6] <= lb1_out[63:56]; green_window[7] <= lb1_out[39:32]; green_window[8] <= lb1_out[15:8];
-                    
-                blue_window[0] <= lb3_out[55:48]; blue_window[1] <= lb3_out[31:24]; blue_window[2] <= lb3_out[7:0];
-                blue_window[3] <= lb0_out[55:48]; blue_window[4] <= lb0_out[31:24]; blue_window[5] <= lb0_out[7:0];
-                blue_window[6] <= lb1_out[55:48]; blue_window[7] <= lb1_out[31:24]; blue_window[8] <= lb1_out[7:0];
-            end
-        
-        2'b01:
-            begin
-                red_window[0] <= lb2_out[71:64]; red_window[1] <= lb2_out[47:40]; red_window[2] <= lb2_out[23:16];
-                red_window[3] <= lb3_out[71:64]; red_window[4] <= lb3_out[47:40]; red_window[5] <= lb3_out[23:16];
-                red_window[6] <= lb0_out[71:64]; red_window[7] <= lb0_out[47:40]; red_window[8] <= lb0_out[23:16];
-                        
-                green_window[0] <= lb2_out[63:56]; green_window[1] <= lb2_out[39:32]; green_window[2] <= lb2_out[15:8];
-                green_window[3] <= lb3_out[63:56]; green_window[4] <= lb3_out[39:32]; green_window[5] <= lb3_out[15:8];
-                green_window[6] <= lb0_out[63:56]; green_window[7] <= lb0_out[39:32]; green_window[8] <= lb0_out[15:8];
-                      
-                blue_window[0] <= lb2_out[55:48]; blue_window[1] <= lb2_out[31:24]; blue_window[2] <= lb2_out[7:0];
-                blue_window[3] <= lb3_out[55:48]; blue_window[4] <= lb3_out[31:24]; blue_window[5] <= lb3_out[7:0];
-                blue_window[6] <= lb0_out[55:48]; blue_window[7] <= lb0_out[31:24]; blue_window[8] <= lb0_out[7:0];
-            end
-                    
-        2'b00:
-            begin
-                red_window[0] <= lb1_out[71:64]; red_window[1] <= lb1_out[47:40]; red_window[2] <= lb1_out[23:16];
-                red_window[3] <= lb2_out[71:64]; red_window[4] <= lb2_out[47:40]; red_window[5] <= lb2_out[23:16];
-                red_window[6] <= lb3_out[71:64]; red_window[7] <= lb3_out[47:40]; red_window[8] <= lb3_out[23:16];                    
-                            
-                green_window[0] <= lb1_out[63:56]; green_window[1] <= lb1_out[39:32]; green_window[2] <= lb1_out[15:8];
-                green_window[3] <= lb2_out[63:56]; green_window[4] <= lb2_out[39:32]; green_window[5] <= lb2_out[15:8];
-                green_window[6] <= lb3_out[63:56]; green_window[7] <= lb3_out[39:32]; green_window[8] <= lb3_out[15:8];
-                                
-                blue_window[0] <= lb1_out[55:48]; blue_window[1] <= lb1_out[31:24]; blue_window[2] <= lb1_out[7:0];
-                blue_window[3] <= lb2_out[55:48]; blue_window[4] <= lb2_out[31:24]; blue_window[5] <= lb2_out[7:0];
-                blue_window[6] <= lb3_out[55:48]; blue_window[7] <= lb3_out[31:24]; blue_window[8] <= lb3_out[7:0];
-            end
-        
-        endcase
+        end
     end
-end
-//line buffer instantiations
-LineBuffer lb0(
-    .clk(r_clk),
-    .rst(r_rst),
-    .input_pixel(input_pixel_data),
-    .input_is_valid(LB0_data_valid),
-    .read_buffer_enable(rd_line_buffers[3]),
-    .output_pixel(lb0_out)
-);
-LineBuffer lb1(
-    .clk(r_clk),
-    .rst(r_rst),
-    .input_pixel(input_pixel_data),
-    .input_is_valid(LB1_data_valid),
-    .read_buffer_enable(rd_line_buffers[2]),
-    .output_pixel(lb1_out)
-);
-LineBuffer lb2(
-    .clk(r_clk),
-    .rst(r_rst),
-    .input_pixel(input_pixel_data),
-    .input_is_valid(LB2_data_valid),
-    .read_buffer_enable(rd_line_buffers[1]),
-    .output_pixel(lb2_out)
-);
-LineBuffer lb3(
-    .clk(r_clk),
-    .rst(r_rst),
-    .input_pixel(input_pixel_data),
-    .input_is_valid(LB3_data_valid),
-    .read_buffer_enable(rd_line_buffers[0]),
-    .output_pixel(lb3_out)
-);
-assign output_is_valid = start_window_gen;
-//output windows assignment
-assign red_window_out = {red_window[8],red_window[7],red_window[6],
-                            red_window[5],red_window[4],red_window[3],
-                                red_window[2],red_window[1],red_window[0]};
-                                
-assign green_window_out = {green_window[8],green_window[7],green_window[6],
-                            green_window[5],green_window[4],green_window[3],
-                                green_window[2],green_window[1],green_window[0]};
-                                
-assign blue_window_out = {blue_window[8],blue_window[7],blue_window[6],
-                            blue_window[5],blue_window[4],blue_window[3],
-                                blue_window[2],blue_window[1],blue_window[0]};
+    
+    always @(posedge clk)
+    begin
+        if(rst)
+        begin
+            Row_counter <= 0;
+            Column_counter <= 0;
+        end else
+        begin
+            if(output_is_valid) begin
+                Column_counter <= (Column_counter == Columns - 1) ? 0 : Column_counter + 1;
+                        
+                if(Column_counter == Columns - 1) begin
+                    Row_counter <= (Row_counter == Rows - 1) ? 0 : Row_counter + 1;
+                end
+            end
+        end
+    end
+    
+    always @(posedge clk)
+    begin
+        if(rst)
+        begin
+            p1 <= 0; p2 <= 0; p3 <= 0;
+            p4 <= 0; p5 <= 0; p6 <= 0;
+            p7 <= 0; p8 <= 0; p9 <= 0;
+        end else
+        begin
+            if(input_is_valid) begin
+                p1 <= p2; p2 <= p3; p3 <= input_pixel_3;
+                p4 <= p5; p5 <= p6; p6 <= input_pixel_2;
+                p7 <= p8; p8 <= p9; p9 <= input_pixel_1;
+            end
+        end
+    end
+    
+    // Handling all cases accordingly
+    always @(*)
+    begin
+        if(rst)
+        begin
+            output_pixel_1 <= 0; output_pixel_2 <= 0; output_pixel_3 <= 0;
+            output_pixel_4 <= 0; output_pixel_5 <= 0; output_pixel_6 <= 0;
+            output_pixel_7 <= 0; output_pixel_8 <= 0; output_pixel_9 <= 0;
+        end
+        
+        else
+        begin
+            if(output_is_valid) 
+            begin
+                if(Row_counter == 0 && Column_counter == 0) // Top left corner pixel
+                begin
+                    output_pixel_1 <= p5; output_pixel_2 <= p5; output_pixel_3 <= p6; // Replicate pixel posiitions 1,2,4 with 5
+                    output_pixel_4 <= p5; output_pixel_5 <= p5; output_pixel_6 <= p6; // Replicate pixel posiition 3 with 6
+                    output_pixel_7 <= p8; output_pixel_8 <= p8; output_pixel_9 <= p9; // Replicate pixel posiition 7 with 8
+                end
+                else if(Row_counter == 0 && Column_counter > 0 && Column_counter < Columns - 1) // First row edge pixels
+                begin
+                    output_pixel_1 <= p4; output_pixel_2 <= p5; output_pixel_3 <= p6; // Replicate pixel posiitions 1,2,3 with 4,5,6
+                    output_pixel_4 <= p4; output_pixel_5 <= p5; output_pixel_6 <= p6;
+                    output_pixel_7 <= p7; output_pixel_8 <= p8; output_pixel_9 <= p9;
+                end
+                else if(Row_counter == 0 && Column_counter == Columns - 1) // Top right corner pixel
+                begin
+                    output_pixel_1 <= p4; output_pixel_2 <= p5; output_pixel_3 <= p5; // Replicate pixel posiitions 2,3,6 with 5
+                    output_pixel_4 <= p4; output_pixel_5 <= p5; output_pixel_6 <= p5; // Replicate pixel posiition 1 with 4
+                    output_pixel_7 <= p7; output_pixel_8 <= p8; output_pixel_9 <= p8; // Replicate pixel posiition 9 with 8
+                end
+                else if(Row_counter > 0 && Row_counter < Rows - 1 && Column_counter == 0) // First column edge pixels
+                begin
+                    output_pixel_1 <= p2; output_pixel_2 <= p2; output_pixel_3 <= p3; // Replicate pixel posiitions 1,4,7 with 2,5,8
+                    output_pixel_4 <= p5; output_pixel_5 <= p5; output_pixel_6 <= p6;
+                    output_pixel_7 <= p8; output_pixel_8 <= p8; output_pixel_9 <= p9;
+                end
+                else if(Row_counter > 0 && Row_counter < Rows - 1 && Column_counter > 0 && Column_counter < Columns - 1) // Middle(default) cases
+                begin
+                    output_pixel_1 <= p1; output_pixel_2 <= p2; output_pixel_3 <= p3;
+                    output_pixel_4 <= p4; output_pixel_5 <= p5; output_pixel_6 <= p6;
+                    output_pixel_7 <= p7; output_pixel_8 <= p8; output_pixel_9 <= p9;
+                end
+                else if(Row_counter > 0 && Row_counter < Rows - 1 && Column_counter == Columns - 1) // Last column edge pixels
+                begin
+                    output_pixel_1 <= p1; output_pixel_2 <= p2; output_pixel_3 <= p2; // Replicate pixel positions 3,6,9 with 2,5,8
+                    output_pixel_4 <= p4; output_pixel_5 <= p5; output_pixel_6 <= p5;
+                    output_pixel_7 <= p7; output_pixel_8 <= p8; output_pixel_9 <= p8;
+                end
+                else if(Row_counter == Rows - 1 && Column_counter == 0) // Bottom left corner pixel
+                begin
+                    output_pixel_1 <= p2; output_pixel_2 <= p2; output_pixel_3 <= p3; // Replicate pixel positions 1,4,7 with 2,5,5
+                    output_pixel_4 <= p5; output_pixel_5 <= p5; output_pixel_6 <= p6; // Replicate pixel positions 8,9 with 5,6
+                    output_pixel_7 <= p5; output_pixel_8 <= p5; output_pixel_9 <= p6;
+                end
+                else if(Row_counter == Rows - 1 && Column_counter > 0 && Column_counter < Columns - 1) // Last row edge pixels
+                begin
+                    output_pixel_1 <= p1; output_pixel_2 <= p2; output_pixel_3 <= p3; // Replicate pixel positions 7,8,9 with 4,5,6
+                    output_pixel_4 <= p4; output_pixel_5 <= p5; output_pixel_6 <= p6;
+                    output_pixel_7 <= p4; output_pixel_8 <= p5; output_pixel_9 <= p6;
+                end
+                else if(Row_counter == Rows - 1 && Column_counter == Columns - 1) // Bottom right corner pixel
+                begin
+                output_pixel_1 <= p1; output_pixel_2 <= p2; output_pixel_3 <= p2; // Replicate pixel positions 6,8,9 with 5
+                output_pixel_4 <= p4; output_pixel_5 <= p5; output_pixel_6 <= p5; // Replicate pixel positions 3,7 with 2,4
+                output_pixel_7 <= p4; output_pixel_8 <= p5; output_pixel_9 <= p5;
+                end
+            end
+        end
+    end
+
+    assign output_is_valid = (PixelCounter == 2) ? 1 : 0;
+    
 endmodule
