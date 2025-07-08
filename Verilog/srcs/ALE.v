@@ -29,7 +29,7 @@ module ALE(
 );
 
     reg [17:0] pixel_counter;
-    reg done_reg;
+    reg        done_reg;
     
     // Minimum of 9 - R/G/B channels (output wires)
     wire [7:0] minimum_red, minimum_green, minimum_blue;
@@ -63,22 +63,23 @@ module ALE(
             minimum_blue_P <= minimum_blue;
         end
     end
-    
+
+    // Dark channel pixel value
     wire [7:0] Dark_channel;
-    
-    // LUT outputs
-    wire [15:0] LUT_Inv_AR, LUT_Inv_AG, LUT_Inv_AB;
-    
-    wire [7:0] Dark_channel_Red, Dark_channel_Green, Dark_channel_Blue;
     
     // Pipeline Registers (Stage 2)
     reg [7:0]   Dark_channel_P;
     reg [7:0]   AR_P, AG_P, AB_P;
     reg [15:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
     
+    wire [7:0] Dark_channel_Red, Dark_channel_Green, Dark_channel_Blue;
+    
     assign Dark_channel_Red = (Dark_channel > Dark_channel_P) ? (minimum_red_P * 7) >> 3 : AR_P;
     assign Dark_channel_Green = (Dark_channel > Dark_channel_P) ? (minimum_green_P * 7) >> 3 : AG_P;
     assign Dark_channel_Blue = (Dark_channel > Dark_channel_P) ? (minimum_blue_P * 7) >> 3 : AB_P;
+    
+    // LUT outputs
+    wire [15:0] LUT_Inv_AR, LUT_Inv_AG, LUT_Inv_AB;
     
     always @(posedge clk) begin
         if(rst) begin
@@ -137,7 +138,7 @@ module ALE(
 /////////////////////////////////////////////////////////////////////////////////
 
     // Find the minimum of each color channel inputs
-    ALE_Minimum_9 Red (
+    ALE_Minimum_9 Min_Red (
         .input_pixel_1(input_pixel_1[23:16]),
         .input_pixel_2(input_pixel_2[23:16]),
         .input_pixel_3(input_pixel_3[23:16]),
@@ -150,7 +151,7 @@ module ALE(
         .minimum_pixel(minimum_red)
     );
     
-    ALE_Minimum_9 Green (
+    ALE_Minimum_9 Min_Green (
         .input_pixel_1(input_pixel_1[15:8]),
         .input_pixel_2(input_pixel_2[15:8]),
         .input_pixel_3(input_pixel_3[15:8]),
@@ -163,7 +164,7 @@ module ALE(
         .minimum_pixel(minimum_green)
     );
     
-    ALE_Minimum_9 Blue (
+    ALE_Minimum_9 Min_Blue (
         .input_pixel_1(input_pixel_1[7:0]),
         .input_pixel_2(input_pixel_2[7:0]),
         .input_pixel_3(input_pixel_3[7:0]),
@@ -178,7 +179,7 @@ module ALE(
     
     // Calculate minimum among the three channels to get dark channel
     ALE_Minimum_3 Dark_Channel(
-        .a(minimum_red_P), .b(minimum_green_P), .c(minimum_blue_P),
+        .R(minimum_red_P), .G(minimum_green_P), .B(minimum_blue_P),
         .minimum(Dark_channel)
     );
     
