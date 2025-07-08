@@ -1,17 +1,17 @@
 module ED_Top(
-    input input_is_valid,
-    input wire [23:0] output_pixel_1,
-    input wire [23:0] output_pixel_2,
-    input wire [23:0] output_pixel_3,
-    input wire [23:0] output_pixel_4,
-    input wire [23:0] output_pixel_5,
-    input wire [23:0] output_pixel_6,
-    input wire [23:0] output_pixel_7,
-    input wire [23:0] output_pixel_8,
-    input wire [23:0] output_pixel_9,
+    input        input_is_valid,
+    input [23:0] output_pixel_1,
+    input [23:0] output_pixel_2,
+    input [23:0] output_pixel_3,
+    input [23:0] output_pixel_4,
+    input [23:0] output_pixel_5,
+    input [23:0] output_pixel_6,
+    input [23:0] output_pixel_7,
+    input [23:0] output_pixel_8,
+    input [23:0] output_pixel_9,
     
-    output [1:0]ED1_out,ED2_out,ED3_out
-    );
+    output [1:0] ED1_out,ED2_out,ED3_out
+);
     
     ED red_edges_detection(
         .in1(output_pixel_1[23:16]),
@@ -25,9 +25,9 @@ module ED_Top(
         .in9(output_pixel_9[23:16]),
         
         .ED_out(ED1_out)
-        );
+    );
         
-        ED green_edges_detection(
+    ED green_edges_detection(
         .in1(output_pixel_1[15:8]),
         .in2(output_pixel_2[15:8]),
         .in3(output_pixel_3[15:8]),
@@ -39,9 +39,9 @@ module ED_Top(
         .in9(output_pixel_9[15:8]),
         
         .ED_out(ED2_out)
-        );
+    );
         
-        ED blue_edges_detection(
+    ED blue_edges_detection(
         .in1(output_pixel_1[7:0]),
         .in2(output_pixel_2[7:0]),
         .in3(output_pixel_3[7:0]),
@@ -53,6 +53,6 @@ module ED_Top(
         .in9(output_pixel_9[7:0]),
         
         .ED_out(ED3_out)
-        );
+    );
     
 endmodule
