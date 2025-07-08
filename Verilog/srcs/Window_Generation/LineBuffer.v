@@ -1,55 +1,62 @@
-`timescale 1ns/1ps
 module LineBuffer(
     input         clk,
     input         rst,
+    
     input [23:0]  input_pixel,
     input         input_is_valid,
-    input         read_buffer_enable,
-    output [71:0] output_pixel
+
+    output [23:0] output_pixel,
+    output        output_is_valid
 );
 
-parameter Pixel_Size = 24;
-parameter Row_Size = 512;
+parameter Buffer_Size = 512;
 
-reg [$clog2(Row_Size):0]     wr_counter, rd_counter;
-reg [Pixel_Size - 1:0]       line_buffer_mem [Row_Size - 1:0];
-reg [(3 * Pixel_Size) - 1:0] buffer_out;
+reg [$clog2(Buffer_Size):0] wr_counter;
+reg [$clog2(Buffer_Size):0] rd_counter;
+
+reg [23:0] line_buffer_mem [0 : Buffer_Size - 1];
+
+reg [$clog2(Buffer_Size):0] PixelCounter;
 
 always @(posedge clk)
 begin
     if(rst)
-    begin
-        wr_counter <= 'b0;
-        rd_counter <= 'b0;
-        buffer_out <= 'b0;
+        PixelCounter <= 'b0;
+    else begin
+        if(input_is_valid)
+            PixelCounter <= (PixelCounter == Buffer_Size) ? PixelCounter : PixelCounter + 1; 
     end
+end
+
+always @(posedge clk)
+begin
+    if(rst)
+        wr_counter <= 'b0;
     else
     begin
         if(input_is_valid)
         begin
             line_buffer_mem[wr_counter] <= input_pixel;
-            if(wr_counter == Row_Size - 1)
-                wr_counter <= 'b0;
-            else
-                wr_counter <= wr_counter + 1;
-        end
-        
-        if(read_buffer_enable)
-        begin
-            if(rd_counter == Row_Size - 2)
-                buffer_out <= { line_buffer_mem[rd_counter], line_buffer_mem[rd_counter + 1], line_buffer_mem[rd_counter + 1] };
-            else if(rd_counter == Row_Size - 1)
-                buffer_out <= { line_buffer_mem[rd_counter], line_buffer_mem[rd_counter], line_buffer_mem[rd_counter] };
-            else
-                buffer_out <= { line_buffer_mem[rd_counter], line_buffer_mem[rd_counter + 1], line_buffer_mem[rd_counter + 2] };
-                
-            if(rd_counter == Row_Size - 1)
-                rd_counter <= 'b0;
-            else
-                rd_counter <= rd_counter + 1;
+            wr_counter <= (wr_counter == Buffer_Size - 1) ? 0 : wr_counter + 1; 
         end
     end
 end
 
-assign output_pixel = buffer_out;
+always @(posedge clk)
+begin
+    if(rst)
+        rd_counter <= 'b0;
+    else
+    begin
+        if(input_is_valid)
+        begin
+            if(PixelCounter == Buffer_Size)
+                rd_counter <= (rd_counter == Buffer_Size -1 ) ? 0 : rd_counter + 1;
+        end
+    end
+end
+
+assign output_is_valid = (PixelCounter == Buffer_Size);
+assign output_pixel = line_buffer_mem[rd_counter];
+
 endmodule
