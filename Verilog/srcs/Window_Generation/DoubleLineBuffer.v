@@ -1,6 +1,7 @@
 module Double_LineBuffer(
     input         clk,
     input         rst,
+    
     input [23:0]  input_pixel,
     input         input_is_valid,
 
@@ -21,6 +22,7 @@ module Double_LineBuffer(
     LineBuffer LB1(
         .clk(clk),
         .rst(rst),
+        
         .input_pixel(input_pixel),
         .input_is_valid(input_is_valid),
     
@@ -31,6 +33,7 @@ module Double_LineBuffer(
     LineBuffer LB2(
         .clk(clk),
         .rst(rst),
+        
         .input_pixel(lb1_out),
         .input_is_valid(lb1_valid),
     
