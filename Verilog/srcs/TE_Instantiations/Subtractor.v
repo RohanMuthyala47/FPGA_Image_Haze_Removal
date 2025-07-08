@@ -9,7 +9,7 @@
 //endmodule
 
 module Subtractor(
-    input [15:0] a,
+    input [15:0]  a,
     output [15:0] diff
 );
     parameter signed [16:0] One = 17'd65535; // 1.0 in Q0.16
