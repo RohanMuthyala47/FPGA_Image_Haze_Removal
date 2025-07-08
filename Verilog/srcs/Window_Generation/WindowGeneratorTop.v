@@ -1,20 +1,20 @@
 module WindowGeneratorTop(
-    input              clk,
-    input              rst,
+    input         clk,
+    input         rst,
     
-    input [23:0]       input_pixel,
-    input              input_is_valid,
+    input [23:0]  input_pixel,
+    input         input_is_valid,
 
-    output wire [23:0] output_pixel_1,
-    output wire [23:0] output_pixel_2,
-    output wire [23:0] output_pixel_3,
-    output wire [23:0] output_pixel_4,
-    output wire [23:0] output_pixel_5,
-    output wire [23:0] output_pixel_6,
-    output wire [23:0] output_pixel_7,
-    output wire [23:0] output_pixel_8,
-    output wire [23:0] output_pixel_9,
-    output wire        output_is_valid
+    output [23:0] output_pixel_1,
+    output [23:0] output_pixel_2,
+    output [23:0] output_pixel_3,
+    output [23:0] output_pixel_4,
+    output [23:0] output_pixel_5,
+    output [23:0] output_pixel_6,
+    output [23:0] output_pixel_7,
+    output [23:0] output_pixel_8,
+    output [23:0] output_pixel_9,
+    output        output_is_valid
 );
 
     wire [23:0] dlb_out_1,dlb_out_2,dlb_out_3;
@@ -33,7 +33,7 @@ module WindowGeneratorTop(
         .output_is_valid(dlb_out_valid)
     );
     
-    WindowGenerator WG(
+    WindowGenerator WindowGenerator(
         .clk(clk),
         .rst(rst),
             
