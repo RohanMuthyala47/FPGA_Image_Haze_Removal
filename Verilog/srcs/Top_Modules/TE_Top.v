@@ -1,17 +1,21 @@
-`timescale 1ns/1ps
-module trans_top(
-input clk,rst,
-input [23:0]input_pixel,
-input input_is_valid,
-output wire [7:0] transmission,
-output wire trans_valid
+module TE_Top(
+    input        clk,
+    input        rst,
+            
+    input [23:0] input_pixel,
+    input        input_is_valid,
+            
+    output [7:0] transmission,
+    output       trans_valid
 );
-
-wire [23:0] output_pixel_1, output_pixel_2, output_pixel_3, output_pixel_4,
-            output_pixel_5, output_pixel_6, output_pixel_7,output_pixel_8,output_pixel_9;
- wire valid;
- wire ale_valid;
-WindowGeneratorTop W1(
+            
+    wire [23:0] output_pixel_1, output_pixel_2, output_pixel_3,
+                output_pixel_4, output_pixel_5, output_pixel_6,
+                output_pixel_7, output_pixel_8, output_pixel_9;
+    wire        valid;
+    wire        ale_valid;
+            
+    WindowGeneratorTop WindowGenerator(
         .clk(clk),
         .rst(rst),
         
@@ -33,7 +37,7 @@ WindowGeneratorTop W1(
     wire [7:0] a_r,a_g,a_b;
     wire [8:0] inv_a_r,inv_a_g,inv_a_b;
     
-    ALE A1(
+    ALE ALE(
         .clk(clk),
         .rst(rst),
         .input_valid(valid),
@@ -57,26 +61,26 @@ WindowGeneratorTop W1(
     );
     
     TE Trans(
-     .clk(clk),
-     .rst(rst),
+        .clk(clk),
+        .rst(rst),
     
-     .input_is_valid(valid),
-     .in1(output_pixel_1),
-     .in2(output_pixel_2),
-     .in3(output_pixel_3),
-     .in4(output_pixel_4),
-     .in5(output_pixel_5),
-     .in6(output_pixel_6),
-     .in7(output_pixel_7),
-     .in8(output_pixel_8),
-     .in9(output_pixel_9),
-    
-     .inv_ar('d315),
-     .inv_ag('d315),
-     .inv_ab('d315),
-     .atm_valid(ale_valid),
-     .transmission(transmission),
-     .output_is_valid(trans_valid)
-     
-    );
+        .input_is_valid(valid),
+        .in1(output_pixel_1),
+        .in2(output_pixel_2),
+        .in3(output_pixel_3),
+        .in4(output_pixel_4),
+        .in5(output_pixel_5),
+        .in6(output_pixel_6),
+        .in7(output_pixel_7),
+        .in8(output_pixel_8),
+        .in9(output_pixel_9),
+   
+        .inv_ar(inv_a_r),
+        .inv_ag(inv_a_g),
+        .inv_ab(inv_a_b),
+        .atm_valid(ale_valid),
+        .transmission(transmission),
+        .output_is_valid(trans_valid) 
+   );
+            
 endmodule
