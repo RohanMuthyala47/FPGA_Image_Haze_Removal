@@ -1,17 +1,18 @@
 `timescale 1ns/1ps
 module LineBuffer(
-    input wire clk,rst,
-    input wire[23:0]input_pixel,
-    input wire input_is_valid,
-    input wire read_buffer_enable,
-    output wire [71:0] output_pixel
+    input         clk,
+    input         rst,
+    input [23:0]  input_pixel,
+    input         input_is_valid,
+    input         read_buffer_enable,
+    output [71:0] output_pixel
 );
 
 parameter Pixel_Size = 24;
 parameter Row_Size = 512;
 
-reg [$clog2(Row_Size):0] wr_counter, rd_counter;
-reg [Pixel_Size - 1:0] line_buffer_mem[Row_Size - 1:0];
+reg [$clog2(Row_Size):0]     wr_counter, rd_counter;
+reg [Pixel_Size - 1:0]       line_buffer_mem [Row_Size - 1:0];
 reg [(3 * Pixel_Size) - 1:0] buffer_out;
 
 always @(posedge clk)
