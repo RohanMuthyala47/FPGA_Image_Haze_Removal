@@ -3,7 +3,7 @@ module Multiplier(
     input [7:0]   b,
     
     output [15:0] product
-    );
+);
     
     parameter [15:0] Omega = 16'd61440;
     
