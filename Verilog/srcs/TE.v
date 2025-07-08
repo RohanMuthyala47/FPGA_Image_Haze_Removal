@@ -1,34 +1,35 @@
 module TE(
-    input clk,rst,
+    input            clk,
+    input            rst,
     
-    input wire input_is_valid,
-    input  wire [23:0] in1,
-    input  wire [23:0] in2,
-    input  wire [23:0] in3,
-    input  wire [23:0] in4,
-    input  wire [23:0] in5,
-    input  wire [23:0] in6,
-    input  wire [23:0] in7,
-    input  wire [23:0] in8,
-    input  wire [23:0] in9,
+    input            input_is_valid,
+    input [23:0]     in1,
+    input [23:0]     in2,
+    input [23:0]     in3,
+    input [23:0]     in4,
+    input [23:0]     in5,
+    input [23:0]     in6,
+    input [23:0]     in7,
+    input [23:0]     in8,
+    input [23:0]     in9,
     
-    input wire [15:0] inv_ar,inv_ag,inv_ab,
-    input wire atm_valid,
+    input [15:0]     inv_ar,inv_ag,inv_ab,
+    input            atm_valid,
     
     output reg [7:0] transmission,
-    output reg output_is_valid
+    output reg       output_is_valid
     );
     
     //edge detection internal wires
     wire [1:0] ed1,ed2,ed3;
     
     //edge filtering internal wires
-    wire [7:0] p0_red_out,p0_green_out,p0_blue_out;
-    wire [7:0] p1_red_out,p1_green_out,p1_blue_out;
-    wire [7:0] p2_red_out,p2_green_out,p2_blue_out;
+    wire [7:0] p0_red_out, p0_green_out, p0_blue_out;
+    wire [7:0] p1_red_out, p1_green_out, p1_blue_out;
+    wire [7:0] p2_red_out, p2_green_out, p2_blue_out;
     
     //Inverse ATM multiplexer(min) outputs
-    wire [15:0] min_atm0,min_atm1,min_atm2;
+    wire [15:0] min_atm0, min_atm1, min_atm2;
     
     //Edge Filtering Multiplexer outputs
     wire [7:0] minimum_p0, minimum_p1, minimum_p2;
@@ -40,7 +41,7 @@ module TE(
     
     
     //stage 4 pipeline registers
-    reg [1:0] ed1_reg,ed2_reg,ed3_reg;
+    reg [1:0]  ed1_reg,ed2_reg,ed3_reg;
     reg [15:0] inv_ar1, inv_ag1, inv_ab1,
                     inv_ar2, inv_ag2, inv_ab2,
                     inv_ar3, inv_ag3, inv_ab3;  
@@ -76,10 +77,10 @@ module TE(
     wire[1:0] final_edge=(ed1_reg | ed2_reg | ed3_reg);
     
     // stage 5 pipeline registers
-    reg [1:0] final_edge_reg_1;
-    reg [15:0] inv_ar1_1,inv_ag1_1,inv_ab1_1,
-                      inv_ar2_2,inv_ag2_2,inv_ab2_2,
-                      inv_ar3_3,inv_ag3_3,inv_ab3_3; 
+    reg [1:0]  final_edge_reg_1;
+    reg [15:0] inv_ar1_1, inv_ag1_1, inv_ab1_1,
+                      inv_ar2_2, inv_ag2_2, inv_ab2_2,
+                      inv_ar3_3, inv_ag3_3, inv_ab3_3; 
                    
     reg stage_5_valid;
     always @(posedge clk)
@@ -108,10 +109,10 @@ module TE(
     end
 
     //stage 6 pipeline registers
-    reg [1:0] final_edge_reg_2;
+    reg [1:0]  final_edge_reg_2;
     reg [15:0] inv_mux0_reg, inv_mux1_reg, inv_mux2_reg;
-    reg [7:0] P0_reg, P1_reg, P2_reg;
-    reg stage_6_valid;
+    reg [7:0]  P0_reg, P1_reg, P2_reg;
+    reg        stage_6_valid;
     
     always @(posedge clk)
     begin
@@ -147,9 +148,10 @@ module TE(
             transmission <= 0;
             output_is_valid <= 0;
             end
-        else
-                transmission <= (subtract_out * 255 + 32767) >> 16;
-                output_is_valid <= stage_6_valid;
+        else begin
+            transmission <= (subtract_out * 255 + 32767) >> 16;
+            output_is_valid <= stage_6_valid;
+        end
     end
     
     
@@ -369,6 +371,5 @@ module TE(
         .diff(subtract_out)
     );
 
-        
 endmodule
 
