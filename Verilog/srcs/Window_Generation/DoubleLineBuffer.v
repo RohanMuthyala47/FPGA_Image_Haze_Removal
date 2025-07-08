@@ -10,13 +10,13 @@ module Double_LineBuffer(
     output        output_is_valid
 );
 
-wire        lb1_valid, lb2_valid;
-wire [23:0] lb1_out, lb2_out;
-
-assign output_pixel_1 = input_pixel;
-assign output_pixel_2 = lb1_out;
-assign output_pixel_3 = lb2_out;
-assign output_is_valid = lb1_valid;
+    wire        lb1_valid, lb2_valid;
+    wire [23:0] lb1_out, lb2_out;
+    
+    assign output_pixel_1 = input_pixel;
+    assign output_pixel_2 = lb1_out;
+    assign output_pixel_3 = lb2_out;
+    assign output_is_valid = lb1_valid;
 
     LineBuffer LB1(
         .clk(clk),
