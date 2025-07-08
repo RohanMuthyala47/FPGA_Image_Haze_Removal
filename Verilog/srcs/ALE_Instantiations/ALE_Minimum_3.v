@@ -1,8 +1,8 @@
 // Find the dark channel
 module ALE_Minimum_3(
-    input  [7:0]   a,
-    input  [7:0]   b,
-    input  [7:0]   c,
+    input  [7:0]   R,
+    input  [7:0]   G,
+    input  [7:0]   B,
     
     output [7:0] minimum
 );
@@ -14,6 +14,6 @@ module ALE_Minimum_3(
         end
     endfunction
     
-    assign minimum = min(a, b, c);
+    assign minimum = min(R, G, B);
 
 endmodule
