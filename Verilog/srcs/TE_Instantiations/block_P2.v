@@ -15,6 +15,6 @@ module block_P2(
     wire [15:0] sum;
     assign sum = (in1 * 2) + (in2 * 1) + (in3 * 2) + (in4 * 1) + (in5 * 4) + (in6 * 1) + (in7 * 2) + (in8 * 1) + (in9 * 2);
     
-    assign p2_result = sum / 16;
+    assign p2_result = sum >> 4;
     
 endmodule
