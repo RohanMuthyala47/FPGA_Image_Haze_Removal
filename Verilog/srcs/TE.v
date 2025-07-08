@@ -18,7 +18,7 @@ module TE(
     
     output reg [7:0] transmission,
     output reg       output_is_valid
-    );
+);
     
     //edge detection internal wires
     wire [1:0] ed1,ed2,ed3;
