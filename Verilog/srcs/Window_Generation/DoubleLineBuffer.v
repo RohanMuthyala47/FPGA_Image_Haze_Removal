@@ -1,17 +1,17 @@
 module Double_LineBuffer(
-    input clk,
-    input rst,
-    input [23:0]input_pixel,
-    input input_is_valid,
+    input         clk,
+    input         rst,
+    input [23:0]  input_pixel,
+    input         input_is_valid,
 
     output [23:0] output_pixel_1,
     output [23:0] output_pixel_2,
     output [23:0] output_pixel_3,
-    output output_is_valid
+    output        output_is_valid
 );
 
-wire lb1_valid, lb2_valid;
-wire [23:0]lb1_out, lb2_out;
+wire        lb1_valid, lb2_valid;
+wire [23:0] lb1_out, lb2_out;
 
 assign output_pixel_1 = input_pixel;
 assign output_pixel_2 = lb1_out;
