@@ -1,15 +1,15 @@
 module ALE_Top(
-    input clk,
-    input rst,
+    input         clk,
+    input         rst,
     
     // Input pixel stream
-    input [23:0] input_pixel,
-    input        input_is_valid,
+    input [23:0]  input_pixel,
+    input         input_is_valid,
     
     // Atmospheric Light Values
-    output [7:0] A_R,
-    output [7:0] A_G,
-    output [7:0] A_B,
+    output [7:0]  A_R,
+    output [7:0]  A_G,
+    output [7:0]  A_B,
     
     // Inverse Atmospheric Light Values
     output [15:0] Inv_A_R,
@@ -17,13 +17,13 @@ module ALE_Top(
     output [15:0] Inv_A_B,
     
     // Output valid signal
-    output output_is_valid
+    output        output_is_valid
 );
 
     wire [23:0] window_pixel_1, window_pixel_2, window_pixel_3;
     wire [23:0] window_pixel_4, window_pixel_5, window_pixel_6;
     wire [23:0] window_pixel_7, window_pixel_8, window_pixel_9;
-    wire window_valid;
+    wire        window_valid;
 
     WindowGeneratorTop WindowGenerator (
         .clk(clk),
