@@ -1,16 +1,16 @@
 `timescale 1ns/1ps
 
-module dehazing_tb;
+module ALE_TE_TB;
 
-    reg clk;
-    reg rst;
-    reg en;
+    reg        clk;
+    reg        rst;
+    reg        en;
     reg [23:0] input_pixel;
-    reg input_is_valid;
+    reg        input_is_valid;
 
     wire [7:0] transmission_out;
-    wire transmission_valid;
-    wire done_flag;
+    wire       transmission_valid;
+    wire       done_flag;
 
     // Instantiate the ALE_TE_Top module
     ALE_TE_Top dut (
@@ -29,15 +29,16 @@ module dehazing_tb;
     always #5 clk = ~clk;
 
     // BMP Handling
-    localparam array_length = 800 * 1024;
-    reg [7:0] bmpdata[0:array_length - 1];
-    reg [7:0] result[0:array_length - 1]; // Output BMP
+    localparam File_Size = 800 * 1024;
+    
+    reg [7:0] bmpdata[0:File_Size - 1];
+    reg [7:0] result[0:File_Size - 1]; // Output BMP
 
     integer bmp_size, bmp_start_pos, bmp_width, bmp_height, bmp_count;
     integer i, j;
 
-    // BMP reading
-    task read_file;
+    // Read from BMP File
+    task READ_FILE;
         integer file1;
         begin 
             file1 = $fopen("canyon_512.bmp", "rb");
@@ -66,15 +67,18 @@ module dehazing_tb;
         end
     endtask
 
-    // BMP writing
-    task write_file;
+    // Write to BMP File
+    task WRITE_FILE;
         integer file2;
         begin
             file2 = $fopen("output_file.bmp", "wb");
+            
             for (i = 0; i < bmp_start_pos; i = i + 1)
                 $fwrite(file2, "%c", bmpdata[i]);
+            
             for (i = 0; i < bmp_size - bmp_start_pos; i = i + 1)
                 $fwrite(file2, "%c", result[i]);
+            
             $fclose(file2);
             $display("Write successful.");
         end
@@ -84,12 +88,13 @@ module dehazing_tb;
         // Initialize
         clk = 0;
         rst = 1;
-        en = 0; // Start in ALE mode
+        en = 0; // Enable ALE
         input_pixel = 0;
         input_is_valid = 0;
 
-        read_file;
-        #20 rst = 0;
+        READ_FILE;
+        
+        #10 rst = 0;
 
         // --------------------------
         // Pass 1: Feed image to ALE
@@ -111,7 +116,7 @@ module dehazing_tb;
         // ------------------------------
         // Pass 2: Feed image to TE
         // ------------------------------
-        en = 1; // Switch to TE mode
+        en = 1; // Enable TE
         #10;
       
         read_file;
@@ -127,8 +132,9 @@ module dehazing_tb;
         input_is_valid = 0;
 
         #100;
-
-        write_file;
+        WRITE_FILE;
+        
+        #10;
         $stop;
     end
 
