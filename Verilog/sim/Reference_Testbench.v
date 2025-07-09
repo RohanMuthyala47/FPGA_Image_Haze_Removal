@@ -91,7 +91,7 @@ module Example_TB;
             end
 
             $fclose(file2);
-            $display("write successful");
+            $display("Write successful");
         end
     endtask
 
