@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module te_tb;
+module TE_TB;
     reg clk,rst;
     reg [23:0] input_pixel;
     reg input_is_valid;
@@ -8,7 +8,7 @@ module te_tb;
     wire [7:0] transmission;
     wire trans_valid;
 
-    trans_top uut(
+    TE_Top uut(
         clk,rst,
         input_pixel,
         input_is_valid,
@@ -21,7 +21,7 @@ module te_tb;
     always #5 clk = ~clk;
 
     // File and image data
-    localparam array_length = 769*1024;
+    localparam array_length = 800 * 1024;
     
 
     reg [7:0] result[0:array_length-1];
