@@ -34,12 +34,13 @@ module TE_Top(
         .output_is_valid(valid)
     );
     
-    wire [7:0] a_r,a_g,a_b;
-    wire [8:0] inv_a_r,inv_a_g,inv_a_b;
+    wire [7:0] a_r, a_g, a_b;
+    wire [8:0] inv_a_r, inv_a_g, inv_a_b;
     
     ALE ALE(
         .clk(clk),
         .rst(rst),
+        
         .input_valid(valid),
         .output_pixel_1(output_pixel_1),
         .output_pixel_2(output_pixel_2),
@@ -50,14 +51,16 @@ module TE_Top(
         .output_pixel_7(output_pixel_7),
         .output_pixel_8(output_pixel_8),
         .output_pixel_9(output_pixel_9),
+        
         .o_a_r(a_r),
         .o_a_g(a_g),
         .o_a_b(a_b),
+        
         .o_inv_a_r(inv_a_r),
         .o_inv_a_g(inv_a_g),
         .o_inv_a_b(inv_a_b),
-        .o_valid(ale_valid)
         
+        .o_valid(ale_valid)
     );
     
     TE Trans(
