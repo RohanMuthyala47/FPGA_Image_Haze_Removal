@@ -18,35 +18,37 @@ module TE(
     
     output reg [7:0] transmission,
     output reg       output_is_valid
-);
+    );
     
-    //edge detection internal wires
+    // Edge detection internal wires
     wire [1:0] ed1,ed2,ed3;
     
-    //edge filtering internal wires
-    wire [7:0] p0_red_out, p0_green_out, p0_blue_out;
-    wire [7:0] p1_red_out, p1_green_out, p1_blue_out;
-    wire [7:0] p2_red_out, p2_green_out, p2_blue_out;
+    // Edge filtering internal wires
+    wire [7:0] p0_red_out,p0_green_out,p0_blue_out;
+    wire [7:0] p1_red_out,p1_green_out,p1_blue_out;
+    wire [7:0] p2_red_out,p2_green_out,p2_blue_out;
     
-    //Inverse ATM multiplexer(min) outputs
-    wire [15:0] min_atm0, min_atm1, min_atm2;
+    // Inverse ATM multiplexer(min) outputs
+    wire [15:0] min_atm0,min_atm1,min_atm2;
     
-    //Edge Filtering Multiplexer outputs
+    // Edge Filtering Multiplexer outputs
     wire [7:0] minimum_p0, minimum_p1, minimum_p2;
     
-    //Multiplier outputs
+    // Multiplier outputs
     wire [15:0] prod0, prod1, prod2;
-    
+
+    // Transmission before low bound check
     wire [15:0] pre_transmission;
     
     
-    //stage 4 pipeline registers
+    // Stage 4 pipeline registers
     reg [1:0]  ed1_reg,ed2_reg,ed3_reg;
     reg [15:0] inv_ar1, inv_ag1, inv_ab1,
-                    inv_ar2, inv_ag2, inv_ab2,
-                    inv_ar3, inv_ag3, inv_ab3;  
-                    
-    reg stage_4_valid;
+               inv_ar2, inv_ag2, inv_ab2,
+               inv_ar3, inv_ag3, inv_ab3;  
+    reg        stage_4_valid;
+
+    // Stage 4
     always @(posedge clk)
     begin
         if(rst)
@@ -73,16 +75,17 @@ module TE(
     end
     
     
-    //stage 5
+    // Stage 5
     wire[1:0] final_edge=(ed1_reg | ed2_reg | ed3_reg);
     
-    // stage 5 pipeline registers
+    // Stage 5 pipeline registers
     reg [1:0]  final_edge_reg_1;
-    reg [15:0] inv_ar1_1, inv_ag1_1, inv_ab1_1,
-                      inv_ar2_2, inv_ag2_2, inv_ab2_2,
-                      inv_ar3_3, inv_ag3_3, inv_ab3_3; 
-                   
-    reg stage_5_valid;
+    reg [15:0] inv_ar1_1,inv_ag1_1,inv_ab1_1,
+               inv_ar2_2,inv_ag2_2,inv_ab2_2,
+               inv_ar3_3,inv_ag3_3,inv_ab3_3; 
+    reg        stage_5_valid;
+
+    // Stage 5
     always @(posedge clk)
     begin
         if(rst)
@@ -97,23 +100,23 @@ module TE(
         end
         else begin
 
-             final_edge_reg_1<= final_edge;
+            final_edge_reg_1<= final_edge;
              
-             stage_5_valid <= stage_4_valid;
+            inv_ar1_1 <= inv_ar1; inv_ag1_1 <= inv_ag1; inv_ab1_1 <= inv_ab1;
+            inv_ar2_2 <= inv_ar2; inv_ag2_2 <= inv_ag2; inv_ab2_2 <= inv_ab2;
+            inv_ar3_3 <= inv_ar3; inv_ag3_3 <= inv_ag3; inv_ab3_3 <= inv_ab3;
 
-             inv_ar1_1 <= inv_ar1; inv_ag1_1 <= inv_ag1; inv_ab1_1 <= inv_ab1;
-             inv_ar2_2 <= inv_ar2; inv_ag2_2 <= inv_ag2; inv_ab2_2 <= inv_ab2;
-             inv_ar3_3 <= inv_ar3; inv_ag3_3 <= inv_ag3; inv_ab3_3 <= inv_ab3;
-
+            stage_5_valid <= stage_4_valid;
         end
     end
 
-    //stage 6 pipeline registers
+    // Stage 6 pipeline registers
     reg [1:0]  final_edge_reg_2;
     reg [15:0] inv_mux0_reg, inv_mux1_reg, inv_mux2_reg;
     reg [7:0]  P0_reg, P1_reg, P2_reg;
     reg        stage_6_valid;
-    
+
+    // Stage 6
     always @(posedge clk)
     begin
         if(rst)
@@ -128,20 +131,19 @@ module TE(
         end
         else begin
 
-                final_edge_reg_2 <= final_edge_reg_1;
+            final_edge_reg_2 <= final_edge_reg_1;
             
-                inv_mux0_reg <= min_atm0; inv_mux1_reg <= min_atm1; inv_mux2_reg <= min_atm2;
+            inv_mux0_reg <= min_atm0; inv_mux1_reg <= min_atm1; inv_mux2_reg <= min_atm2;
             
-                P0_reg <= minimum_p0; P1_reg <= minimum_p1; P2_reg <= minimum_p2;
+            P0_reg <= minimum_p0; P1_reg <= minimum_p1; P2_reg <= minimum_p2;
             
-                stage_6_valid <= stage_5_valid;
-
+            stage_6_valid <= stage_5_valid;
         end
     end
 
     wire [15:0]subtract_out;
 
-    //stage 7
+    // Stage 7
     always @(posedge clk)
     begin
         if(rst) begin
@@ -156,9 +158,10 @@ module TE(
     
     
 /////////////////////////////////////////////////////////////////////////////////////////////
-//BLOCK INSTANTIATIONS
+// BLOCK INSTANTIATIONS
 /////////////////////////////////////////////////////////////////////////////////////////////
-    //detect the type of edges
+    
+    // Detect the type of edge
     ED_Top Edge_detection(
         .output_pixel_1(in1), .output_pixel_2(in2), .output_pixel_3(in3),
         .output_pixel_4(in4), .output_pixel_5(in5), .output_pixel_6(in6), 
@@ -167,7 +170,7 @@ module TE(
         .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
     );
     
-    //P0 blocks for mean filtering
+    // P0 blocks for mean filtering
     block_P0 P0_Red(
         .in1(in1[23:16]), .in2(in2[23:16]), .in3(in3[23:16]),
         .in4(in4[23:16]), .in5(in5[23:16]), .in6(in6[23:16]),
@@ -192,7 +195,7 @@ module TE(
         .p0_result(p0_blue_out)
     );
     
-    //P1 blocks for edge preserving
+    // P1 blocks for edge preserving
     block_P1 P1_Red(
         .in1(in1[23:16]), .in2(in2[23:16]), .in3(in3[23:16]),
         .in4(in4[23:16]), .in5(in5[23:16]), .in6(in6[23:16]),
@@ -217,7 +220,7 @@ module TE(
         .p1_result(p1_blue_out)
     );
     
-    //P2 blocks for edge preserving
+    // P2 blocks for edge preserving
     block_P2 P2_Red(
         .in1(in1[23:16]), .in2(in2[23:16]), .in3(in3[23:16]),
         .in4(in4[23:16]), .in5(in5[23:16]), .in6(in6[23:16]),
@@ -242,8 +245,7 @@ module TE(
         .p2_result(p2_blue_out)
     );
     
-    //comparator blocks to find the minimum among R,G,B
-    //compare p0,p1,p2
+    // Comparator blocks to find the minimum among R,G,B
     wire [1:0]cmp_out_0,cmp_out_1,cmp_out_2;
     
     Comparator_Minimum compare_P0(
@@ -270,9 +272,8 @@ module TE(
         .min_val(cmp_out_2)
         );
         
-    //Multiplexers Instantiations
+    // Multiplexer Instantiations
     
-   //p0,p1,p2 blocks
     Mux_1 P0_Mux(
         .a(p0_red_out),
         .b(p0_green_out),
@@ -303,7 +304,6 @@ module TE(
         .out(minimum_p2)
     );
     
-    //min atm muxes
     Mux_2 InvA_0_Mux(
         .a(inv_ar1_1),
         .b(inv_ag1_1),
@@ -334,7 +334,7 @@ module TE(
         .out(min_atm2)
     );
     
-    //stage 7 multiplier block instantiations
+    // Stage 7 multiplier block instantiations
     Multiplier multiply_P0(
         .a(inv_mux0_reg),
         .b(P0_reg),
@@ -356,7 +356,7 @@ module TE(
         .product(prod2)
     );
     
-    //17 bit multiplexer
+    // 17-bit multiplexer
     mux_17bit Stage_7_Mux(
         .m1(prod0), .m2(prod1), .m3(prod2),
         
@@ -365,11 +365,11 @@ module TE(
         .p(pre_transmission)
     );
 
-    //subtractor instantiation
+    // Subtractor instantiation
     Subtractor Sub(
         .a(pre_transmission),
         .diff(subtract_out)
     );
 
+        
 endmodule
-
