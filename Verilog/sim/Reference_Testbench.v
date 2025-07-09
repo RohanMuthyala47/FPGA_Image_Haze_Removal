@@ -25,7 +25,7 @@ module Example_TB;
     always #5 clk = ~clk;
 
     // File and image data
-    localparam File_Size = 800*1024;
+    localparam File_Size = 800 * 1024;
 
     // Store and obtain BMP file data
     reg [23:0] result[0:(File_Size / 3) - 1];
