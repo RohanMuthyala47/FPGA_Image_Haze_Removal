@@ -6,13 +6,13 @@ module ALE_TB;
     reg [23:0]  input_pixel;
     reg         input_is_valid;
 
-    wire [7:0]  a_r;
-    wire [7:0]  a_g;
-    wire [7:0]  a_b;
-    wire [15:0] inv_a_r;
-    wire [15:0] inv_a_g;
+    wire [7:0]  A_R;
+    wire [7:0]  A_G;
+    wire [7:0]  A_B;
+    wire [15:0] Inv_A_R;
+    wire [15:0] Inv_A_G;
     wire [15:0] inv_a_b;
-    wire        ale_valid;
+    wire        output_is_valid;
 
     ALE_Top dut (
         .clk           (clk),
@@ -20,13 +20,14 @@ module ALE_TB;
         .input_pixel   (input_pixel),
         .input_is_valid(input_is_valid),
 
-        .a_r           (a_r),
-        .a_g           (a_g),
-        .a_b           (a_b),
-        .inv_a_r       (inv_a_r),
-        .inv_a_g       (inv_a_g),
-        .inv_a_b       (inv_a_b),
-        .ale_valid     (ale_valid)
+        .A_R            (A_R),
+        .A_G            (A_G),
+        .A_B            (A_B),
+        .Inv_A_R        (Inv_A_R),
+        .Inv_A_G        (Inv_A_G),
+        .Inv_A_B        (Inv_A_B),
+        
+        .output_is_valid(output_is_valid)
     );
 
     // Clock generation
@@ -133,10 +134,10 @@ module ALE_TB;
     always @(posedge clk) begin
         if (rst)
             j <= 0;
-        else if (ale_valid) begin
+        else if (output_is_valid) begin
             $display("Output Pixel %0d:", j);
-            $display("A_R: %d, A_G: %d, A_B: %d", a_r, a_g, a_b);
-            $display("Inv_AR: %d, Inv_AG: %d, Inv_AB: %d", inv_a_r, inv_a_g, inv_a_b);
+            $display("A_R: %d, A_G: %d, A_B: %d", A_R, A_G, A_B);
+            $display("Inv_AR: %d, Inv_AG: %d, Inv_AB: %d", Inv_A_R, Inv_A_G, Inv_A_B);
             j <= j + 1;
         end
     end
