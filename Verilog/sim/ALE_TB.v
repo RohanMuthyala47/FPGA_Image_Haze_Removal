@@ -14,7 +14,7 @@ module ALE_TB;
     wire [15:0] inv_a_b;
     wire        ale_valid;
 
-    ale_top dut (
+    ALE_Top dut (
         .clk           (clk),
         .rst           (rst),
         .input_pixel   (input_pixel),
