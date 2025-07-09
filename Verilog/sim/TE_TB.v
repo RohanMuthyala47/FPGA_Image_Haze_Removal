@@ -1,37 +1,41 @@
 `timescale 1ns/1ps
 
 module TE_TB;
-    reg clk,rst;
+    reg        clk,
+    reg        rst;
+    
     reg [23:0] input_pixel;
-    reg input_is_valid;
+    reg        input_is_valid;
     
     wire [7:0] transmission;
-    wire trans_valid;
+    wire       trans_valid;
 
     TE_Top uut(
-        clk,rst,
+        clk,
+        rst,
+        
         input_pixel,
         input_is_valid,
+        
         transmission,
         trans_valid
-        );
+    );
 
     // Clock generation
     initial clk = 1;
     always #5 clk = ~clk;
 
     // File and image data
-    localparam array_length = 800 * 1024;
+    localparam File_Size = 800 * 1024;
     
-
-    reg [7:0] result[0:array_length-1];
-    reg [7:0] bmpdata[0:array_length-1];
+    reg [7:0] result[0:File_Size - 1];
+    reg [7:0] bmpdata[0:File_Size - 1];
     
     integer bmp_size, bmp_start_pos, bmp_width, bmp_height, bmp_count;
     integer i, j;
     
     // Task: Read BMP File
-    task read_file;
+    task READ_FILE;
         integer file1;
         begin 
             file1 = $fopen("canyon_512.bmp", "rb");
@@ -67,63 +71,62 @@ module TE_TB;
         end
     endtask
     
-    //write BMP file
-    task write_file;
+    // Write to BMP file
+    task WRITE_FILE;
         integer file2,i;
         begin
-        file2 = $fopen("output_file.bmp","wb");
-        
-        for(i = 0;i < bmp_start_pos; i = i + 1)
-        begin   
+            file2 = $fopen("output_file.bmp","wb");
+            
+            for(i = 0; i < bmp_start_pos; i = i + 1) begin   
                 $fwrite(file2, "%c", bmpdata[i]);
-        end
-        
-         for(i = bmp_start_pos;i < bmp_size; i = i + 1)
-               begin   
-                       $fwrite(file2, "%c",result [i-bmp_start_pos]);
-               end
-        
-        $fclose(file2);
-        $display("write successful");
-        
+            end
+            
+            for(i = bmp_start_pos; i < bmp_size; i = i + 1) begin   
+                $fwrite(file2, "%c", result[i - bmp_start_pos]);
+            end
+            
+            $fclose(file2);
+            $display("write successful");
         end
     endtask
 
-    // Stimulus
+    // Start of Simulation
     initial begin
         rst = 1;
         input_is_valid = 0;
-        input_pixel=0;
+        input_pixel = 0;
         
-        read_file;
+        READ_FILE;
+        
         #10;
         rst = 0;
 
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
-            input_pixel[7:0]  = bmpdata[i];     // BMP stores pixels as BGR
-            input_pixel[15:8] = bmpdata[i + 1];
-            input_pixel[23:16]   = bmpdata[i + 2];
+            input_pixel[7:0]    = bmpdata[i];
+            input_pixel[15:8]   = bmpdata[i + 1];
+            input_pixel[23:16]  = bmpdata[i + 2];
             #10;
-           input_is_valid = 1;
+            input_is_valid = 1;
         end
-        
-        
+
         #10;
         input_is_valid = 0;
+        
         #10;
-        write_file;
+        WRITE_FILE;
+        
         #10;
         $stop;
     end
 
-    // Output Monitor
+    // Store the output
     always @(posedge clk) begin
         if (rst)
             j <= 0;
         else if (trans_valid) begin
-            result[j] = transmission;
-            result[j+1] = transmission;
-            result[j+2] = transmission;
+            result[j]     = transmission;
+            result[j + 1] = transmission;
+            result[j + 2] = transmission;
             j <= j + 3;
         end
     end
