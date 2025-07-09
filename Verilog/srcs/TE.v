@@ -14,7 +14,6 @@ module TE(
     input [23:0]     in9,
     
     input [15:0]     inv_ar,inv_ag,inv_ab,
-    input            atm_valid,
     
     output reg [7:0] transmission,
     output reg       output_is_valid
