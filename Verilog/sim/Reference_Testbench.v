@@ -128,7 +128,7 @@ module Example_TB;
     always @(posedge clk) begin
         if (rst)
             j <= 0;
-        else if (o_valid) begin
+        else if (output_is_valid) begin
             result[j] <= {O_R, O_G, O_B};
             j <= j + 1;
         end
