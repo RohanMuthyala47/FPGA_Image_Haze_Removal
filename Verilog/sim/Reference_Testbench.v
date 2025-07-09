@@ -28,7 +28,7 @@ module Example_TB;
     localparam File_Size = 800*1024;
 
     // Store and obtain BMP file data
-    reg [23:0] result[0:(File_Size/3) - 1];
+    reg [23:0] result[0:(File_Size / 3) - 1];
     reg [7:0] bmpdata[0:File_Size - 1];
 
     // BMP Header Data
