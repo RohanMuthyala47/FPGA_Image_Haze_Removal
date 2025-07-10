@@ -606,26 +606,26 @@ module TE_and_SRSC(
     //==========================================================================
     
     Subtractor_SRSC Sub_Red(
-        .a(I_R),
-        .b(A_R2),
+        .Ic(I_R),
+        .Ac(A_R2),
     
-        .out(IR_minus_AR),
+        .diff(IR_minus_AR),
         .add_or_sub(add_or_sub_R)
     );
     
     Subtractor_SRSC Sub_Green(
-        .a(I_G),
-        .b(A_G2),
+        .Ic(I_G),
+        .Ac(A_G2),
     
-        .out(IG_minus_AG),
+        .diff(IG_minus_AG),
         .add_or_sub(add_or_sub_G)
     );
 
     Subtractor_SRSC Sub_Blue(
-        .a(I_B),
-        .b(A_B2),
+        .Ic(I_B),
+        .Ac(A_B2),
     
-        .out(IB_minus_AB),
+        .diff(IB_minus_AB),
         .add_or_sub(add_or_sub_B)
     );
     
@@ -645,22 +645,22 @@ module TE_and_SRSC(
     //==========================================================================
     
     Multiplier_SRSC Mult_Red(
-        .in_q214(inverse_transmission_reg),
-        .in_uint8(IR_minus_AR_reg),
+        .Inv_Trans(inverse_transmission_reg),
+        .Ic_minus_Ac(IR_minus_AR_reg),
 
         .result(Diff_R_times_T)
     );
         
     Multiplier_SRSC Mult_Green(
-        .in_q214(inverse_transmission_reg),
-        .in_uint8(IG_minus_AG_reg),
+        .Inv_Trans(inverse_transmission_reg),
+        .Ic_minus_Ac(IG_minus_AG_reg),
 
         .result(Diff_G_times_T)
     );
     
     Multiplier_SRSC Mult_Blue(
-        .in_q214(inverse_transmission_reg),
-        .in_uint8(IB_minus_AB_reg),
+        .Inv_Trans(inverse_transmission_reg),
+        .Ic_minus_Ac(IB_minus_AB_reg),
         
         .result(Diff_B_times_T)
     );
@@ -670,8 +670,8 @@ module TE_and_SRSC(
     //==========================================================================
     
     Adder_SRSC Add_Red(
-        .a(A_R_reg2),
-        .b(Mult_Red_Reg),
+        .Ac(A_R_reg2),
+        .Multiplier_out(Mult_Red_Reg),
         
         .add_or_sub(add_or_sub_R_reg2),
         
@@ -679,8 +679,8 @@ module TE_and_SRSC(
     );
         
     Adder_SRSC Add_Green(
-        .a(A_G_reg2),
-        .b(Mult_Green_Reg),
+        .Ac(A_G_reg2),
+        .Multiplier_out(Mult_Green_Reg),
         
         .add_or_sub(add_or_sub_G_reg2),
         
@@ -688,8 +688,8 @@ module TE_and_SRSC(
     );
         
     Adder_SRSC Add_Blue(
-        .a(A_B_reg2),
-        .b(Mult_Blue_Reg),
+        .Ac(A_B_reg2),
+        .Multiplier_out(Mult_Blue_Reg),
         
         .add_or_sub(add_or_sub_B_reg2),
         
