@@ -118,14 +118,14 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Features
 
-- ✅ 3×3 sliding window for local filtering  
-- ✅ Dark channel estimation with comparator trees  
-- ✅ Fixed-point division and multiplication  
-- ✅ Transmission floor control (`t₀ = 0.1`)  
-- ✅ Fully pipelined 10-stage datapath  
-- ✅ Synthesizable on ZedBoard FPGA  
-- ✅ Modular, reusable Verilog architecture  
-- ✅ Verified using waveform simulations and output BMP comparison
+- 3×3 sliding window for local filtering  
+- Dark channel estimation with comparator trees  
+- Fixed-point division and multiplication  
+- Transmission floor control (`t₀ = 0.1`)  
+- Fully pipelined 10-stage datapath  
+- Synthesizable on ZedBoard FPGA  
+- Modular, reusable Verilog architecture  
+- Verified using waveform simulations and output BMP comparison
 
 ---
 
