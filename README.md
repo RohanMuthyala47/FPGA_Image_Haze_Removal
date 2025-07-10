@@ -74,7 +74,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 - Computes:  
   `J(x) = (I(x) - A) / max(t(x), t₀) + A`  
 - Handles division using reciprocal lookup  
-- Ensures `t(x) ≥ t₀ = 0.1` (Q0.16)  
+- Ensures `t(x) ≥ t₀ = 0.25` (Q0.16)  
 - Produces dehazed RGB output
 
 ### 5. **TE_and_SRSC**
@@ -121,7 +121,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - 3×3 sliding window for local filtering  
 - Dark channel estimation with comparator trees  
 - Fixed-point division and multiplication  
-- Transmission floor control (`t₀ = 0.1`)  
+- Transmission floor control (`t₀ = 0.25`)  
 - Fully pipelined 10-stage datapath  
 - Synthesizable on ZedBoard FPGA  
 - Modular, reusable Verilog architecture  
@@ -140,7 +140,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Testing and Simulation
 
-- **Tools Used:** ModelSim, GTKWave  
+- **Tools Used:** Vivado Simulator, MATLAB, Pycharm
 - **BMP I/O:**  
   - Header parsed and preserved  
   - Input and output streams verified  
@@ -158,12 +158,6 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - Custom serial protocol over UART  
 - Image streamed pixel-wise (RGB) from host to FPGA  
 - Processed dehazed image returned via UART
-
-### Planned Enhancements:
-
-- Use FIFO buffers to improve performance  
-- Integrate AXI UART for Linux-based workflows  
-- Add DMA and AXI4-Lite for higher throughput  
 
 ---
 
@@ -191,7 +185,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 - Optimize fixed-point dynamic range  
 - Add gamma correction and contrast enhancement  
-- Real-time camera input via HDMI or CMOS sensor
+- Real-time camera input
 - Video Processing
 
 ---
