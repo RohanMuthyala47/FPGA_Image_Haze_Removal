@@ -36,10 +36,9 @@ This project is inspired by the IEEE TCSVT paper:
 
 ### Key Steps:
 
-1. **Dark Channel Prior Estimation**  
-2. **Atmospheric Light Estimation**  
-3. **Transmission Estimation**  
-4. **Scene Radiance Recovery**
+1. **Atmospheric Light Estimation**  
+2. **Transmission Estimation**  
+3. **Scene Radiance Recovery**
 
 ---
 
@@ -54,7 +53,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 - Used in both ALE and TE stages
 - Easily scalable to generate larger windows
 
-### 3. **ALE (Atmospheric Light Estimation)**
+### 2. **ALE (Atmospheric Light Estimation)**
 
 - Computes per-pixel minimum(R, G, B)  
 - Performs 3×3 spatial minimum using comparator trees
@@ -63,14 +62,14 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 - Calculates inverse atmospheric light for TE stage  
 - Fully pipelined and stream-compatible
 
-### 4. **TE (Transmission Estimation)**
+### 3. **TE (Transmission Estimation)**
 
 - Estimates pixel-wise haze using:  
   `t(x) = 1 - ω * min(R, G, B) / A`  
 - ω = 0.9375 is implemented as a constant  
 - All operations use Q0.16 fixed-point arithmetic
 
-### 5. **SRSC (Scene Radiance and Scaling Correction)**
+### 4. **SRSC (Scene Radiance and Scaling Correction)**
 
 - Computes:  
   `J(x) = (I(x) - A) / max(t(x), t₀) + A`  
@@ -78,7 +77,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 - Ensures `t(x) ≥ t₀ = 0.1` (Q0.16)  
 - Produces dehazed RGB output
 
-### 6. **TE_and_SRSC**
+### 5. **TE_and_SRSC**
 
 - 8-stage pipelined core combining TE and SRSC  
 - Improves throughput by eliminating intermediate buffering  
