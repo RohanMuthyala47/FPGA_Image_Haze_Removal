@@ -95,7 +95,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### **Pipeline Flow**
 
 ```
-WindowGenerato → DarkChannel → ALE → TE_and_SRSC
+WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 ```
 
 ### **Interface**
