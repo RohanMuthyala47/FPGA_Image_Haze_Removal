@@ -1,4 +1,4 @@
-# Real-Time Image Haze Removal on FPGA (ZedBoard)    ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+# Real-Time Image Haze Removal on FPGA (ZedBoard)    ![License: MIT](https://img.shields.io/badge/License-MIT-00008B.svg)
 
 ---
 
