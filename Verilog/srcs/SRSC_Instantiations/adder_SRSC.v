@@ -1,15 +1,13 @@
 module Adder_SRSC(
-    input [7:0] a,
-    input [15:0] b,
+    input [7:0]  Ac,
+    input [7:0]  Multiplier_out,
     
-    input add_or_sub,
+    input        add_or_sub,
 
     output [7:0] out
-    );
+);
     
-    wire [7:0] sum;
-    
-    assign sum = add_or_sub ? (a + b) : (a - b);
-    assign out = sum >> 8;
+    assign out = add_or_sub ? ((Ac+ Multiplier_out > 8'd255) ? 8'd255 : (Ac + Multiplier_out)) :
+                              ((Ac > Multiplier_out) ? (Ac - Multiplier_out) : 8'd0);
     
 endmodule
