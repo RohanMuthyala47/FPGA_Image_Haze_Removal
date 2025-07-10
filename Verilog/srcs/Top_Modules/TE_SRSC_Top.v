@@ -1,13 +1,14 @@
 module TE_SRSC_Top (
-    input clk,
-    input rst,
+    input        clk,
+    input        rst,
     input [23:0] input_pixel,
-    input input_is_valid,
+    input        input_is_valid,
 
-    output [7:0]   J_R,
-    output [7:0]   J_G,
-    output [7:0]   J_B,
-    output           output_valid
+    output [7:0] J_R,
+    output [7:0] J_G,
+    output [7:0] J_B,
+    
+    output       output_valid
 );
 
     // Wires for 3x3 window pixels from WindowGeneratorTop
@@ -42,7 +43,7 @@ module TE_SRSC_Top (
         .output_is_valid(window_valid)
     );
 
-    // Instance of design module
+  // Instance of design module
   TE_and_SRSC TE_SRSC(
         .clk(clk),
         .rst(rst),
