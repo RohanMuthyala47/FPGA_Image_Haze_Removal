@@ -30,7 +30,8 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 ## Algorithm Overview
 
 This project is inspired by the IEEE TCSVT paper:  
-** "Hardware Implementation of a Fast and Efficient Haze Removal Method" **
+**"Hardware Implementation of a Fast and Efficient Haze Removal Method"**
+
  **Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang**
 
 ### Key Steps:
