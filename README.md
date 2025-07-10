@@ -2,7 +2,6 @@
 
    ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-
 ---
 
 ## Overview
@@ -53,17 +52,15 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 - Extracts 3×3 RGB window using 4 line buffers  
 - Outputs 9 pixels (in1 to in9) in parallel  
-- Used in both DCP and TE stages
-
-### 2. **DarkChannel**
-
-- Computes per-pixel minimum(R, G, B)  
-- Performs 3×3 spatial minimum using comparator trees  
-- Outputs a grayscale dark channel pixel
+- Used in both ALE and TE stages
+- Easily scalable to generate larger windows
 
 ### 3. **ALE (Atmospheric Light Estimation)**
 
-- Selects the top 0.1% brightest pixels from the dark channel  
+- Computes per-pixel minimum(R, G, B)  
+- Performs 3×3 spatial minimum using comparator trees
+- Computes the dark channel per 3x3 RGB window
+- Selects brightest pixel from the dark channel of the frame 
 - Calculates inverse atmospheric light for TE stage  
 - Fully pipelined and stream-compatible
 
@@ -71,7 +68,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 - Estimates pixel-wise haze using:  
   `t(x) = 1 - ω * min(R, G, B) / A`  
-- ω = 0.95 is implemented as a constant  
+- ω = 0.9375 is implemented as a constant  
 - All operations use Q0.16 fixed-point arithmetic
 
 ### 5. **SRSC (Scene Radiance and Scaling Correction)**
@@ -84,7 +81,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 ### 6. **TE_and_SRSC**
 
-- 10-stage pipelined core combining TE and SRSC  
+- 8-stage pipelined core combining TE and SRSC  
 - Improves throughput by eliminating intermediate buffering  
 - Maintains valid signal propagation across pipeline
 
@@ -184,12 +181,11 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Tools & Technologies
 
-- Verilog HDL  
-- Xilinx Vivado (Synthesis & Implementation)  
+- Xilinx Vivado 2023.2 (Synthesis & Implementation)  
 - ZedBoard FPGA (Zynq-7000)  
-- UART for serial I/O  
 - Custom Python tools for image analysis
-- MATLAB
+- MATLAB Simulink, HDL Coder
+- Xilinx Vitis HLS
 
 ---
 
