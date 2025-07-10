@@ -1,20 +1,22 @@
 module SRSC_Top(
     input            clk,
     input            rst,
+    
     input [23:0]     input_pixel,
     input            input_is_valid,
+    
     output [7:0]     J_R, J_G, J_B,
     output           output_valid
 );
 
     wire [23:0] output_pixel_1, output_pixel_2, output_pixel_3, 
-               output_pixel_4, output_pixel_5, output_pixel_6, 
-               output_pixel_7, output_pixel_8, output_pixel_9;
-    wire valid;
+                output_pixel_4, output_pixel_5, output_pixel_6, 
+                output_pixel_7, output_pixel_8, output_pixel_9;
+    wire        valid;
 
     wire [15:0] transmission;
-    wire te_output_valid;
-    wire atmospheric_data_ready;
+    wire        te_output_valid;
+    wire        atmospheric_data_ready;
 
     // 3x3 Window Generator
     WindowGeneratorTop W1(
@@ -97,17 +99,17 @@ module SRSC (
 );
 
     wire [7:0] diff_r, diff_g, diff_b;
-    wire c1, c2, c3;
+    wire       c1, c2, c3;
 
-    reg  [7:0] red, green, blue;
-    reg c1_reg, c2_reg, c3_reg;
-    reg        stage_1_valid;
+    reg [7:0] red, green, blue;
+    reg       c1_reg, c2_reg, c3_reg;
+    reg       stage_1_valid;
 
-    reg  [15:0] inv_trans;
+    reg [15:0] inv_trans;
 
-    reg  [7:0] x, y, z;
-    reg c1_reg1, c2_reg1, c3_reg1;
-    reg        stage_2_valid;
+    reg [7:0] x, y, z;
+    reg       c1_reg1, c2_reg1, c3_reg1;
+    reg       stage_2_valid;
 
     // Absolute difference
     assign diff_r = (I_R > A_R) ? (I_R - A_R) : (A_R - I_R);
