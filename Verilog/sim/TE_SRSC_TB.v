@@ -135,6 +135,4 @@ module TE_SRSC_Tb;
         end
     end
     
-
-    
 endmodule
