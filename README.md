@@ -1,7 +1,7 @@
 # Real-Time Image Haze Removal on FPGA (ZedBoard)
 
-**An FPGA-accelerated implementation of a haze removal algorithm using pipelined Verilog modules with UART BMP image I/O and fixed-point math.**  
-**License: MIT**
+   ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 
 ---
 
@@ -34,6 +34,7 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 
 This project is inspired by the IEEE TCSVT paper:  
 **"Hardware Implementation of a Fast and Efficient Haze Removal Method"**
+ **Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang**
 
 ### Key Steps:
 
@@ -56,8 +57,8 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 ### 2. **DarkChannel**
 
-- Computes per-pixel min(R, G, B)  
-- Performs 3×3 spatial min using comparator trees  
+- Computes per-pixel minimum(R, G, B)  
+- Performs 3×3 spatial minimum using comparator trees  
 - Outputs a grayscale dark channel pixel
 
 ### 3. **ALE (Atmospheric Light Estimation)**
@@ -94,7 +95,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### **Pipeline Flow**
 
 ```
-Register_Bank → DarkChannel → ALE → TE_and_SRSC
+WindowGenerato → DarkChannel → ALE → TE_and_SRSC
 ```
 
 ### **Interface**
@@ -128,7 +129,6 @@ Register_Bank → DarkChannel → ALE → TE_and_SRSC
 - ✅ Transmission floor control (`t₀ = 0.1`)  
 - ✅ Fully pipelined 10-stage datapath  
 - ✅ Synthesizable on ZedBoard FPGA  
-- ✅ UART-based BMP image streaming  
 - ✅ Modular, reusable Verilog architecture  
 - ✅ Verified using waveform simulations and output BMP comparison
 
@@ -185,11 +185,11 @@ Register_Bank → DarkChannel → ALE → TE_and_SRSC
 ## Tools & Technologies
 
 - Verilog HDL  
-- ModelSim / GTKWave  
 - Xilinx Vivado (Synthesis & Implementation)  
 - ZedBoard FPGA (Zynq-7000)  
 - UART for serial I/O  
-- Custom Python tools for image analysis  
+- Custom Python tools for image analysis
+- MATLAB
 
 ---
 
@@ -197,10 +197,8 @@ Register_Bank → DarkChannel → ALE → TE_and_SRSC
 
 - Optimize fixed-point dynamic range  
 - Add gamma correction and contrast enhancement  
-- Real-time camera input via HDMI or CMOS sensor  
-- Memory-mapped buffer interface with AXI  
-- Convert to SystemVerilog with formal assertions  
-- Add AXI-stream support for SDSoC / Vitis HLS integration  
+- Real-time camera input via HDMI or CMOS sensor
+- Video Processing
 
 ---
 
@@ -212,7 +210,7 @@ Register_Bank → DarkChannel → ALE → TE_and_SRSC
 
 - **IEEE TCSVT Paper**  
   *"Hardware Implementation of a Fast and Efficient Haze Removal Method"*
-
+  *Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang*
 ---
 
 ## License
