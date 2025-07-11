@@ -1,13 +1,13 @@
 module ALE_TE_Top(
-    input  wire        clk,
-    input  wire        enable,
-    input  wire        reset,
-    input  wire [23:0] pixel_input,
-    input  wire        pixel_valid,
+    input        clk,
+    input        enable,
+    input        reset,
+    input [23:0] pixel_input,
+    input        pixel_valid,
     
-    output wire [7:0]  transmission_value,
-    output wire        transmission_ready,
-    output wire        processing_complete
+    output [7:0] transmission_value,
+    output       transmission_ready,
+    output       processing_complete
 );
 
     // 3x3 sliding window pixel outputs
@@ -76,19 +76,16 @@ module ALE_TE_Top(
     reg [15:0] latched_inverse_atm_red;
     reg [15:0] latched_inverse_atm_green;
     reg [15:0] latched_inverse_atm_blue;
-    reg        atmospheric_data_ready;
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             latched_inverse_atm_red   <= 16'b0;
             latched_inverse_atm_green <= 16'b0;
             latched_inverse_atm_blue  <= 16'b0;
-            
         end else if (ale_processing_done) begin
             latched_inverse_atm_red   <= inverse_atm_red;
             latched_inverse_atm_green <= inverse_atm_green;
             latched_inverse_atm_blue  <= inverse_atm_blue;
-            
         end
     end
 
