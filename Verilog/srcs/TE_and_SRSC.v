@@ -73,10 +73,10 @@ module TE_and_SRSC(
     // PIPELINE REGISTERS - STAGE 6
     //==========================================================================
     
-    reg [1:0]   final_edge_reg_2;
-    reg [15:0]  inv_mux0_reg, inv_mux1_reg, inv_mux2_reg;
-    reg [7:0]   P0_reg, P1_reg, P2_reg;
-    reg         stage_6_valid;
+    reg [1:0]  final_edge_reg_2;
+    reg [15:0] inv_mux0_reg, inv_mux1_reg, inv_mux2_reg;
+    reg [7:0]  P0_reg, P1_reg, P2_reg;
+    reg        stage_6_valid;
     
     //==========================================================================
     // STAGE 7 WIRES AND REGISTERS
@@ -95,9 +95,9 @@ module TE_and_SRSC(
     reg [23:0] I_0, I_1, I_2, I_3;
     
     // Pipeline Atmospheric Light for SRSC
-    reg [7:0]  A_R0, A_G0, A_B0;
-    reg [7:0]  A_R1, A_G1, A_B1;
-    reg [7:0]  A_R2, A_G2, A_B2;
+    reg [7:0] A_R0, A_G0, A_B0;
+    reg [7:0] A_R1, A_G1, A_B1;
+    reg [7:0] A_R2, A_G2, A_B2;
     
     // Pipeline Registers for stage 7
     reg [7:0]   A_R_reg, A_G_reg, A_B_reg;
@@ -153,7 +153,9 @@ module TE_and_SRSC(
             
             I_0 <= 0;
             
-            A_R0 <= 0; A_G0 <= 0; A_B0 <= 0;
+            A_R0 <= 0;
+            A_G0 <= 0; 
+            A_B0 <= 0;
             
             stage_4_valid <= 0;
         end
@@ -168,7 +170,9 @@ module TE_and_SRSC(
             
             I_0 <= in5;
             
-            A_R0 <= A_R; A_G0 <= A_G; A_B0 <= A_B;
+            A_R0 <= A_R;
+            A_G0 <= A_G;
+            A_B0 <= A_B;
             
             stage_4_valid <= input_is_valid;
         end
@@ -185,7 +189,9 @@ module TE_and_SRSC(
             
             I_1 <= 0;
             
-            A_R1 <= 0; A_G1 <= 0; A_B1 <= 0;
+            A_R1 <= 0; 
+            A_G1 <= 0; 
+            A_B1 <= 0;
             
             stage_5_valid <= 0;
         end
@@ -198,7 +204,9 @@ module TE_and_SRSC(
              
             I_1 <= I_0;
              
-            A_R1 <= A_R0; A_G1 <= A_G0; A_B1 <= A_B0;
+            A_R1 <= A_R0; 
+            A_G1 <= A_G0; 
+            A_B1 <= A_B0;
              
             stage_5_valid <= stage_4_valid;
         end
@@ -209,26 +217,38 @@ module TE_and_SRSC(
         if (rst) begin
             final_edge_reg_2 <= 0;
             
-            inv_mux0_reg <= 0; inv_mux1_reg <= 0; inv_mux2_reg <= 0;
+            inv_mux0_reg <= 0; 
+            inv_mux1_reg <= 0; 
+            inv_mux2_reg <= 0;
             
-            P0_reg <= 0; P1_reg <= 0; P2_reg <= 0;
+            P0_reg <= 0; 
+            P1_reg <= 0; 
+            P2_reg <= 0;
             
             I_2 <= 0;
             
-            A_R2 <= 0; A_G2 <= 0; A_B2 <= 0;
+            A_R2 <= 0; 
+            A_G2 <= 0;
+            A_B2 <= 0;
             
             stage_6_valid <= 0;
         end
         else begin
             final_edge_reg_2 <= final_edge_reg_1;
             
-            inv_mux0_reg <= min_atm0; inv_mux1_reg <= min_atm1; inv_mux2_reg <= min_atm2;
+            inv_mux0_reg <= min_atm0;
+            inv_mux1_reg <= min_atm1;
+            inv_mux2_reg <= min_atm2;
             
-            P0_reg <= minimum_p0; P1_reg <= minimum_p1; P2_reg <= minimum_p2;
+            P0_reg <= minimum_p0;
+            P1_reg <= minimum_p1;
+            P2_reg <= minimum_p2;
                 
             I_2 <= I_1;
                 
-            A_R2 <= A_R1; A_G2 <= A_G1; A_B2 <= A_B1;
+            A_R2 <= A_R1;
+            A_G2 <= A_G1; 
+            A_B2 <= A_B1;
                 
             stage_6_valid <= stage_5_valid;
         end
@@ -468,7 +488,7 @@ module TE_and_SRSC(
     // COMPARATOR BLOCKS TO FIND MINIMUM AMONG R,G,B
     //==========================================================================
     
-    // Compare p0, p1, p2
+    // Compare P0, P1, P2
     wire [1:0] cmp_out_0, cmp_out_1, cmp_out_2;
     
     Comparator_Minimum compare_P0(
