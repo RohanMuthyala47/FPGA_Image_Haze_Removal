@@ -1,6 +1,6 @@
 module Saturation_Correction_Multiplier (
-    input  [7:0]  x1,          // For x^0.3
-    input  [7:0]  x2,          // For x^0.7
+    input  [7:0] x1,       // Ac
+    input  [7:0] x2,       // Jc
     output [7:0] result    // Final unsigned 8-bit result
 );
 
