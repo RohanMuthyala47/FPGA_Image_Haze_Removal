@@ -1,5 +1,5 @@
 module LUT_03 (
-    input  [7:0] x,
+    input       [7:0] x,
     output reg [15:0] y_q8_8
 );
 
