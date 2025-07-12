@@ -47,7 +47,7 @@ module TE_and_SRSC(
     wire [15:0] pre_transmission;
     
     //==========================================================================
-    // PIPELINE REGISTERS - STAGE 4
+    // WIRES AND PIPELINE REGISTERS - STAGE 4
     //==========================================================================
     
     reg [1:0]   ed1_reg, ed2_reg, ed3_reg;
@@ -57,7 +57,7 @@ module TE_and_SRSC(
     reg         stage_4_valid;
     
     //==========================================================================
-    // STAGE 5 LOGIC AND REGISTERS
+    // WIRES AND PIPELINE REGISTERS - STAGE 5
     //==========================================================================
     
     wire [1:0] final_edge = (ed1_reg | ed2_reg | ed3_reg);
@@ -70,16 +70,16 @@ module TE_and_SRSC(
     reg         stage_5_valid;
     
     //==========================================================================
-    // PIPELINE REGISTERS - STAGE 6
+    // WIRES AND PIPELINE REGISTERS - STAGE 6
     //==========================================================================
     
-    reg [1:0]  final_edge_reg_2;
-    reg [15:0] inv_mux0_reg, inv_mux1_reg, inv_mux2_reg;
-    reg [7:0]  P0_reg, P1_reg, P2_reg;
-    reg        stage_6_valid;
+    reg [1:0]   final_edge_reg_2;
+    reg [15:0]  inv_mux0_reg, inv_mux1_reg, inv_mux2_reg;
+    reg [7:0]   P0_reg, P1_reg, P2_reg;
+    reg         stage_6_valid;
     
     //==========================================================================
-    // STAGE 7 WIRES AND REGISTERS
+    // WIRES AND PIPELINE REGISTERS - STAGE 7
     //==========================================================================
     
     wire [15:0] subtract_out;
@@ -95,9 +95,9 @@ module TE_and_SRSC(
     reg [23:0] I_0, I_1, I_2, I_3;
     
     // Pipeline Atmospheric Light for SRSC
-    reg [7:0] A_R0, A_G0, A_B0;
-    reg [7:0] A_R1, A_G1, A_B1;
-    reg [7:0] A_R2, A_G2, A_B2;
+    reg [7:0]  A_R0, A_G0, A_B0;
+    reg [7:0]  A_R1, A_G1, A_B1;
+    reg [7:0]  A_R2, A_G2, A_B2;
     
     // Pipeline Registers for stage 7
     reg [7:0]   A_R_reg, A_G_reg, A_B_reg;
@@ -107,7 +107,7 @@ module TE_and_SRSC(
     reg         stage_7_valid;
     
     //==========================================================================
-    // PIPELINE REGISTERS - STAGE 8
+    // WIRES AND PIPELINE REGISTERS - STAGE 8
     //==========================================================================
     
     reg [7:0] A_R_reg1, A_G_reg1, A_B_reg1;
@@ -118,7 +118,7 @@ module TE_and_SRSC(
     wire [7:0] Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
     
     //==========================================================================
-    // PIPELINE REGISTERS - STAGE 9
+    // WIRES AND PIPELINE REGISTERS - STAGE 9
     //==========================================================================
     
     reg [7:0] A_R_reg2, A_G_reg2, A_B_reg2;
@@ -130,11 +130,16 @@ module TE_and_SRSC(
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
     
     //==========================================================================
-    // PIPELINE REGISTERS - STAGE 10
+    // WIRES AND PIPELINE REGISTERS - STAGE 10
     //==========================================================================
     
     reg [7:0] J_R_reg, J_G_reg, J_B_reg;
     reg       stage_10_valid;
+    
+    wire [15:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
+    wire [15:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
+    
+    wire [7:0] SC_R, SC_G, SC_B;
     
     //==========================================================================
     // UPDATING PIPELINE REGISTERS
@@ -153,9 +158,7 @@ module TE_and_SRSC(
             
             I_0 <= 0;
             
-            A_R0 <= 0;
-            A_G0 <= 0; 
-            A_B0 <= 0;
+            A_R0 <= 0; A_G0 <= 0; A_B0 <= 0;
             
             stage_4_valid <= 0;
         end
@@ -170,9 +173,7 @@ module TE_and_SRSC(
             
             I_0 <= in5;
             
-            A_R0 <= A_R;
-            A_G0 <= A_G;
-            A_B0 <= A_B;
+            A_R0 <= A_R; A_G0 <= A_G; A_B0 <= A_B;
             
             stage_4_valid <= input_is_valid;
         end
@@ -189,9 +190,7 @@ module TE_and_SRSC(
             
             I_1 <= 0;
             
-            A_R1 <= 0; 
-            A_G1 <= 0; 
-            A_B1 <= 0;
+            A_R1 <= 0; A_G1 <= 0; A_B1 <= 0;
             
             stage_5_valid <= 0;
         end
@@ -204,9 +203,7 @@ module TE_and_SRSC(
              
             I_1 <= I_0;
              
-            A_R1 <= A_R0; 
-            A_G1 <= A_G0; 
-            A_B1 <= A_B0;
+            A_R1 <= A_R0; A_G1 <= A_G0; A_B1 <= A_B0;
              
             stage_5_valid <= stage_4_valid;
         end
@@ -217,38 +214,26 @@ module TE_and_SRSC(
         if (rst) begin
             final_edge_reg_2 <= 0;
             
-            inv_mux0_reg <= 0; 
-            inv_mux1_reg <= 0; 
-            inv_mux2_reg <= 0;
+            inv_mux0_reg <= 0; inv_mux1_reg <= 0; inv_mux2_reg <= 0;
             
-            P0_reg <= 0; 
-            P1_reg <= 0; 
-            P2_reg <= 0;
+            P0_reg <= 0; P1_reg <= 0; P2_reg <= 0;
             
             I_2 <= 0;
             
-            A_R2 <= 0; 
-            A_G2 <= 0;
-            A_B2 <= 0;
+            A_R2 <= 0; A_G2 <= 0; A_B2 <= 0;
             
             stage_6_valid <= 0;
         end
         else begin
             final_edge_reg_2 <= final_edge_reg_1;
             
-            inv_mux0_reg <= min_atm0;
-            inv_mux1_reg <= min_atm1;
-            inv_mux2_reg <= min_atm2;
+            inv_mux0_reg <= min_atm0; inv_mux1_reg <= min_atm1; inv_mux2_reg <= min_atm2;
             
-            P0_reg <= minimum_p0;
-            P1_reg <= minimum_p1;
-            P2_reg <= minimum_p2;
+            P0_reg <= minimum_p0; P1_reg <= minimum_p1; P2_reg <= minimum_p2;
                 
             I_2 <= I_1;
                 
-            A_R2 <= A_R1;
-            A_G2 <= A_G1; 
-            A_B2 <= A_B1;
+            A_R2 <= A_R1; A_G2 <= A_G1; A_B2 <= A_B1;
                 
             stage_6_valid <= stage_5_valid;
         end
@@ -308,7 +293,7 @@ module TE_and_SRSC(
             A_R_reg1 <= 0;
             A_G_reg1 <= 0;
             A_B_reg1 <= 0;
-            
+
             add_or_sub_R_reg1 <= 0;
             add_or_sub_G_reg1 <= 0;
             add_or_sub_B_reg1 <= 0;
@@ -319,7 +304,7 @@ module TE_and_SRSC(
             A_R_reg1 <= A_R_reg;
             A_G_reg1 <= A_G_reg;
             A_B_reg1 <= A_B_reg;
-            
+
             add_or_sub_R_reg1 <= add_or_sub_R_reg;
             add_or_sub_G_reg1 <= add_or_sub_G_reg;
             add_or_sub_B_reg1 <= add_or_sub_B_reg;
@@ -372,9 +357,9 @@ module TE_and_SRSC(
             stage_10_valid <= 0;
         end
         else begin
-            J_R_reg <= Sum_Red;
-            J_G_reg <= Sum_Green;
-            J_B_reg <= Sum_Blue;
+            J_R_reg <= SC_R;
+            J_G_reg <= SC_G;
+            J_B_reg <= SC_B;
             
             stage_10_valid <= stage_9_valid;
         end
@@ -488,7 +473,7 @@ module TE_and_SRSC(
     // COMPARATOR BLOCKS TO FIND MINIMUM AMONG R,G,B
     //==========================================================================
     
-    // Compare P0, P1, P2
+    // Compare p0, p1, p2
     wire [1:0] cmp_out_0, cmp_out_1, cmp_out_2;
     
     Comparator_Minimum compare_P0(
@@ -714,6 +699,58 @@ module TE_and_SRSC(
         .add_or_sub(add_or_sub_B_reg2),
         
         .out(Sum_Blue)
+    );
+    
+    //==========================================================================
+    // LOOK-UP TABLES TO COMPUTE Ac ^ 0.3 AND J ^ 0.7
+    //==========================================================================
+    
+    LUT_03 A_R_Correction(
+        .x(A_R_reg2),
+        .y_q8_8(A_R_Corrected)
+    );
+    
+    LUT_03 A_G_Correction(
+        .x(A_G_reg2),
+        .y_q8_8(A_G_Corrected)
+    );
+    
+    LUT_03 A_B_Correction(
+        .x(A_B_reg2),
+        .y_q8_8(A_B_Corrected)
+    );
+    
+    LUT_07 J_R_Correction(
+        .x(Sum_Red),
+        .y_q8_8(J_R_Corrected)
+    );
+    
+    LUT_07 J_G_Correction(
+        .x(Sum_Green),
+        .y_q8_8(J_G_Corrected)
+    );
+    
+    LUT_07 J_B_Correction(
+        .x(Sum_Blue),
+        .y_q8_8(J_B_Corrected)
+    );
+    
+    //==========================================================================
+    // MULTIPLIER MODULES TO COMPUTE Ac^? × Jc^(1-?)
+    //==========================================================================
+    Saturation_Correction_Multiplier Saturation_Correction_Red(
+        .x1(A_R_Corrected), .x2(J_R_Corrected),
+        .result(SC_R)
+    );
+    
+    Saturation_Correction_Multiplier Saturation_Correction_Green(
+        .x1(A_G_Corrected), .x2(J_G_Corrected),
+        .result(SC_G)
+    );
+    
+    Saturation_Correction_Multiplier Saturation_Correction_Blue(
+        .x1(A_B_Corrected), .x2(J_B_Corrected),
+        .result(SC_B)
     );
     
 endmodule
