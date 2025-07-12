@@ -2,43 +2,46 @@
 
 module Haze_Removal_TB;
 
-    reg clk;
-    reg rst;
-    reg enable;
+    reg        clk;
+    reg        rst;
+    reg        enable;
+    
     reg [23:0] input_pixel;
-    reg input_is_valid;
+    reg        input_is_valid;
 
     wire [23:0] output_pixel;
-    wire output_is_valid;
+    wire        output_is_valid;
 
     // Instantiate the ALE_TE_Top module
     Haze_Removal_Top dut(
-    .clk(clk),
-    .rst(rst),
-    .enable(enable),
+        .clk(clk),
+        .rst(rst),
+        .enable(enable),
     
-    .input_pixel(input_pixel),
-    .input_is_valid(input_is_valid),
+        .input_pixel(input_pixel),
+        .input_is_valid(input_is_valid),
 
-    .output_pixel(output_pixel),
-    .output_is_valid(output_is_valid)
-);
+        .output_pixel(output_pixel),
+        .output_is_valid(output_is_valid)
+    );
 
     // Clock generation
-    initial clk = 0;  // Start with 0 for cleaner simulation
+    initial clk = 0;
     always #5 clk = ~clk;
     
     // File and image data
-    localparam array_length = 800 * 1024;
-    reg [7:0] bmpdata[0:array_length-1];
-    reg [23:0] result[0:(array_length /3)- 1];
+    localparam File_Size = 800 * 1024;
+    reg [7:0] bmpdata[0:File_Size - 1];
+    reg [23:0] result[0:(File_Size / 3) - 1];
+    
     integer bmp_size, bmp_start_pos, bmp_width, bmp_height, bmp_count;
     integer i, j;
-    
-    task read_file;
+
+    // Read from BMP File
+    task READ_FILE;
         integer file1;
         begin 
-            file1 = $fopen("canyon_512.bmp", "rb");
+            file1 = $fopen("input_image.bmp", "rb");
             if (file1 == 0) begin
                 $display("Error: Cannot open BMP file.");
                 $finish;
@@ -71,11 +74,12 @@ module Haze_Removal_TB;
             end
         end
     endtask
-    
-    task write_file;
+
+    // Write to BMP File
+    task WRITE_FILE;
         integer file2, k;
         begin
-            file2 = $fopen("output_file.bmp", "wb");
+            file2 = $fopen("result_image.bmp", "wb");
             
             for (k = 0; k < bmp_start_pos; k = k + 1) begin   
                 $fwrite(file2, "%c", bmpdata[k]);
@@ -84,10 +88,10 @@ module Haze_Removal_TB;
             // Write BMP header
             for(k = bmp_start_pos; k < bmp_size; k = k + 3) begin   
                 $fwrite(file2, "%c%c%c", 
-                    result[(k - bmp_start_pos)/3][7:0],        // Blue
-                    result[(k - bmp_start_pos)/3][15:8],       // Green
-                    result[(k - bmp_start_pos)/3][23:16]       // Red
-                    );
+                            result[(k - bmp_start_pos)/3][7:0],        // Blue
+                            result[(k - bmp_start_pos)/3][15:8],       // Green
+                            result[(k - bmp_start_pos)/3][23:16]       // Red
+                        );
             end
             
             $fclose(file2);
@@ -102,7 +106,7 @@ module Haze_Removal_TB;
         input_is_valid = 0;
         input_pixel = 0;
         
-        read_file;
+        READ_FILE;
         
         #10;
         rst = 0;
@@ -126,10 +130,10 @@ module Haze_Removal_TB;
         // ------------------------------
         // Pass 2: Feed image to TE and SRSC
         // ------------------------------
-        enable = 1; // enable TE and SRSC
+        enable = 1; // Enable TE and SRSC
         #10;
       
-        read_file;
+        READ_FILE;
         #20;
       
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
@@ -139,11 +143,12 @@ module Haze_Removal_TB;
             input_is_valid = 1;
             #10;
         end
+        
         input_is_valid = 0;
-
         #100;
+        
         // Write output file
-        write_file;
+        WRITE_FILE;
         
         #10;
         $stop;
@@ -153,7 +158,8 @@ module Haze_Removal_TB;
     always @(posedge clk) begin
         if (rst) begin
             j <= 0;
-        end else if (output_is_valid) begin
+        end 
+        else if (output_is_valid) begin
             result[j] <= output_pixel;
             j <= j + 1;
         end
