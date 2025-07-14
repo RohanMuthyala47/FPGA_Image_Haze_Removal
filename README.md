@@ -26,13 +26,15 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 - Reduce latency compared to software solutions
 
 ---
+## Objectives
+
+- Accelerate the Dark Channel Prior based haze removal algorithm using FPGA for real-time performance.
+- Modular Verilog Implementation of each processing stage: Atmospheric Light Estimation, Transmission Estimation, Scene Recovery and Saturation Correction
+- Optimize for low-latency and energy efficiency using pipelining and parallelism
+- Enable deployment on embedded platforms (Zynq SoC) with AXI-stream interface.
+---
 
 ## Algorithm Overview
-
-This project is inspired by the IEEE TCSVT paper:  
-**"Hardware Implementation of a Fast and Efficient Haze Removal Method"**
-
- **Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang**
 
 ### Key Steps:
 
@@ -65,23 +67,17 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### 3. **TE (Transmission Estimation)**
 
 - Estimates pixel-wise haze using:  
-  `t(x) = 1 - ω * min(R, G, B) / A`  
+  `t(i, j)=1− ω min c∈{R,G,B} (Pc / Ac)`  
 - ω = 0.9375 is implemented as a constant  
 - All operations use Q0.16 fixed-point arithmetic
 
-### 4. **SRSC (Scene Radiance and Scaling Correction)**
+### 4. **SRSC (Scene Recovery and Saturation Correction)**
 
 - Computes:  
-  `J(x) = (I(x) - A) / max(t(x), t₀) + A`  
+  `J(x) = {(I(x) - A) / max(t(x), t₀)} + A`  
 - Handles division using reciprocal lookup  
 - Ensures `t(x) ≥ t₀ = 0.25` (Q0.16)  
-- Produces dehazed RGB output
-
-### 5. **TE_and_SRSC**
-
-- 8-stage pipelined core combining TE and SRSC  
-- Improves throughput by eliminating intermediate buffering  
-- Maintains valid signal propagation across pipeline
+- Produces a sharp output image with the haze eliminated
 
 ---
 
@@ -122,10 +118,10 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - Dark channel estimation with comparator trees  
 - Fixed-point division and multiplication  
 - Transmission floor control (`t₀ = 0.25`)  
-- Fully pipelined 10-stage datapath  
+- Fully pipelined 10-stage architecture  
 - Synthesizable on ZedBoard FPGA  
 - Modular, reusable Verilog architecture  
-- Verified using waveform simulations and output BMP comparison
+- Verified using waveform simulations and output BMP image comparison
 
 ---
 
