@@ -67,7 +67,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### 3. **TE (Transmission Estimation)**
 
 - Estimates pixel-wise haze using:  
-  `t(i, j)=1− ω min c∈{R,G,B} (Pc / Ac)`  
+  `t(x)=1 − ω min c∈{R,G,B} (Pc / Ac)`  
 - ω = 0.9375 is implemented as a constant  
 - All operations use Q0.16 fixed-point arithmetic
 
