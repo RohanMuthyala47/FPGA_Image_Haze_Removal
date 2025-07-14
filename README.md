@@ -15,8 +15,8 @@ The pipeline receives BMP images via UART, processes them to remove haze, and re
 Hazy or foggy images reduce visibility and impair the performance of vision-based systems in applications such as:
 
 - Autonomous vehicles  
-- Surveillance systems  
-- Outdoor robotics
+- Surveillance systems
+- Remote Sensing
 
 Real-time haze removal is computationally expensive on general-purpose CPUs. To address this, the design uses a custom FPGA-based hardware accelerator to:
 
@@ -24,6 +24,7 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 - Support stream-based pipelining  
 - Enable real-time dehazing on-chip  
 - Reduce latency compared to software solutions
+- Reduce power consumption by implementing clock gating
 
 ---
 ## Objectives
@@ -50,9 +51,9 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 ### 1. **WindowGenerator**
 
-- Extracts 3×3 RGB window using 4 line buffers  
+- Extracts 3×3 RGB window using 2 line buffers  
 - Outputs 9 pixels (in1 to in9) in parallel  
-- Used in both ALE and TE stages
+- Used in both ALE AND TE stages
 - Easily scalable to generate larger windows
 
 ### 2. **ALE (Atmospheric Light Estimation)**
