@@ -571,22 +571,22 @@ module TE_and_SRSC(
     //==========================================================================
     
     Multiplier multiply_P0(
-        .a(inv_mux0_reg),
-        .b(P0_reg),
+        .Ac_Inv(inv_mux0_reg),
+        .Pc(P0_reg),
         
         .product(prod0)
     );
     
     Multiplier multiply_P1(
-        .a(inv_mux1_reg),
-        .b(P1_reg),
+        .Ac_Inv(inv_mux1_reg),
+        .Pc(P1_reg),
         
         .product(prod1)
     );
     
     Multiplier multiply_P2(
-        .a(inv_mux2_reg),
-        .b(P2_reg),
+        .Ac_Inv(inv_mux2_reg),
+        .Pc(P2_reg),
         
         .product(prod2)
     );
