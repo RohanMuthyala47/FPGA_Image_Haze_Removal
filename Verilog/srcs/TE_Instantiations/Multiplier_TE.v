@@ -1,7 +1,7 @@
 module Multiplier(
     input  [15:0] Ac_Inv, // Inverted Atmospheric Light value in Q0.16 format
     input  [7:0]  Pc,     // Edge Detection Filter result
-    output [15:0] product // Product in Q0.16 format
+    output [15:0] product // // OMEGA * min(Pc / Ac) ; c ∈ {R, G, B} in Q0.16 format
 );
 
     // Constants in Q0.16 format
