@@ -1,4 +1,4 @@
-module block_P1(
+module Block_P1(
     input [7:0]  in1,
     input [7:0]  in2,
     input [7:0]  in3,
