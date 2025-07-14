@@ -1,14 +1,14 @@
 //stage 7 multiplexer
 module mux_17bit(
-    input [16:0] m1, m2, m3,
+    input [16:0] a, b, c,
     input [1:0]  sel,
         
-    output [16:0] p
+    output [16:0] out
 );
     
-    assign p = (sel == 2'b00) ? m1 : 
-               (sel == 2'b01) ? m2 : 
-               (sel == 2'b10) ? m3 :
-               0;
+    assign out = (sel == 2'b00) ? a : 
+                 (sel == 2'b01) ? b : 
+                 (sel == 2'b10) ? c :
+                  0;
     
 endmodule
