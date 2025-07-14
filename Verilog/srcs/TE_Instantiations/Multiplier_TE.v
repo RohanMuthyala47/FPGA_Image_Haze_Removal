@@ -1,14 +1,15 @@
-module Multiplier (
-    input  [15:0] a,      // Inverted Atmospheric Light value in Q0.16 format
-    input  [7:0]  b,      // Edge Detection Filter result
+module Multiplier(
+    input  [15:0] Ac_Inv, // Inverted Atmospheric Light value in Q0.16 format
+    input  [7:0]  Pc,     // Edge Detection Filter result
     output [15:0] product // Product in Q0.16 format
 );
 
-    parameter [15:0] OMEGA       = 16'd61440; // 0.9375 in Q0.16
-    parameter [15:0] UPPER_BOUND = 16'd49152; // 0.75 in Q0.16
+    // Constants in Q0.16 format
+    parameter [15:0] OMEGA      = 16'd61440;   // 0.9375 in Q0.16
+    parameter [15:0] MAX_OUTPUT = 16'd49152;   // 0.75 in Q0.16
 
     // Unscaled result is in Q8.16 format
-    wire [23:0] unscaled_product = a * b;
+    wire [23:0] unscaled_product = Ac_Inv * Pc;
 
     // Scale the result with OMEGA (Q0.16)
     // Scaled result is in Q8.32 format
@@ -20,7 +21,7 @@ module Multiplier (
     // Check if the unscaled product is greater than 1 to prevent roll around due to negative result in the Subtractor circuit
     wire is_gt_one = (unscaled_product[23:16] != 0);
 
-    // Clamp output to 0.75 unscaled product is greater than 1
-    assign product = is_gt_one ? UPPER_BOUND : result;
+    // Clamp output to 0.75 if overflow occurred
+    assign product = is_gt_one ? MAX_OUTPUT : result;
 
 endmodule
