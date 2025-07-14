@@ -591,18 +591,19 @@ module TE_and_SRSC(
         .product(prod2)
     );
     
-    // 17 bit multiplexer
+    // Select Multiplier result depending on Edge Detected
     mux_17bit Stage_7_Mux(
-        .m1(prod0), .m2(prod1), .m3(prod2),
+        .a(prod0), .b(prod1), .c(prod2),
         
         .sel(final_edge_reg_2),
         
-        .p(pre_transmission)
+        .out(pre_transmission)
     );
 
     // Subtractor instantiation
     Subtractor Sub(
-        .a(pre_transmission),
+        .in(pre_transmission),
+        
         .diff(subtract_out)
     );
     
