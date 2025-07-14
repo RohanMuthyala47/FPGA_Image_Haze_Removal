@@ -99,7 +99,8 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - Valid signal-based flow control  
 - Modular and synthesizable design  
 - Fully stream-based datapath
-
+- Pipeline Stalling to obtain the final Atmospheric Light value
+- Clock Gating technique to reduce power consumption
 ---
 
 ## Testbench (Top_TB)
@@ -171,10 +172,11 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 - Xilinx Vivado 2023.2 (Synthesis & Implementation)  
 - ZedBoard FPGA (Zynq-7000)  
-- Custom Python tools for image analysis
+- Python for algorithm analysis and Look-Up Table Generation
+- MATLAB for algorithm analysis
 - MATLAB Simulink, HDL Coder
 - Xilinx Vitis HLS
-
+- 
 ---
 
 ## Future Work
