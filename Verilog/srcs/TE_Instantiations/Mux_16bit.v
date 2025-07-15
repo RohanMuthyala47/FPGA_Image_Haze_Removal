@@ -1,9 +1,9 @@
-//stage 7 multiplexer
-module mux_17bit(
-    input [16:0] a, b, c,
+// Stage 7 multiplexer
+module mux_16bit(
+    input [15:0] a, b, c,
     input [1:0]  sel,
         
-    output [16:0] out
+    output [15:0] out
 );
     
     assign out = (sel == 2'b00) ? a : 
