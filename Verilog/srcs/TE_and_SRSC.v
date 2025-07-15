@@ -593,7 +593,7 @@ module TE_and_SRSC(
     );
     
     // Select Multiplier result depending on Edge Detected
-    mux_17bit Stage_7_Mux(
+    Stage_7_Mux Stage_7_Mux(
         .a(prod0), .b(prod1), .c(prod2),
         
         .sel(final_edge_reg_2),
