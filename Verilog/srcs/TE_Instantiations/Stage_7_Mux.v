@@ -1,5 +1,5 @@
 // Stage 7 multiplexer
-module mux_16bit(
+module Stage_7_Mux(
     input [15:0] a, b, c,
     input [1:0]  sel,
         
