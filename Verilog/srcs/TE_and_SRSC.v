@@ -263,8 +263,6 @@ module TE_and_SRSC(
             IG_minus_AG_reg <= 0;
             IB_minus_AB_reg <= 0;
             
-            inverse_transmission_reg <= 0;
-            
             stage_7_valid <= 0;
         end
         else begin
@@ -281,8 +279,6 @@ module TE_and_SRSC(
             IR_minus_AR_reg <= IR_minus_AR;
             IG_minus_AG_reg <= IG_minus_AG;
             IB_minus_AB_reg <= IB_minus_AB;
-            
-            inverse_transmission_reg <= inverse_transmission;
                 
             stage_7_valid <= stage_6_valid;
         end
@@ -298,6 +294,8 @@ module TE_and_SRSC(
             add_or_sub_R_reg1 <= 0;
             add_or_sub_G_reg1 <= 0;
             add_or_sub_B_reg1 <= 0;
+
+            inverse_transmission_reg <= 0;
             
             stage_8_valid <= 0;
         end
@@ -310,6 +308,8 @@ module TE_and_SRSC(
             add_or_sub_G_reg1 <= add_or_sub_G_reg;
             add_or_sub_B_reg1 <= add_or_sub_B_reg;
 
+            inverse_transmission_reg <= inverse_transmission;
+            
             stage_8_valid <= stage_7_valid;
         end
     end
