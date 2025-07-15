@@ -1,6 +1,6 @@
 module Trans_LUT (
-    input  [15:0] x, // Q0.16 input (unsigned)
-    output [15:0] y  // Q2.14 output (unsigned)
+    input  [15:0] x, // Q0.16 Transmission value input (unsigned)
+    output [15:0] y  // Q2.14 Inverted Transmission value output (unsigned)
 );
 
     wire [31:0] reciprocal;
