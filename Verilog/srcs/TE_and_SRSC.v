@@ -61,7 +61,7 @@ module TE_and_SRSC(
     // WIRES AND PIPELINE REGISTERS - STAGE 5
     //==========================================================================
     
-    wire [1:0] final_edge = (ed1_reg | ed2_reg | ed3_reg);
+    wire [1:0]  final_edge = (ed1_reg | ed2_reg | ed3_reg);
     
     // Pipeline Registers for stage 5
     reg [1:0]   final_edge_reg_1;
@@ -86,19 +86,19 @@ module TE_and_SRSC(
     wire [15:0] subtract_out;
     
     // Compute (Ic - Ac)
-    wire [7:0] IR_minus_AR, IG_minus_AG, IB_minus_AB;
-    wire       add_or_sub_R, add_or_sub_G, add_or_sub_B;
+    wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
+    wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
         
     // Inverted transmission value
     wire [15:0] inverse_transmission;
     
     // Pipeline the center pixel for SRSC
-    reg [23:0] I_0, I_1, I_2;
+    reg [23:0]  I_0, I_1, I_2;
     
     // Pipeline Atmospheric Light for SRSC
-    reg [7:0]  A_R0, A_G0, A_B0;
-    reg [7:0]  A_R1, A_G1, A_B1;
-    reg [7:0]  A_R2, A_G2, A_B2;
+    reg [7:0]   A_R0, A_G0, A_B0;
+    reg [7:0]   A_R1, A_G1, A_B1;
+    reg [7:0]   A_R2, A_G2, A_B2;
     
     // Pipeline Registers for stage 7
     reg [7:0]   A_R_reg, A_G_reg, A_B_reg;
@@ -111,21 +111,21 @@ module TE_and_SRSC(
     // WIRES AND PIPELINE REGISTERS - STAGE 8
     //==========================================================================
     
-    reg [7:0] A_R_reg1, A_G_reg1, A_B_reg1;
-    reg       add_or_sub_R_reg1, add_or_sub_G_reg1, add_or_sub_B_reg1;
-    reg       stage_8_valid;
+    reg [7:0]   A_R_reg1, A_G_reg1, A_B_reg1;
+    reg         add_or_sub_R_reg1, add_or_sub_G_reg1, add_or_sub_B_reg1;
+    reg         stage_8_valid;
 
     // Compute (Ic-Ac)*(1/T)
-    wire [7:0] Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
+    wire [7:0]  Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
     
     //==========================================================================
     // WIRES AND PIPELINE REGISTERS - STAGE 9
     //==========================================================================
     
-    reg [7:0] A_R_reg2, A_G_reg2, A_B_reg2;
-    reg       add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
-    reg [7:0] Mult_Red_Reg, Mult_Green_Reg, Mult_Blue_Reg;
-    reg       stage_9_valid;
+    reg [7:0]  A_R_reg2, A_G_reg2, A_B_reg2;
+    reg        add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
+    reg [7:0]  Mult_Red_Reg, Mult_Green_Reg, Mult_Blue_Reg;
+    reg        stage_9_valid;
     
     // Compute Ac +/- (|I-A|/t)
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
@@ -134,13 +134,13 @@ module TE_and_SRSC(
     // WIRES AND PIPELINE REGISTERS - STAGE 10
     //==========================================================================
     
-    reg [7:0] J_R_reg, J_G_reg, J_B_reg;
-    reg       stage_10_valid;
+    reg [7:0]   J_R_reg, J_G_reg, J_B_reg;
+    reg         stage_10_valid;
     
     wire [15:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [15:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
     
-    wire [7:0] SC_R, SC_G, SC_B;
+    wire [7:0]  SC_R, SC_G, SC_B;
     
     //==========================================================================
     // UPDATING PIPELINE REGISTERS
