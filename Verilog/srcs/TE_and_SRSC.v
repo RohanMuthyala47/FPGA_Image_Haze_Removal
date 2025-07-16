@@ -92,7 +92,7 @@ module TE_and_SRSC(
     // Inverted transmission value
     wire [15:0] inverse_transmission;
     
-    // Pipeline the center pixel for SRSC
+    // Pipeline the Center Pixel for SRSC
     reg [23:0]  I_0, I_1, I_2;
     
     // Pipeline Atmospheric Light for SRSC
@@ -122,13 +122,13 @@ module TE_and_SRSC(
     // WIRES AND PIPELINE REGISTERS - STAGE 9
     //==========================================================================
     
-    reg [7:0]  A_R_reg2, A_G_reg2, A_B_reg2;
-    reg        add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
-    reg [7:0]  Mult_Red_Reg, Mult_Green_Reg, Mult_Blue_Reg;
-    reg        stage_9_valid;
+    reg [7:0]   A_R_reg2, A_G_reg2, A_B_reg2;
+    reg         add_or_sub_R_reg2, add_or_sub_G_reg2, add_or_sub_B_reg2;
+    reg [7:0]   Mult_Red_Reg, Mult_Green_Reg, Mult_Blue_Reg;
+    reg         stage_9_valid;
     
     // Compute Ac +/- (|I-A|/t)
-    wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
+    wire [7:0]  Sum_Red, Sum_Green, Sum_Blue;
     
     //==========================================================================
     // WIRES AND PIPELINE REGISTERS - STAGE 10
@@ -136,10 +136,12 @@ module TE_and_SRSC(
     
     reg [7:0]   J_R_reg, J_G_reg, J_B_reg;
     reg         stage_10_valid;
-    
+
+    // Outputs of Look-Up Tables for Saturation Corection
     wire [15:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [15:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
-    
+
+    // Product of corrected Ac and Jc
     wire [7:0]  SC_R, SC_G, SC_B;
     
     //==========================================================================
@@ -245,7 +247,8 @@ module TE_and_SRSC(
     assign I_R = I_2[23:16];
     assign I_G = I_2[15:8];
     assign I_B = I_2[7:0];
-    
+
+    // Further pipeline Center Pixel for the Adder module
     reg [7:0] I_R1, I_G1, I_B1, I_R2, I_G2, I_B2, I_R3, I_G3, I_B3;
     
     // Update Stage 7 Pipeline Registers
