@@ -44,7 +44,7 @@ module TE_and_SRSC(
     // Multiplier outputs
     wire [15:0] prod0, prod1, prod2;
     
-    // Transmission before subtracting from 1
+    // Transmission before subtracting it from 1
     wire [15:0] pre_transmission;
     
     //==========================================================================
