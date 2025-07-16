@@ -93,7 +93,7 @@ module TE_and_SRSC(
     wire [15:0] inverse_transmission;
     
     // Pipeline the Center Pixel for SRSC
-    reg [23:0]  I_0, I_1, I_2, I_3;
+    reg [23:0]  I_0, I_1, I_2;
     
     // Pipeline Atmospheric Light for SRSC
     reg [7:0]   A_R0, A_G0, A_B0;
