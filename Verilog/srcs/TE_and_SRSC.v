@@ -422,7 +422,7 @@ module TE_and_SRSC(
     // P0 BLOCKS FOR MEAN FILTERING
     //==========================================================================
     
-    block_P0 P0_Red(
+    Block_P0 P0_Red(
         .in1(in1[23:16]), .in2(in2[23:16]), .in3(in3[23:16]),
         .in4(in4[23:16]), .in5(in5[23:16]), .in6(in6[23:16]),
         .in7(in7[23:16]), .in8(in8[23:16]), .in9(in9[23:16]),
@@ -430,7 +430,7 @@ module TE_and_SRSC(
         .p0_result(p0_red_out)
     );
     
-    block_P0 P0_Green(
+    Block_P0 P0_Green(
         .in1(in1[15:8]), .in2(in2[15:8]), .in3(in3[15:8]),
         .in4(in4[15:8]), .in5(in5[15:8]), .in6(in6[15:8]),
         .in7(in7[15:8]), .in8(in8[15:8]), .in9(in9[15:8]),
@@ -438,7 +438,7 @@ module TE_and_SRSC(
         .p0_result(p0_green_out)
     );
     
-    block_P0 P0_Blue(
+    Block_P0 P0_Blue(
         .in1(in1[7:0]), .in2(in2[7:0]), .in3(in3[7:0]),
         .in4(in4[7:0]), .in5(in5[7:0]), .in6(in6[7:0]),
         .in7(in7[7:0]), .in8(in8[7:0]), .in9(in9[7:0]),
@@ -450,7 +450,7 @@ module TE_and_SRSC(
     // P1 BLOCKS FOR EDGE PRESERVING
     //==========================================================================
     
-    block_P1 P1_Red(
+    Block_P1 P1_Red(
         .in1(in1[23:16]), .in2(in2[23:16]), .in3(in3[23:16]),
         .in4(in4[23:16]), .in5(in5[23:16]), .in6(in6[23:16]),
         .in7(in7[23:16]), .in8(in8[23:16]), .in9(in9[23:16]),
@@ -458,7 +458,7 @@ module TE_and_SRSC(
         .p1_result(p1_red_out)
     );
     
-    block_P1 P1_Green(
+    Block_P1 P1_Green(
         .in1(in1[15:8]), .in2(in2[15:8]), .in3(in3[15:8]),
         .in4(in4[15:8]), .in5(in5[15:8]), .in6(in6[15:8]),
         .in7(in7[15:8]), .in8(in8[15:8]), .in9(in9[15:8]),
@@ -466,7 +466,7 @@ module TE_and_SRSC(
         .p1_result(p1_green_out)
     );
     
-    block_P1 P1_Blue(
+    Block_P1 P1_Blue(
         .in1(in1[7:0]), .in2(in2[7:0]), .in3(in3[7:0]),
         .in4(in4[7:0]), .in5(in5[7:0]), .in6(in6[7:0]),
         .in7(in7[7:0]), .in8(in8[7:0]), .in9(in9[7:0]),
@@ -478,7 +478,7 @@ module TE_and_SRSC(
     // P2 BLOCKS FOR EDGE PRESERVING
     //==========================================================================
     
-    block_P2 P2_Red(
+    Block_P2 P2_Red(
         .in1(in1[23:16]), .in2(in2[23:16]), .in3(in3[23:16]),
         .in4(in4[23:16]), .in5(in5[23:16]), .in6(in6[23:16]),
         .in7(in7[23:16]), .in8(in8[23:16]), .in9(in9[23:16]),
@@ -486,7 +486,7 @@ module TE_and_SRSC(
         .p2_result(p2_red_out)
     );
     
-    block_P2 P2_Green(
+    Block_P2 P2_Green(
         .in1(in1[15:8]), .in2(in2[15:8]), .in3(in3[15:8]),
         .in4(in4[15:8]), .in5(in5[15:8]), .in6(in6[15:8]),
         .in7(in7[15:8]), .in8(in8[15:8]), .in9(in9[15:8]),
@@ -494,7 +494,7 @@ module TE_and_SRSC(
         .p2_result(p2_green_out)
     );
     
-    block_P2 P2_Blue(
+    Block_P2 P2_Blue(
         .in1(in1[7:0]), .in2(in2[7:0]), .in3(in3[7:0]),
         .in4(in4[7:0]), .in5(in5[7:0]), .in6(in6[7:0]),
         .in7(in7[7:0]), .in8(in8[7:0]), .in9(in9[7:0]),
