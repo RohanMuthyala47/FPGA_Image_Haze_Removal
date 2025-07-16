@@ -624,8 +624,8 @@ module TE_and_SRSC(
         .product(prod2)
     );
     
-    // 16 bit multiplexer
-    mux_16bit Stage_7_Mux(
+    // Stage 7 16-bit multiplexer
+    Stage_7_Mux Stage_7_Mux(
         .a(prod0), .b(prod1), .c(prod2),
         
         .sel(final_edge_reg_2),
