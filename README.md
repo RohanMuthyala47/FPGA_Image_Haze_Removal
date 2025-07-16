@@ -177,7 +177,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - MATLAB for algorithm analysis
 - MATLAB Simulink, HDL Coder
 - Xilinx Vitis HLS
-- 
+  
 ---
 
 ## Future Work
