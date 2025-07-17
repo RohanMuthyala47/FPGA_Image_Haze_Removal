@@ -195,7 +195,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
   *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI), 2011.*
 
 - **IEEE TCSVT Paper**  
-  *"Hardware Implementation of a Fast and Efficient Haze Removal Method"*
+  *"Hardware Implementation of a Fast and Efficient Haze Removal Method - "*
   *Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang*
 
 - **Image Processing on Zynq**  
