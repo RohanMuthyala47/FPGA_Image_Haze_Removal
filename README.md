@@ -199,10 +199,10 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
   *Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang*
 
 - **Image Processing on Zynq**  
-  *"Vipin Kizheppatt - https://www.youtube.com/@Vipinkmenon"*
+  *Vipin Kizheppatt - https://www.youtube.com/@Vipinkmenon*
 
   - **FPGA Image Processing**  
-  *"Udemy Course by Hui Hu"*
+  *Udemy Course by Hui Hu*
   
 ---
 
