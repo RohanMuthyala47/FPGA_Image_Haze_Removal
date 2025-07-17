@@ -17,9 +17,7 @@ module Haze_Removal_Top (
     output [31:0] M_AXIS_TDATA,
     output        M_AXIS_TVALID,
     output        M_AXIS_TLAST,
-    input         M_AXIS_TREADY,
-    
-    output        o_intr
+    input         M_AXIS_TREADY
 );
 
     assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
