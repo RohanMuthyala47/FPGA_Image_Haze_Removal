@@ -53,7 +53,6 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 - Extracts 3×3 RGB window using 2 line buffers  
 - Outputs 9 pixels (in1 to in9) in parallel  
-- Used in both ALE AND TE stages
 - Easily scalable to generate larger windows
 
 ### 2. **ALE (Atmospheric Light Estimation)**
@@ -198,6 +197,13 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - **IEEE TCSVT Paper**  
   *"Hardware Implementation of a Fast and Efficient Haze Removal Method"*
   *Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang*
+
+- **Image Processing on Zynq**  
+  *"Vipin Kizheppatt - https://www.youtube.com/@Vipinkmenon"*
+
+  - **FPGA Image Processing**  
+  *"Udemy Course by Hui Hu"*
+  
 ---
 
 ## License
