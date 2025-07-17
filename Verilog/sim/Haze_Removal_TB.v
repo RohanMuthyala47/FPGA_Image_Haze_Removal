@@ -20,8 +20,6 @@ module Haze_Removal_TB;
     wire        M_AXIS_TVALID;
     wire        M_AXIS_TLAST;
     reg         M_AXIS_TREADY;
-    
-    wire        o_intr;
 
     // Instantiate the ALE_TE_Top module
     Haze_Removal_Top dut(
