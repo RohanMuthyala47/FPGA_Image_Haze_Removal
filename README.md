@@ -201,7 +201,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - **Image Processing on Zynq**  
   *Vipin Kizheppatt - https://www.youtube.com/@Vipinkmenon*
 
-  - **FPGA Image Processing**  
+- **FPGA Image Processing**  
   *Udemy Course by Hui Hu*
   
 ---
