@@ -1,33 +1,50 @@
 `timescale 1ns/1ps
 
 module Haze_Removal_TB;
-
-    reg        clk;
-    reg        rst;
-    reg        enable;
     
-    reg [23:0] input_pixel;
-    reg        input_is_valid;
-
-    wire [23:0] output_pixel;
-    wire        output_is_valid;
+    // AXI4-Stream Global Signals
+    reg         ACLK;
+    reg         ARESETn;
+    
+    // Enable Signal
+    reg         enable;
+    
+    // AXI4-Stream Slave Interface
+    reg [31:0]  S_AXIS_TDATA;
+    reg         S_AXIS_TVALID;
+    reg         S_AXIS_TLAST;
+    wire        S_AXIS_TREADY;
+    
+    // AXI4-Stream Master Interface
+    wire [31:0] M_AXIS_TDATA;
+    wire        M_AXIS_TVALID;
+    wire        M_AXIS_TLAST;
+    reg         M_AXIS_TREADY;
+    
+    wire        o_intr;
 
     // Instantiate the ALE_TE_Top module
     Haze_Removal_Top dut(
-        .clk(clk),
-        .rst(rst),
+        .ACLK(ACLK),
+        .ARESETn(ARESETn),
         .enable(enable),
     
-        .input_pixel(input_pixel),
-        .input_is_valid(input_is_valid),
+        .S_AXIS_TDATA(S_AXIS_TDATA),
+        .S_AXIS_TVALID(S_AXIS_TVALID),
+        .S_AXIS_TLAST(S_AXIS_TLAST),
+        .S_AXIS_TREADY(S_AXIS_TREADY),
 
-        .output_pixel(output_pixel),
-        .output_is_valid(output_is_valid)
+        .M_AXIS_TDATA(M_AXIS_TDATA),
+        .M_AXIS_TVALID(M_AXIS_TVALID),
+        .M_AXIS_TLAST(M_AXIS_TLAST),
+        .M_AXIS_TREADY(M_AXIS_TREADY),
+        
+        .o_intr(o_intr)
     );
 
     // Clock generation
-    initial clk = 0;
-    always #5 clk = ~clk;
+    initial ACLK = 0;
+    always #5 ACLK = ~ACLK;
     
     // File and image data
     localparam File_Size = 800 * 1024;
@@ -41,7 +58,7 @@ module Haze_Removal_TB;
     task READ_FILE;
         integer file1;
         begin 
-            file1 = $fopen("input_image.bmp", "rb");
+            file1 = $fopen("canyon_512.bmp", "rb");
             if (file1 == 0) begin
                 $display("Error: Cannot open BMP file.");
                 $finish;
@@ -101,28 +118,33 @@ module Haze_Removal_TB;
     
     // Main test sequence
     initial begin
-        rst = 1;
+        ARESETn = 0;
+
+        S_AXIS_TDATA = 0;
+        S_AXIS_TVALID = 0;
+        S_AXIS_TLAST = 0;
+
+        M_AXIS_TREADY = 1;
+
         enable = 0;
-        input_is_valid = 0;
-        input_pixel = 0;
         
         READ_FILE;
         
         #10;
-        rst = 0;
+        ARESETn = 1;
         
         // --------------------------
         // Pass 1: Feed image to ALE
         // --------------------------
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
-            input_pixel[7:0]   = bmpdata[i];       // B
-            input_pixel[15:8]  = bmpdata[i + 1];   // G
-            input_pixel[23:16] = bmpdata[i + 2];   // R
-            input_is_valid = 1;
+            S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
+            S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
+            S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // R
+            S_AXIS_TVALID = 1;
             #10;
         end
         
-        input_is_valid = 0;
+        S_AXIS_TVALID = 0;
         #10;
         
         wait(dut.ALE_done == 1);
@@ -137,14 +159,14 @@ module Haze_Removal_TB;
         #20;
       
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
-            input_pixel[7:0]   = bmpdata[i];       // B
-            input_pixel[15:8]  = bmpdata[i + 1];   // G
-            input_pixel[23:16] = bmpdata[i + 2];   // R
-            input_is_valid = 1;
+            S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
+            S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
+            S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // R
+            S_AXIS_TVALID = 1;
             #10;
         end
         
-        input_is_valid = 0;
+        S_AXIS_TVALID = 0;
         #100;
         
         // Write output file
@@ -155,12 +177,12 @@ module Haze_Removal_TB;
     end
     
     // Output Monitor
-    always @(posedge clk) begin
-        if (rst) begin
+    always @(posedge ACLK) begin
+        if (~ARESETn) begin
             j <= 0;
         end 
-        else if (output_is_valid) begin
-            result[j] <= output_pixel;
+        else if (M_AXIS_TVALID) begin
+            result[j] <= M_AXIS_TDATA;
             j <= j + 1;
         end
     end
