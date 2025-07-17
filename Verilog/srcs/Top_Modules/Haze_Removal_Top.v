@@ -1,14 +1,30 @@
 module Haze_Removal_Top (
-    input         clk,
-    input         rst,
+
+    // AXI4-Stream Global Signals
+    input         ACLK,
+    input         ARESETn,
+    
+    // Enable Signal
     input         enable,
     
-    input [23:0]  input_pixel,
-    input         input_is_valid,
-
-    output [23:0] output_pixel,
-    output        output_is_valid
+    // AXI4-Stream Slave Interface
+    input [31:0]  S_AXIS_TDATA,
+    input         S_AXIS_TVALID,
+    input         S_AXIS_TLAST,
+    output        S_AXIS_TREADY,
+    
+    // AXI4-Stream Master Interface
+    output [31:0] M_AXIS_TDATA,
+    output        M_AXIS_TVALID,
+    output        M_AXIS_TLAST,
+    input         M_AXIS_TREADY,
+    
+    output        o_intr
 );
+
+    assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
+    
+    assign M_AXIS_TLAST = 1'b0; // Continuous stream
 
     // 3x3 Window of RGB pixels generated from Line Buffers
     wire [23:0] Pixel_00, Pixel_01, Pixel_02;
@@ -20,11 +36,11 @@ module Haze_Removal_Top (
 
     // Instance of 3x3 Window Generator
     WindowGeneratorTop WindowGenerator (
-        .clk(clk),
-        .rst(rst),
+        .clk(ACLK),
+        .rst(~ARESETn),
         
-        .input_pixel(input_pixel),
-        .input_is_valid(input_is_valid),
+        .input_pixel(S_AXIS_TDATA),
+        .input_is_valid(S_AXIS_TVALID & S_AXIS_TREADY),
         
         .output_pixel_1(Pixel_00), .output_pixel_2(Pixel_01), .output_pixel_3(Pixel_02),
         .output_pixel_4(Pixel_10), .output_pixel_5(Pixel_11), .output_pixel_6(Pixel_12),
@@ -32,16 +48,16 @@ module Haze_Removal_Top (
         .output_is_valid(window_valid)
     );
     
-    wire [7:0]  A_R, A_G, A_B;
+    wire [7:0] A_R, A_G, A_B;
     wire [15:0] Inv_AR, Inv_AG, Inv_AB;
-    wire        ALE_done;
+    wire ALE_done;
 
     wire ALE_enable = (~enable) & window_valid;
 
     // Atmospheric Light Estimation
     ALE ALE (
-        .clk(clk),
-        .rst(rst),
+        .clk(ACLK),
+        .rst(~ARESETn),
         
         .input_is_valid(ALE_enable),
         .input_pixel_1(Pixel_00), .input_pixel_2(Pixel_01), .input_pixel_3(Pixel_02),
@@ -56,11 +72,11 @@ module Haze_Removal_Top (
     );
 
     // Final registers for ALE output
-    reg [7:0]  Final_A_R, Final_A_G, Final_A_B;
+    reg [7:0] Final_A_R, Final_A_G, Final_A_B;
     reg [15:0] Final_Inv_AR, Final_Inv_AG, Final_Inv_AB;
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
+    always @(posedge ACLK or negedge ARESETn) begin
+        if (~ARESETn) begin
             Final_A_R <= 0; Final_A_G <= 0; Final_A_B <= 0;
             
             Final_Inv_AR <= 0; Final_Inv_AG <= 0; Final_Inv_AB <= 0;
@@ -72,14 +88,14 @@ module Haze_Removal_Top (
     end
 
     wire [7:0] J_R, J_G, J_B;
-    assign output_pixel = {J_R, J_G, J_B};
+    assign M_AXIS_TDATA = {8'h00, J_R, J_G, J_B};
 
     wire TE_SRSC_enable = enable & window_valid;
     
     // Transmission Estimation, Scene Recovery and Saturation Correction
     TE_and_SRSC TE_SRSC (
-        .clk(clk),
-        .rst(rst),
+        .clk(ACLK),
+        .rst(~ARESETn),
         
         .input_is_valid(TE_SRSC_enable),
         .in1(Pixel_00), .in2(Pixel_01), .in3(Pixel_02),
@@ -92,7 +108,7 @@ module Haze_Removal_Top (
         
         .J_R(J_R), .J_G(J_G), .J_B(J_B),
         
-        .output_valid(output_is_valid)
+        .output_valid(M_AXIS_TVALID)
     );
 
 endmodule
