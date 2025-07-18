@@ -19,6 +19,7 @@ module Haze_Removal_Top(
     output        M_AXIS_TLAST,
     input         M_AXIS_TREADY
 );
+    
     wire ALE_clk, TE_SRSC_clk;
     
     assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
@@ -112,7 +113,7 @@ module Haze_Removal_Top(
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Clock Gating Cells for ALE AND TE_SRSC
+    // Clock Gating Cell Instantiations for ALE AND TE_SRSC
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     Clock_Gating_Cell ALE_CGC(
@@ -131,4 +132,28 @@ module Haze_Removal_Top(
         .clk_gated(TE_SRSC_clk)
     );
 
+endmodule
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Clock Gating Cell for power saving
+///////////////////////////////////////////////////////////////////////////////////////////////////
+module Clock_Gating_Cell(
+    input  clk,
+    input  clk_enable,
+    input  rstn,
+    
+    output clk_gated
+);
+    
+    reg latch;
+    
+    always @(posedge clk) begin
+        if (rstn)
+            latch <= 1'b0;
+        else
+            latch <= clk_enable;
+    end
+
+    assign clk_gated = latch & clk;
+    
 endmodule
