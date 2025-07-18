@@ -1,15 +1,15 @@
 module ED(
-    input  wire [7:0] in1,
-    input  wire [7:0] in2,
-    input  wire [7:0] in3,
-    input  wire [7:0] in4,
+    input [7:0]  in1,
+    input [7:0]  in2,
+    input [7:0]  in3,
+    input [7:0]  in4,
 
-    input  wire [7:0] in6,
-    input  wire [7:0] in7,
-    input  wire [7:0] in8,
-    input  wire [7:0] in9,
+    input [7:0]  in6,
+    input [7:0]  in7,
+    input [7:0]  in8,
+    input [7:0]  in9,
     
-    output wire [1:0] ED_out
+    output [1:0] ED_out
 );
     parameter D = 8'b01010000; // Threshold Value = 80
     
