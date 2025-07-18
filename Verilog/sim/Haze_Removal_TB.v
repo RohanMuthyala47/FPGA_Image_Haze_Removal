@@ -116,18 +116,18 @@ module Haze_Removal_TB;
     initial begin
         ARESETn = 0;
         enable = 1;
+        
         S_AXIS_TDATA = 0;
         S_AXIS_TVALID = 0;
         S_AXIS_TLAST = 0;
-
         M_AXIS_TREADY = 1;
-        
+
+        // Read input file
         READ_FILE;
         
         #10;
         ARESETn = 1;
 
-        
         // --------------------------
         // Pass 1: Feed image to ALE
         // --------------------------
@@ -135,8 +135,8 @@ module Haze_Removal_TB;
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
             S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
             S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // R
-            S_AXIS_TVALID = 1;
             #10;
+            S_AXIS_TVALID = 1;
         end
         
         S_AXIS_TVALID = 0;
@@ -146,20 +146,19 @@ module Haze_Removal_TB;
         // Pass 2: Feed image to TE and SRSC
         // ------------------------------
 
+        // Read input file
         READ_FILE;
-        #20;
+        #10;
       
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
             S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
             S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // R
-            S_AXIS_TVALID = 1;
             #10;
+            S_AXIS_TVALID = 1;
         end
         
         S_AXIS_TVALID = 0;
-        #100;
-        
         // Write output file
         WRITE_FILE;
         
