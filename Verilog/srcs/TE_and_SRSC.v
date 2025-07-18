@@ -766,32 +766,32 @@ module TE_and_SRSC(
     // LOOK-UP TABLES TO COMPUTE Ac ^ β AND J ^ (1 - β) (β = 0.2/0.3)
     //==========================================================================
     
-    LUT_02 A_R_Correction(
+    LUT_03 A_R_Correction(
         .x(A_R_reg2),
         .y_q8_8(A_R_Corrected)
     );
     
-    LUT_02 A_G_Correction(
+    LUT_03 A_G_Correction(
         .x(A_G_reg2),
         .y_q8_8(A_G_Corrected)
     );
     
-    LUT_02 A_B_Correction(
+    LUT_03 A_B_Correction(
         .x(A_B_reg2),
         .y_q8_8(A_B_Corrected)
     );
     
-    LUT_08 J_R_Correction(
+    LUT_07 J_R_Correction(
         .x(Sum_Red),
         .y_q8_8(J_R_Corrected)
     );
     
-    LUT_08 J_G_Correction(
+    LUT_07 J_G_Correction(
         .x(Sum_Green),
         .y_q8_8(J_G_Corrected)
     );
     
-    LUT_08 J_B_Correction(
+    LUT_07 J_B_Correction(
         .x(Sum_Blue),
         .y_q8_8(J_B_Corrected)
     );
