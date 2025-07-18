@@ -116,17 +116,17 @@ module Haze_Removal_TB;
     initial begin
         ARESETn = 0;
         enable = 1;
-        
         S_AXIS_TDATA = 0;
         S_AXIS_TVALID = 0;
         S_AXIS_TLAST = 0;
-        M_AXIS_TREADY = 1;
 
-        // Read input file
+        M_AXIS_TREADY = 1;
+        
         READ_FILE;
         
         #10;
         ARESETn = 1;
+
         
         // --------------------------
         // Pass 1: Feed image to ALE
@@ -142,13 +142,10 @@ module Haze_Removal_TB;
         S_AXIS_TVALID = 0;
         #10;
         
-        wait(dut.ALE_done == 1);
-        #10;
         // ------------------------------
         // Pass 2: Feed image to TE and SRSC
         // ------------------------------
 
-        //Read input file
         READ_FILE;
         #20;
       
@@ -166,7 +163,7 @@ module Haze_Removal_TB;
         // Write output file
         WRITE_FILE;
         
-        #10;
+        #100;
         $stop;
     end
     
