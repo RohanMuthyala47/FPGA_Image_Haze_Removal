@@ -35,9 +35,7 @@ module Haze_Removal_TB;
         .M_AXIS_TDATA(M_AXIS_TDATA),
         .M_AXIS_TVALID(M_AXIS_TVALID),
         .M_AXIS_TLAST(M_AXIS_TLAST),
-        .M_AXIS_TREADY(M_AXIS_TREADY),
-        
-        .o_intr(o_intr)
+        .M_AXIS_TREADY(M_AXIS_TREADY)
     );
 
     // Clock generation
@@ -117,15 +115,14 @@ module Haze_Removal_TB;
     // Main test sequence
     initial begin
         ARESETn = 0;
-
+        enable = 1;
+        
         S_AXIS_TDATA = 0;
         S_AXIS_TVALID = 0;
         S_AXIS_TLAST = 0;
-
         M_AXIS_TREADY = 1;
 
-        enable = 0;
-        
+        // Read input file
         READ_FILE;
         
         #10;
@@ -150,9 +147,8 @@ module Haze_Removal_TB;
         // ------------------------------
         // Pass 2: Feed image to TE and SRSC
         // ------------------------------
-        enable = 1; // Enable TE and SRSC
-        #10;
-      
+
+        //Read input file
         READ_FILE;
         #20;
       
