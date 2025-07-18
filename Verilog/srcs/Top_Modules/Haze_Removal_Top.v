@@ -155,5 +155,5 @@ module Clock_Gating_Cell(
     end
 
     assign clk_gated = latch & clk;
-    
+
 endmodule
