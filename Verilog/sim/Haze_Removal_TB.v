@@ -163,6 +163,7 @@ module Haze_Removal_TB;
         WRITE_FILE;
         
         #100;
+        S_AXIS_TLAST = 1;
         $stop;
     end
     
