@@ -76,7 +76,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 - Computes:  
   `J(x) = {(I(x) - A) / max(t(x), t₀)} + A`  
 - Handles division using reciprocal lookup  
-- Ensures `t(x) ≥ t₀ = 0.25` (Q0.16)  
+- Ensures `t(x) ≥ t₀ = 0.275` (Q0.16)  
 - Produces a sharp output image with the haze eliminated
 
 ---
@@ -118,7 +118,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - 3×3 sliding window for local filtering  
 - Dark channel estimation with comparator trees  
 - Fixed-point division and multiplication  
-- Transmission floor control (`t₀ = 0.25`)  
+- Transmission floor control (`t₀ = 0.275`)  
 - Fully pipelined 10-stage architecture
 - Clock Gating for the ALE and TE_SRSC modules to reduce power consumption
 - Synthesizable on ZedBoard FPGA  
