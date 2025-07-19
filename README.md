@@ -170,7 +170,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 | Input Image | Result Image |
 |-------------|--------------|
-| ![building_512](https://github.com/user-attachments/assets/c60748cc-11c5-4420-9a95-2a84e2fb2239) | ![result_image (1)](https://github.com/user-attachments/assets/2cfa4ff8-5797-4a2c-869c-ba819f16ac31) |
+| ![building_512](https://github.com/user-attachments/assets/c60748cc-11c5-4420-9a95-2a84e2fb2239) | ![result_image (2)](https://github.com/user-attachments/assets/5a065e72-13b5-4426-a631-131404aaf6a7) |
 
 
 ---
