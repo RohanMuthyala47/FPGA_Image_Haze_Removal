@@ -30,8 +30,8 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 ## Objectives
 
 - Accelerate the Dark Channel Prior based haze removal algorithm using FPGA for real-time performance.
-- Modular Verilog Implementation of each processing stage: Atmospheric Light Estimation, Transmission Estimation, Scene Recovery and Saturation Correction
-- Optimize for low-latency and energy efficiency using pipelining and parallelism
+- Modular Verilog Implementation of each processing stage: Atmospheric Light Estimation, Transmission Estimation, Scene Recovery and Saturation Correction.
+- Optimize for low-latency and energy efficiency using pipelining, parallelism and Clock Gating techniques
 - Enable deployment on embedded platforms (Zynq SoC) with AXI-stream interface.
 ---
 
@@ -119,7 +119,8 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - Dark channel estimation with comparator trees  
 - Fixed-point division and multiplication  
 - Transmission floor control (`t₀ = 0.25`)  
-- Fully pipelined 10-stage architecture  
+- Fully pipelined 10-stage architecture
+- Clock Gating for the ALE and TE_SRSC modules to reduce power consumption
 - Synthesizable on ZedBoard FPGA  
 - Modular, reusable Verilog architecture  
 - Verified using waveform simulations and output BMP image comparison
@@ -160,11 +161,14 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Results
 
-### Visual Output:
+## Example Results
 
-- Improved visibility in foggy regions  
-- Enhanced edges and depth perception  
-- Preserved natural color tone and contrast  
+| Input Image | Result Image |
+|-------------|--------------|
+| ![canyon_512](https://github.com/user-attachments/assets/b0f36204-ad30-4f53-a093-c8c53ff24914) | ![result_image](https://github.com/user-attachments/assets/96a39e87-ef30-400d-8690-9f1662d95099) |
+
+| ![building_512](https://github.com/user-attachments/assets/c60748cc-11c5-4420-9a95-2a84e2fb2239) | ![result_image (1)](https://github.com/user-attachments/assets/2cfa4ff8-5797-4a2c-869c-ba819f16ac31) |
+
 
 ---
 
