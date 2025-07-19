@@ -1,4 +1,4 @@
-# Real-Time Image Haze Removal on FPGA (ZedBoard)    ![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD-3-Clause-00008B.svg)
+# Real-Time Image Haze Removal on FPGA (ZedBoard)    ![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD-3-Clause-00008B.svg)
 
 ---
 
