@@ -165,7 +165,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 | Input Image | Result Image |
 |-------------|--------------|
-| ![canyon_512](https://github.com/user-attachments/assets/b0f36204-ad30-4f53-a093-c8c53ff24914) | ![result_image (3)](https://github.com/user-attachments/assets/fe1a0136-389e-4b92-a3ca-ab215f596ef9)|
+| ![canyon_512](https://github.com/user-attachments/assets/b0f36204-ad30-4f53-a093-c8c53ff24914) | ![result_image (2)](https://github.com/user-attachments/assets/d40396a6-113e-4d24-aaaf-2ba8a79968d1) |
 
 
 | Input Image | Result Image | 
