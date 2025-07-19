@@ -219,8 +219,9 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## License
 
-**MIT License**  
-You are free to fork, contribute, and build upon this project.
+**BSD 3-Clause License**  
+You are free to fork, contribute, and build upon this project under the terms of the [BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause).
+
 
 ---
 
