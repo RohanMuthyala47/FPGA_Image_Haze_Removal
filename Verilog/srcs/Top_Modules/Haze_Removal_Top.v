@@ -1,4 +1,4 @@
-module Haze_Removal_Top(
+module Haze_Removal_Top (
 
     // AXI4-Stream Global Signals
     input         ACLK,
@@ -17,13 +17,15 @@ module Haze_Removal_Top(
     output [31:0] M_AXIS_TDATA,
     output        M_AXIS_TVALID,
     output        M_AXIS_TLAST,
-    input         M_AXIS_TREADY
+    input         M_AXIS_TREADY,
+    
+    output reg    o_intr
 );
-    
-    wire ALE_clk, TE_SRSC_clk;
-    
+
     assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
     assign M_AXIS_TLAST = 1'b0; // Continuous stream
+
+    wire ALE_clk;
 
     // 3x3 Window of RGB pixels generated from Line Buffers
     wire [23:0] Pixel_00, Pixel_01, Pixel_02;
@@ -73,7 +75,7 @@ module Haze_Removal_Top(
     // Final registers for ALE output
     reg [7:0] Final_A_R, Final_A_G, Final_A_B;
     reg [15:0] Final_Inv_AR, Final_Inv_AG, Final_Inv_AB;
-
+    //  Capture the final Atmospheric Light Values
     always @(posedge ACLK or negedge ARESETn) begin
         if (~ARESETn) begin
             Final_A_R <= 0; Final_A_G <= 0; Final_A_B <= 0;
@@ -85,9 +87,25 @@ module Haze_Removal_Top(
             Final_Inv_AR <= Inv_AR; Final_Inv_AG <= Inv_AG; Final_Inv_AB <= Inv_AB;
         end
     end
+    
+    // Send interrupt signal to DMA when ALE processing is done
+    reg ALE_done_reg;
 
+    always @(posedge ACLK or negedge ARESETn) begin
+        if (!ARESETn) begin
+            ALE_done_reg <= 0;
+            o_intr <= 0;
+        end else begin
+            ALE_done_reg <= ALE_done;
+            o_intr <= ALE_done & ~ALE_done_reg; // Rising edge detection
+        end
+    end
+    
+    // Output Signals
     wire [7:0] J_R, J_G, J_B;
     assign M_AXIS_TDATA = {8'h00, J_R, J_G, J_B};
+    
+    wire TE_SRSC_clk;
 
     wire TE_SRSC_enable = ALE_done & enable;
     wire TE_SRSC_done;
@@ -113,7 +131,7 @@ module Haze_Removal_Top(
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Clock Gating Cell Instantiations for ALE AND TE_SRSC
+    // Clock Gating Cells for ALE AND TE_SRSC
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     Clock_Gating_Cell ALE_CGC(
@@ -131,29 +149,5 @@ module Haze_Removal_Top(
         
         .clk_gated(TE_SRSC_clk)
     );
-
-endmodule
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Clock Gating Cell for power saving
-///////////////////////////////////////////////////////////////////////////////////////////////////
-module Clock_Gating_Cell(
-    input  clk,
-    input  clk_enable,
-    input  rstn,
-    
-    output clk_gated
-);
-    
-    reg latch;
-    
-    always @(posedge clk) begin
-        if (rstn)
-            latch <= 1'b0;
-        else
-            latch <= clk_enable;
-    end
-
-    assign clk_gated = latch & clk;
 
 endmodule
