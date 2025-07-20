@@ -151,3 +151,28 @@ module Haze_Removal_Top (
     );
 
 endmodule
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Clock Gating Module to reduce Power Consumption
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+module Clock_Gating_Cell(
+    input  clk,
+    input  clk_enable,
+    input  rstn,
+    
+    output clk_gated
+);
+    
+    reg latch;
+    
+    always @(posedge clk) begin
+        if (rstn)
+            latch <= 1'b0;
+        else
+            latch <= clk_enable;
+    end
+
+    assign clk_gated = latch & clk;
+
+endmodule
