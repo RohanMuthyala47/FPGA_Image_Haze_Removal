@@ -20,6 +20,9 @@ module Haze_Removal_TB;
     wire        M_AXIS_TVALID;
     wire        M_AXIS_TLAST;
     reg         M_AXIS_TREADY;
+    
+    wire        o_intr;
+
 
     // Instantiate the ALE_TE_Top module
     Haze_Removal_Top dut(
@@ -35,7 +38,9 @@ module Haze_Removal_TB;
         .M_AXIS_TDATA(M_AXIS_TDATA),
         .M_AXIS_TVALID(M_AXIS_TVALID),
         .M_AXIS_TLAST(M_AXIS_TLAST),
-        .M_AXIS_TREADY(M_AXIS_TREADY)
+        .M_AXIS_TREADY(M_AXIS_TREADY),
+        
+        .o_intr(o_intr)
     );
 
     // Clock generation
@@ -54,7 +59,7 @@ module Haze_Removal_TB;
     task READ_FILE;
         integer file1;
         begin 
-            file1 = $fopen("canyon_512.bmp", "rb");
+            file1 = $fopen("building_512.bmp", "rb");
             if (file1 == 0) begin
                 $display("Error: Cannot open BMP file.");
                 $finish;
@@ -121,8 +126,7 @@ module Haze_Removal_TB;
         S_AXIS_TVALID = 0;
         S_AXIS_TLAST = 0;
         M_AXIS_TREADY = 1;
-
-        // Read input file
+        
         READ_FILE;
         
         #10;
@@ -146,7 +150,6 @@ module Haze_Removal_TB;
         // Pass 2: Feed image to TE and SRSC
         // ------------------------------
 
-        // Read input file
         READ_FILE;
         #10;
       
@@ -160,6 +163,7 @@ module Haze_Removal_TB;
         
         S_AXIS_TVALID = 0;
         // Write output file
+        #100;
         WRITE_FILE;
         
         #100;
