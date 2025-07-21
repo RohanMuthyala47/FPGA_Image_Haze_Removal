@@ -1,4 +1,5 @@
-module Haze_Removal_Top (
+// Top Module which connects Window Generator, Clock Gating Cell, ALE, TE and SRSC modules
+module DCP_HazeRemoval (
 
     // AXI4-Stream Global Signals
     input         ACLK,
@@ -23,6 +24,7 @@ module Haze_Removal_Top (
 );
 
     assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
+    
     assign M_AXIS_TLAST = 1'b0; // Continuous stream
 
     wire ALE_clk;
