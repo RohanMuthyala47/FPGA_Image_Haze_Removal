@@ -1,3 +1,4 @@
+// Top module for the Window Generator which takes the pixel stream as output and outputs 3x3 windows of RGB Pixels
 module WindowGeneratorTop(
     input         clk,
     input         rst,
