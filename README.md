@@ -161,6 +161,15 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Results
 
+## IP
+
+<img width="1563" height="721" alt="Screenshot 2025-07-21 175931" src="https://github.com/user-attachments/assets/729c6edd-807f-416e-a179-26ccda339144" />
+
+## Block Design
+
+![WhatsApp Image 2025-07-20 at 21 20 28_b6302f47](https://github.com/user-attachments/assets/28b66b09-444a-44ff-af62-7ded2eefbf7c)
+
+
 ## Example Results
 
 | Input Image | Result Image |
