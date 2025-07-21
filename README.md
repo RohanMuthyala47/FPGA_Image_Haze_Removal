@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project presents a hardware-accelerated, real-time image dehazing pipeline, fully implemented in Verilog and synthesized on a Xilinx ZedBoard FPGA (Zynq-7000). The goal is to achieve high-performance image dehazing using a custom pipelined architecture based on the Dark Channel Prior and Scene Radiance Recovery methods, optimized for fixed-point arithmetic and stream-based throughput.
+This project presents a hardware-accelerated, real-time image dehazing pipeline, fully implemented in Verilog and synthesized on a Xilinx ZedBoard FPGA (Zynq-7000). The goal is to achieve high-performance image dehazing using a custom pipelined architecture based on the Dark Channel Prior method, optimized for fixed-point arithmetic and stream-based throughput.
 
 The pipeline receives BMP images via UART, processes them to remove haze, and returns the reconstructed haze-free image back to the host PC.
 
@@ -195,7 +195,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - Python for algorithm analysis and Look-Up Table Generation
 - MATLAB for algorithm analysis
 - MATLAB Simulink, HDL Coder
-- Xilinx Vitis HLS
+- Xilinx Vitis 2023.2
   
 ---
 
