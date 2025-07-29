@@ -193,12 +193,13 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Tools & Technologies
 
-- Xilinx Vivado 2023.2 (Synthesis & Implementation)  
+- Xilinx Vivado 2023.2 (Synthesis & Implementation)
+- Xilinx Vitis 2023.2 for Software coding and FPGA programming
 - ZedBoard FPGA (Zynq-7000)  
 - Python for algorithm analysis and Look-Up Table Generation
 - MATLAB for algorithm analysis
 - MATLAB Simulink, HDL Coder
-- Xilinx Vitis 2023.2
+- Tera Term for Serial Interface
   
 ---
 
