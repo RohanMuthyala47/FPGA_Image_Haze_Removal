@@ -169,6 +169,9 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ![WhatsApp Image 2025-07-20 at 21 20 28_b6302f47](https://github.com/user-attachments/assets/28b66b09-444a-44ff-af62-7ded2eefbf7c)
 
+## Utilization
+
+<img width="632" height="261" alt="image" src="https://github.com/user-attachments/assets/576bb79a-32da-4f11-a9b4-c98d1c1b4613" />
 
 ## Example Results
 
