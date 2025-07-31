@@ -135,6 +135,7 @@ module Haze_Removal_TB;
         // --------------------------
         // Pass 1: Feed image to ALE
         // --------------------------
+        
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
             S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
