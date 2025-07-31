@@ -199,7 +199,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - Python for algorithm analysis and Look-Up Table Generation
 - MATLAB for algorithm analysis
 - MATLAB Simulink, HDL Coder
-- Tera Term for Serial Interface
+- Tera Term for Serial Communication with PC via UART
   
 ---
 
