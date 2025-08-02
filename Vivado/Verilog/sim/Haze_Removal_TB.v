@@ -53,13 +53,13 @@ module Haze_Removal_TB;
     reg [23:0] result[0:(File_Size / 3) - 1];
     
     integer bmp_size, bmp_start_pos, bmp_width, bmp_height, bmp_count;
-    integer i, j;
+    integer i, j, file3;
 
     // Read from BMP File
     task READ_FILE;
         integer file1;
         begin 
-            file1 = $fopen("building_512.bmp", "rb");
+            file1 = $fopen("canyon_512.bmp", "rb");
             if (file1 == 0) begin
                 $display("Error: Cannot open BMP file.");
                 $finish;
@@ -119,6 +119,8 @@ module Haze_Removal_TB;
     
     // Main test sequence
     initial begin
+        file3 = $fopen("ImageData_RGB.h", "w");
+        
         ARESETn = 0;
         enable = 1;
         
@@ -135,11 +137,10 @@ module Haze_Removal_TB;
         // --------------------------
         // Pass 1: Feed image to ALE
         // --------------------------
-        
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
-            S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
-            S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
-            S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // R
+            S_AXIS_TDATA[7:0]   = bmpdata[i];       // Blue
+            S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // Green
+            S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // Red
             #10;
             S_AXIS_TVALID = 1;
         end
@@ -155,9 +156,16 @@ module Haze_Removal_TB;
         #10;
       
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
-            S_AXIS_TDATA[7:0]   = bmpdata[i];       // B
-            S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // G
-            S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // R
+            S_AXIS_TDATA[7:0]   = bmpdata[i];       // Blue
+            S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // Green
+            S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // Red
+            
+            $fwrite(file3, "%0d,%0d,%0d,", 
+                        bmpdata[i],        // Blue
+                        bmpdata[i + 1],    // Green
+                        bmpdata[i + 2]     // Red
+                    );
+            
             #10;
             S_AXIS_TVALID = 1;
         end
@@ -169,6 +177,8 @@ module Haze_Removal_TB;
         
         #100;
         S_AXIS_TLAST = 1;
+        $fclose(file3);
+        
         $stop;
     end
     
