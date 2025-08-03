@@ -42,7 +42,7 @@ module DCP_HazeRemoval (
         .clk(ACLK),
         .rst(~ARESETn),
         
-        .input_pixel(S_AXIS_TDATA),
+        .input_pixel(S_AXIS_TDATA[23:0]),
         .input_is_valid(S_AXIS_TVALID & S_AXIS_TREADY),
         
         .output_pixel_1(Pixel_00), .output_pixel_2(Pixel_01), .output_pixel_3(Pixel_02),
@@ -73,22 +73,6 @@ module DCP_HazeRemoval (
         
         .done(ALE_done)
     );
-
-    // Final registers for ALE output
-    reg [7:0] Final_A_R, Final_A_G, Final_A_B;
-    reg [15:0] Final_Inv_AR, Final_Inv_AG, Final_Inv_AB;
-    //  Capture the final Atmospheric Light Values
-    always @(posedge ACLK or negedge ARESETn) begin
-        if (~ARESETn) begin
-            Final_A_R <= 0; Final_A_G <= 0; Final_A_B <= 0;
-            
-            Final_Inv_AR <= 0; Final_Inv_AG <= 0; Final_Inv_AB <= 0;
-        end else if (ALE_done) begin
-            Final_A_R <= A_R; Final_A_G <= A_G; Final_A_B <= A_B;
-            
-            Final_Inv_AR <= Inv_AR; Final_Inv_AG <= Inv_AG; Final_Inv_AB <= Inv_AB;
-        end
-    end
     
     // Send interrupt signal to DMA when ALE processing is done
     reg ALE_done_reg;
@@ -122,9 +106,9 @@ module DCP_HazeRemoval (
         .in4(Pixel_10), .in5(Pixel_11), .in6(Pixel_12),
         .in7(Pixel_20), .in8(Pixel_21), .in9(Pixel_22),
         
-        .A_R(Final_A_R), .A_G(Final_A_G), .A_B(Final_A_B),
+        .A_R(A_R), .A_G(A_G), .A_B(A_B),
         
-        .Inv_AR(Final_Inv_AR), .Inv_AG(Final_Inv_AG), .Inv_AB(Final_Inv_AB),
+        .Inv_AR(Inv_AR), .Inv_AG(Inv_AG), .Inv_AB(Inv_AB),
         
         .J_R(J_R), .J_G(J_G), .J_B(J_B),
         .output_valid(M_AXIS_TVALID),
@@ -133,7 +117,7 @@ module DCP_HazeRemoval (
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Clock Gating Cells for ALE AND TE_SRSC
+    // Clock Gating Cells Instances for ALE AND TE_SRSC
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     Clock_Gating_Cell ALE_CGC(
