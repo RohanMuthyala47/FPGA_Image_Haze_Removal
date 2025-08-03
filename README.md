@@ -167,7 +167,8 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Block Design
 
-![WhatsApp Image 2025-07-20 at 21 20 28_b6302f47](https://github.com/user-attachments/assets/28b66b09-444a-44ff-af62-7ded2eefbf7c)
+<img width="1325" height="464" alt="Screenshot 2025-08-03 181424" src="https://github.com/user-attachments/assets/40717955-2454-49c0-8725-ab403fe9c897" />
+
 
 ## Utilization
 
