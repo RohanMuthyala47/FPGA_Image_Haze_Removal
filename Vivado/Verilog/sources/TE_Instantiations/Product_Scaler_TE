@@ -1,0 +1,19 @@
+module Product_Scaler_TE (
+    input  [23:0] unscaled_product, // Result of (Pc * 1/Ac) from Multiplier
+    output [15:0] scaled_result     // Result after multiplying with OMEGA and rescaling
+);
+
+    parameter [15:0] MAX_OUTPUT = 16'd47415; // 0.725 in Q0.16
+
+    wire [27:0] scaled = (unscaled_product << 4) - unscaled_product;
+    wire [23:0] scaled_product = scaled[27:4];                       // Multiplying with OMEGA = 0.9375
+    
+    // Truncate Q8.16 to Q0.16
+    wire [15:0] result = scaled_product[15:0];
+    
+    // Step 4: Clamp output to MAX_OUTPUT if value >= 1.0 in Q0.16
+    wire is_gt_one = (unscaled_product[23:16] != 0);
+    
+    assign scaled_result = is_gt_one ? MAX_OUTPUT : result;
+
+endmodule
