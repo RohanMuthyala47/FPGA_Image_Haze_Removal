@@ -1,14 +1,14 @@
 // Edge Preserving Filter for Vertical and Horizontal edges
 module Block_P1 (
-    input [7:0]  in1,
-    input [7:0]  in2,
-    input [7:0]  in3,
-    input [7:0]  in4,
-    input [7:0]  in5,
-    input [7:0]  in6,
-    input [7:0]  in7,
-    input [7:0]  in8,
-    input [7:0]  in9,
+    input  [7:0] in1,
+    input  [7:0] in2,
+    input  [7:0] in3,
+    input  [7:0] in4,
+    input  [7:0] in5,
+    input  [7:0] in6,
+    input  [7:0] in7,
+    input  [7:0] in8,
+    input  [7:0] in9,
     
     output [7:0] p1_result
 );
