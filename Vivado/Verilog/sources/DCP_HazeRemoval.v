@@ -1,6 +1,5 @@
 // Top Module which connects Window Generator, Clock Gating Cell, ALE, TE and SRSC modules
 module DCP_HazeRemoval (
-
     // AXI4-Stream Global Signals
     input         ACLK,
     input         ARESETn,
@@ -102,9 +101,9 @@ module DCP_HazeRemoval (
         .rst(~ARESETn),
         
         .input_is_valid(window_valid & TE_SRSC_enable),
-        .in1(Pixel_00), .in2(Pixel_01), .in3(Pixel_02),
-        .in4(Pixel_10), .in5(Pixel_11), .in6(Pixel_12),
-        .in7(Pixel_20), .in8(Pixel_21), .in9(Pixel_22),
+        .input_pixel_1(Pixel_00), .input_pixel_2(Pixel_01), .input_pixel_3(Pixel_02),
+        .input_pixel_4(Pixel_10), .input_pixel_5(Pixel_11), .input_pixel_6(Pixel_12),
+        .input_pixel_7(Pixel_20), .input_pixel_8(Pixel_21), .input_pixel_9(Pixel_22),
         
         .A_R(A_R), .A_G(A_G), .A_B(A_B),
         
@@ -117,7 +116,7 @@ module DCP_HazeRemoval (
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Clock Gating Cells Instances for ALE AND TE_SRSC
+    // Clock Gating Cells for ALE AND TE_SRSC
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     Clock_Gating_Cell ALE_CGC(
