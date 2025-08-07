@@ -1,4 +1,4 @@
-// Edge Preserving Filter for Vertical and Horizontal edges
+// Edge Preserving Filter when Vertical and Horizontal edges are detected
 module Block_P1 (
     input  [7:0] in1,
     input  [7:0] in2,
