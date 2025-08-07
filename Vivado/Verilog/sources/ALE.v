@@ -1,6 +1,6 @@
 // Atmospheric Light Estimation Module
 `define Image_Size (512 * 512)
-module ALE(
+module ALE (
     input         clk,
     input         rst,
     
@@ -22,9 +22,9 @@ module ALE(
     
     output [15:0] Inv_A_R,
     output [15:0] Inv_A_G,
-    output [15:0] Inv_A_B,          // Inverse Atmospheric Light Values
+    output [15:0] Inv_A_B,          // Inverse Atmospheric Light Values(Q0.16)
     
-    output        done              // Entire image has been processed
+    output        done              // Signal to indicate entire image has been processed
 );
 
     reg [17:0] pixel_counter;
@@ -39,12 +39,12 @@ module ALE(
         else if (input_is_valid && !done_reg) begin
             pixel_counter <= pixel_counter + 1;
             if (pixel_counter == (`Image_Size - 1)) begin
-                done_reg <= 1; // All pixels have been processed through the ALE module
+                done_reg <= 1;                            // All pixels have been processed through the ALE module
             end
         end
     end
     
-    // Minimum of 9 - R/G/B channels (output wires)
+    // Minimum of 9 - R/G/B channels
     wire [7:0] minimum_red, minimum_green, minimum_blue;
     
     // Pipeline Registers (Stage 1)
@@ -180,7 +180,7 @@ module ALE(
     );
     
     // Calculate minimum among the three channels to get Dark Channel
-    ALE_Minimum_3 Dark_Channel(
+    ALE_Minimum_3 Dark_Channel (
         .R(minimum_red_P),
         .G(minimum_green_P), 
         .B(minimum_blue_P),
@@ -188,20 +188,20 @@ module ALE(
         .minimum(Dark_channel)
     );
     
-    // Look-Up Tables to output the reciprocal of the Atmospheric Light value in Q0.16 format
-    ATM_LUT Inverse_Red(
+    // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.16 format
+    ATM_LUT Inverse_Red (
         .in_val(Dark_channel_Red),
         
         .out_val(LUT_Inv_AR)
     );
     
-    ATM_LUT Inverse_Green(
+    ATM_LUT Inverse_Green (
         .in_val(Dark_channel_Green),
         
         .out_val(LUT_Inv_AG)
     );
     
-    ATM_LUT Inverse_Blue(
+    ATM_LUT Inverse_Blue (
         .in_val(Dark_channel_Blue),
         
         .out_val(LUT_Inv_AB)
