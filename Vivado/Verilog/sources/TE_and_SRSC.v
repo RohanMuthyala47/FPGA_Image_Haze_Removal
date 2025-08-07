@@ -68,9 +68,9 @@ module TE_and_SRSC (
     //===========================================
     // Detect the type of edges
     ED_Top EdgeDetection (
-        .output_pixel_1(input_pixel_1), .output_pixel_2(input_pixel_2), .output_pixel_3(input_pixel_3),
-        .output_pixel_4(input_pixel_4),                                 .output_pixel_6(input_pixel_6), 
-        .output_pixel_7(input_pixel_7), .output_pixel_8(input_pixel_8), .output_pixel_9(input_pixel_9),
+        .input_pixel_1(input_pixel_1), .input_pixel_2(input_pixel_2), .input_pixel_3(input_pixel_3),
+        .input_pixel_4(input_pixel_4),                                .input_pixel_6(input_pixel_6), 
+        .input_pixel_7(input_pixel_7), .input_pixel_8(input_pixel_8), .input_pixel_9(input_pixel_9),
         
         .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
     );
@@ -111,7 +111,8 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 5 LOGIC
     //==========================================================================
-        
+
+    // Diagonal, Vertical, Horizonal or no edge detected
     wire [1:0] window_edge = (ed1_P | ed2_P | ed3_P);
     
     // Filter Results
@@ -124,9 +125,9 @@ module TE_and_SRSC (
     reg [15:0] inv_ar1_P1, inv_ag1_P1, inv_ab1_P1,
                inv_ar2_P1, inv_ag2_P1, inv_ab2_P1,
                inv_ar3_P1, inv_ag3_P1, inv_ab3_P1;
-    reg [7:0]  p0_red_P, p0_green_P, p0_blue_P,
-               p1_red_P, p1_green_P, p1_blue_P,
-               p2_red_P, p2_green_P, p2_blue_P;
+    reg [7:0] p0_red_P, p0_green_P, p0_blue_P,
+              p1_red_P, p1_green_P, p1_blue_P,
+              p2_red_P, p2_green_P, p2_blue_P;
     reg        stage_5_valid;
   
     //===========================================
@@ -256,9 +257,9 @@ module TE_and_SRSC (
     wire [23:0] prod0, prod1, prod2;
 
     // Pipeline Registers for stage 6
-    reg [1:0]   window_edge_P1;
-    reg [23:0]  prod0_P, prod1_P, prod2_P;
-    reg         stage_6_valid;
+    reg [1:0]  window_edge_P1;
+    reg [23:0] prod0_P, prod1_P, prod2_P;
+    reg        stage_6_valid;
 
     //===========================================
     // Comparators to choose the minimum value in each filter
@@ -407,29 +408,28 @@ module TE_and_SRSC (
     wire [15:0] transmission;
     
     // Compute (Ic - Ac)
-    wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
-    wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
+    wire [7:0] IR_minus_AR, IG_minus_AG, IB_minus_AB;
+    wire       add_or_sub_R, add_or_sub_G, add_or_sub_B;
     
     // Pipeline Registers for stage 7
-    reg [15:0]  transmission_P;
-    reg [7:0]   A_R_P, A_G_P, A_B_P;
-    reg [7:0]   IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
-    reg         add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
-    reg         stage_7_valid;
+    reg [15:0] transmission_P;
+    reg [7:0]  A_R_P, A_G_P, A_B_P;
+    reg [7:0]  IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
+    reg        add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
+    reg        stage_7_valid;
     
     // Extract RGB components from pipelined center pixel
-    wire [7:0]  I_R, I_G, I_B;
-    assign I_R = I_2[23:16];
-    assign I_G = I_2[15:8];
-    assign I_B = I_2[7:0];
+    wire [7:0] I_R = I_2[23:16],
+               I_G = I_2[15:8],
+               I_B = I_2[7:0];
             
     // Further pipeline Center Pixel for the Adder module
-    reg [7:0]   I_R1, I_G1, I_B1,
-                I_R2, I_G2, I_B2,
-                I_R3, I_G3, I_B3;
+    reg [7:0] I_R1, I_G1, I_B1,
+              I_R2, I_G2, I_B2,
+              I_R3, I_G3, I_B3;
 
     //===========================================
-    // Stage 7 16-bit multiplexer
+    // Multiplexer to choose between the Multiplier outputs based on the edge detected
     Stage_7_Mux Stage_7_Mux (
         .a(prod0), .b(prod1), .c(prod2),
         
@@ -438,7 +438,7 @@ module TE_and_SRSC (
         .out(pre_transmission)
     );
             
-    // Subtractor to compute 1 - pre_transmission
+    // Subtractor to compute final transmission value
     Subtractor Subtractor_TE (
         .in(pre_transmission),
         .diff(transmission)
@@ -527,12 +527,12 @@ module TE_and_SRSC (
     reg [15:0]  inverse_transmission_P;
 
     // Compute (Ic-Ac)*(1/T)
-    wire [7:0]  Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
+    wire [7:0] Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
 
     // Pipeline Registers for stage 7
-    reg [7:0]   A_R_P1, A_G_P1, A_B_P1;
-    reg         add_or_sub_R_P1, add_or_sub_G_P1, add_or_sub_B_P1;
-    reg         stage_8_valid;
+    reg [7:0] A_R_P1, A_G_P1, A_B_P1;
+    reg       add_or_sub_R_P1, add_or_sub_G_P1, add_or_sub_B_P1;
+    reg       stage_8_valid;
     
     //===========================================
     // TRANSMISSION RECIPROCAL LOOKUP TABLE
@@ -693,18 +693,18 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 10 LOGIC
     //==========================================================================
-    reg [7:0]   J_R_P, J_G_P, J_B_P;
-    reg         stage_10_valid;
+    reg [7:0] J_R_P, J_G_P, J_B_P;
+    reg       stage_10_valid;
     
     // Outputs of Look-Up Tables for Saturation Corection
     wire [15:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [15:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
     
     // Product of corrected Ac and Jc
-    wire [7:0]  SC_R, SC_G, SC_B;
+    wire [7:0] SC_R, SC_G, SC_B;
     
     //===========================================
-    // LOOK-UP TABLES TO COMPUTE Ac ^ β AND J ^ (1 - β) (β = 0.2/0.3)
+    // LOOK-UP TABLES TO COMPUTE Ac ^ ? AND J ^ (1 - ?) (? = 0.2/0.3)
     LUT_03 A_R_Correction (
         .x(A_R_P2),
         .y_q8_8(A_R_Corrected)
@@ -735,7 +735,7 @@ module TE_and_SRSC (
         .y_q8_8(J_B_Corrected)
     );
                     
-    // MULTIPLIER MODULES TO COMPUTE Ac^β × Jc^(1-β)
+    // MULTIPLIER MODULES TO COMPUTE Ac^? × Jc^(1-?)
     Saturation_Correction_Multiplier Saturation_Correction_Red (
         .x1(A_R_Corrected), .x2(J_R_Corrected),
         .result(SC_R)
