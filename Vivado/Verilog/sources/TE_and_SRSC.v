@@ -258,7 +258,6 @@ module TE_and_SRSC (
 
     // Pipeline Registers for stage 6
     reg [1:0]  window_edge_P1;
-    reg [23:0] prod0_P, prod1_P, prod2_P;
     reg        stage_6_valid;
 
     //===========================================
