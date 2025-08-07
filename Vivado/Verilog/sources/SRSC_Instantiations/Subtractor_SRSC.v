@@ -1,4 +1,4 @@
-module Subtractor_SRSC(
+module Subtractor_SRSC (
     input [7:0]  Ic,
     input [7:0]  Ac, 
     
