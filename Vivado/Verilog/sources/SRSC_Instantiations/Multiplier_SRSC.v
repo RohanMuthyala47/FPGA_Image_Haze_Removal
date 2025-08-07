@@ -1,6 +1,7 @@
-module Multiplier_SRSC(
-    input  [7:0]  Ic_minus_Ac,             // Q8.0
-    input  [15:0] Inv_Trans,               // Q2.14
+module Multiplier_SRSC (
+    input  [7:0]  Ic_minus_Ac, // Q8.0
+    input  [15:0] Inv_Trans,   // Q2.14
+    
     output [7:0]  result
 );
 
