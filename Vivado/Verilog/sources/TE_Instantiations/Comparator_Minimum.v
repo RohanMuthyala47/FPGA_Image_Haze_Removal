@@ -1,4 +1,4 @@
-// Comparator modue which outputs the minimum value of the inputs
+// Comparator module which outputs the minimum value of the inputs
 module Comparator_Minimum (
     input  [7:0] red, green, blue,
     output [1:0] min_val
