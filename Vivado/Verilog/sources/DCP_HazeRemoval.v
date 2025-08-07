@@ -1,32 +1,30 @@
 // Top Module which connects Window Generator, Clock Gating Cell, ALE, TE and SRSC modules
 module DCP_HazeRemoval (
     // AXI4-Stream Global Signals
-    input         ACLK,
-    input         ARESETn,
+    input         ACLK,          // Global clock 
+    input         ARESETn,       // Global reset signal
     
     // Enable Signal
-    input         enable,
+    input         enable,        // IP enable signal set to constant 1 for operation
     
     // AXI4-Stream Slave Interface
-    input [31:0]  S_AXIS_TDATA,
-    input         S_AXIS_TVALID,
+    input [31:0]  S_AXIS_TDATA,  // Input pixel stream
+    input         S_AXIS_TVALID, // Input valid signal
     input         S_AXIS_TLAST,
     output        S_AXIS_TREADY,
     
     // AXI4-Stream Master Interface
-    output [31:0] M_AXIS_TDATA,
-    output        M_AXIS_TVALID,
+    output [31:0] M_AXIS_TDATA,  // Output pixel stream
+    output        M_AXIS_TVALID, // Output valid signal
     output        M_AXIS_TLAST,
     input         M_AXIS_TREADY,
     
-    output reg    o_intr
+    output reg    o_intr         // Interrupt signal snet to DMA to indicate ALE processing is done
 );
 
     assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
     
-    assign M_AXIS_TLAST = 1'b0; // Continuous stream
-
-    wire ALE_clk;
+    assign M_AXIS_TLAST = 1'b0;  // Continuous stream
 
     // 3x3 Window of RGB pixels generated from Line Buffers
     wire [23:0] Pixel_00, Pixel_01, Pixel_02;
@@ -53,10 +51,12 @@ module DCP_HazeRemoval (
     wire [7:0] A_R, A_G, A_B;
     wire [15:0] Inv_AR, Inv_AG, Inv_AB;
     
-    wire ALE_done;
+    wire ALE_clk;
+    
     wire ALE_enable = ~ALE_done & enable;
+    wire ALE_done;
 
-    // Atmospheric Light Estimation
+    // Insatnce of Atmospheric Light Estimation
     ALE ALE (
         .clk(ALE_clk),
         .rst(~ARESETn),
@@ -73,7 +73,7 @@ module DCP_HazeRemoval (
         .done(ALE_done)
     );
     
-    // Send interrupt signal to DMA when ALE processing is done
+    // ALE processing done signal
     reg ALE_done_reg;
 
     always @(posedge ACLK or negedge ARESETn) begin
@@ -85,17 +85,17 @@ module DCP_HazeRemoval (
             o_intr <= ALE_done & ~ALE_done_reg; // Rising edge detection
         end
     end
-    
-    // Output Signals
-    wire [7:0] J_R, J_G, J_B;
-    assign M_AXIS_TDATA = {8'h00, J_R, J_G, J_B};
-    
+
     wire TE_SRSC_clk;
 
     wire TE_SRSC_enable = ALE_done & enable;
     wire TE_SRSC_done;
     
-    // Transmission Estimation, Scene Recovery and Saturation Correction
+    // Output Signals
+    wire [7:0] J_R, J_G, J_B;
+    assign M_AXIS_TDATA = {8'h00, J_R, J_G, J_B};
+    
+    // Instance of Transmission Estimation, Scene Recovery and Saturation Correction
     TE_and_SRSC TE_SRSC (
         .clk(TE_SRSC_clk),
         .rst(~ARESETn),
@@ -122,7 +122,7 @@ module DCP_HazeRemoval (
     Clock_Gating_Cell ALE_CGC(
         .clk(ACLK),
         .clk_enable(ALE_enable),
-        .rstn(~ARESETn),
+        .rst(~ARESETn),
         
         .clk_gated(ALE_clk)
     );
@@ -130,7 +130,7 @@ module DCP_HazeRemoval (
     Clock_Gating_Cell TE_SRSC_CGC(
         .clk(ACLK),
         .clk_enable(TE_SRSC_enable),
-        .rstn(~ARESETn),
+        .rst(~ARESETn),
         
         .clk_gated(TE_SRSC_clk)
     );
@@ -144,7 +144,7 @@ endmodule
 module Clock_Gating_Cell(
     input  clk,
     input  clk_enable,
-    input  rstn,
+    input  rst,
     
     output clk_gated
 );
@@ -152,7 +152,7 @@ module Clock_Gating_Cell(
     reg latch;
     
     always @(posedge clk) begin
-        if (rstn)
+        if (rst)
             latch <= 1'b0;
         else
             latch <= clk_enable;
