@@ -1,4 +1,4 @@
-module Subtractor(
+module Subtractor (
     input  [15:0] in,  // OMEGA * min(Pc / Ac) ; c ∈ {R, G, B}
     
     output [15:0] diff // Final Transmission value
