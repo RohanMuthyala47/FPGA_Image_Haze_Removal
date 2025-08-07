@@ -1,4 +1,4 @@
-module Double_LineBuffer(
+module Double_LineBuffer (
     input         clk,
     input         rst,
     
