@@ -1,4 +1,4 @@
-// Edge Preserving Filter for Diagonal Edges
+// Edge Preserving Filter when Diagonal Edges are detected
 module Block_P2 (
     input  [7:0] in1,
     input  [7:0] in2,
