@@ -28,6 +28,6 @@ module ED (
     
     assign ED_out = cond1 ? DIAGONAL_EDGE : 
                     cond2 ? VERTICAL_HORIZONTAL_EDGE : 
-                            NO_EDGE;
+                    NO_EDGE;
 
 endmodule
