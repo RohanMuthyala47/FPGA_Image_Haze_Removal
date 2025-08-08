@@ -13,14 +13,15 @@ module Block_P1 (
     output [7:0] p1_result
 );
     
-    reg [10:0] sum1, sum2, sum3;
-    
-    always @(*) begin
-        sum1 <= (in1) + (in2 << 1) + (in3);
-        sum2 <= (in4 << 1) + (in5 << 2) + (in6 << 1);
-        sum3 <= (in7) + (in8 << 1) + (in9);
-    end
-    
-    assign p1_result = (sum1 + sum2 + sum3) >> 4;
+    wire [10:0] sum1, sum2, sum3;
+    wire [11:0] sum;
+
+    assign sum1 = in1 + (in2 << 1) + in3;
+    assign sum2 = (in4 << 1) + (in5 << 2) + (in6 << 1);
+    assign sum3 = in7 + (in8 << 1) + in9;
+
+    assign sum = sum1 + sum2 + sum3;
+
+    assign p1_result = sum >> 4;
     
 endmodule
