@@ -1,4 +1,4 @@
-// Mean Filter when no edges are detected
+// Mean Filter applied when no edges are detected
 module Block_P0 (
     input  [7:0] in1,
     input  [7:0] in2,
@@ -13,9 +13,14 @@ module Block_P0 (
     output [7:0] p0_result
 );
     
-    wire [11:0] sum;
-    assign sum = in1 + in2 + in3 + in4 + in5 + in6 + in7 + in8 + in9;
+    reg [9:0] sum1, sum2, sum3;
     
-    assign p0_result = sum / 9;
+    always @(*) begin
+        sum1 <= in1 + in2 + in3;
+        sum2 <= in4 + in5 + in6;
+        sum3 <= in7 + in8 + in9;
+    end
+    
+    assign p0_result = (sum1 + sum2 + sum3) / 9;
     
 endmodule
