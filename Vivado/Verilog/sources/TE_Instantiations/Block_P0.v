@@ -13,14 +13,16 @@ module Block_P0 (
     output [7:0] p0_result
 );
     
-    reg [9:0] sum1, sum2, sum3;
+    wire [9:0]  sum1, sum2, sum3;
     
-    always @(*) begin
-        sum1 <= in1 + in2 + in3;
-        sum2 <= in4 + in5 + in6;
-        sum3 <= in7 + in8 + in9;
-    end
+    wire [16:0] product;
+
+    assign sum1 = in1 + in2 + in3;
+    assign sum2 = in4 + in5 + in6;
+    assign sum3 = in7 + in8 + in9;
     
-    assign p0_result = (sum1 + sum2 + sum3) / 9;
+    assign product = (sum1 + sum2 + sum3) * 57; // 57/512 = 1/9 (approx.)
+    
+    assign p0_result = product >> 9;
     
 endmodule
