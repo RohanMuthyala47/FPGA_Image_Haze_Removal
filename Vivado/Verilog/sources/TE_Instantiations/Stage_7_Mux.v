@@ -9,6 +9,6 @@ module Stage_7_Mux (
     assign out = (sel == 2'b00) ? a : 
                  (sel == 2'b01) ? b : 
                  (sel == 2'b10) ? c :
-                 0;
+                 'b0;
     
 endmodule
