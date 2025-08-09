@@ -268,7 +268,7 @@ module TE_and_SRSC (
     wire [15:0] min_inv_atm0, min_inv_atm1, min_inv_atm2;
     wire [7:0]  minimum_p0, minimum_p1, minimum_p2;
         
-    wire [23:0] prod0, prod1, prod2;
+    wire [15:0] prod0, prod1, prod2;
 
     // Pipeline Registers for stage 6
     reg [1:0]   window_edge_P1;
