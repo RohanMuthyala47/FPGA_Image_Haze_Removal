@@ -5,7 +5,6 @@ module ALE (
     input         rst,
     
     input         input_is_valid,   // Input data valid signal
-    
     input [23:0]  input_pixel_1,
     input [23:0]  input_pixel_2,
     input [23:0]  input_pixel_3,
