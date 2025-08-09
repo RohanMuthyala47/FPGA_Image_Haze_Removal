@@ -19,7 +19,7 @@ module DCP_HazeRemoval (
     output        M_AXIS_TLAST,
     input         M_AXIS_TREADY,
     
-    output reg    o_intr         // Interrupt signal snet to DMA to indicate ALE processing is done
+    output reg    o_intr         // Interrupt signal sent to DMA to indicate ALE processing is done
 );
 
     assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
@@ -48,15 +48,14 @@ module DCP_HazeRemoval (
         .output_is_valid(window_valid)
     );
     
+    wire ALE_clk;
+    wire ALE_done;
+    wire ALE_enable = ~ALE_done & enable;
+
     wire [7:0] A_R, A_G, A_B;
     wire [15:0] Inv_AR, Inv_AG, Inv_AB;
-    
-    wire ALE_clk;
-    
-    wire ALE_enable = ~ALE_done & enable;
-    wire ALE_done;
 
-    // Insatnce of Atmospheric Light Estimation
+    // Instance of Atmospheric Light Estimation
     ALE ALE (
         .clk(ALE_clk),
         .rst(~ARESETn),
@@ -87,9 +86,8 @@ module DCP_HazeRemoval (
     end
 
     wire TE_SRSC_clk;
-
-    wire TE_SRSC_enable = ALE_done & enable;
     wire TE_SRSC_done;
+    wire TE_SRSC_enable = ALE_done & enable;
     
     // Output Signals
     wire [7:0] J_R, J_G, J_B;
@@ -119,7 +117,7 @@ module DCP_HazeRemoval (
     // Clock Gating Cells for ALE AND TE_SRSC
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Clock_Gating_Cell ALE_CGC(
+    Clock_Gating_Cell ALE_CGC (
         .clk(ACLK),
         .clk_enable(ALE_enable),
         .rst(~ARESETn),
@@ -127,7 +125,7 @@ module DCP_HazeRemoval (
         .clk_gated(ALE_clk)
     );
     
-    Clock_Gating_Cell TE_SRSC_CGC(
+    Clock_Gating_Cell TE_SRSC_CGC (
         .clk(ACLK),
         .clk_enable(TE_SRSC_enable),
         .rst(~ARESETn),
@@ -141,7 +139,7 @@ endmodule
 // Clock Gating Module to reduce Power Consumption
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-module Clock_Gating_Cell(
+module Clock_Gating_Cell (
     input  clk,
     input  clk_enable,
     input  rst,
