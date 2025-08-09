@@ -21,8 +21,8 @@ module Block_P0 (
     assign sum2 = in4 + in5 + in6;
     assign sum3 = in7 + in8 + in9;
     
-    assign product = (sum1 + sum2 + sum3) * 57; // 57/512 = 1/9 (approx.)
-    
+    assign product = (sum1 + sum2 + sum3) * 57;
+    // 57/512 = 1/9 (approx.)
     assign p0_result = product >> 9;
     
 endmodule
