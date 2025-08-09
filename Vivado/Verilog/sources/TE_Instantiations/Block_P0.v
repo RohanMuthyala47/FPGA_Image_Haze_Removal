@@ -16,12 +16,12 @@ module Block_P0 (
 );
     
     // Pipeline Registers
-    reg [7:0]   in1_P, in2_P, in3_P, 
-                in4_P, in5_P, in6_P, 
-                in7_P, in8_P, in9_P;
+    reg [7:0] in1_P, in2_P, in3_P, 
+              in4_P, in5_P, in6_P, 
+              in7_P, in8_P, in9_P;
     
     wire [9:0]  sum1, sum2, sum3;
-    wire [16:0] product;
+    wire [14:0] product;
     
     always @(posedge clk) begin
         if(rst) begin
@@ -40,8 +40,8 @@ module Block_P0 (
     assign sum2 = in4_P + in5_P + in6_P;
     assign sum3 = in7_P + in8_P + in9_P;
     
-    assign product = (sum1 + sum2 + sum3) * 57; // 57/512 = 1/9 (approx.)
-    
-    assign p0_result = product >> 9;
+    assign product = ((sum1 + sum2 + sum3) << 4) - ((sum1 + sum2 + sum3) << 1);
+    // Mutiply by 14 and then divide by 128 -> 14/128 = 1/9 (approx.)
+    assign p0_result = product >> 7;
     
 endmodule
