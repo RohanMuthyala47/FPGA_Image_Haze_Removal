@@ -15,7 +15,7 @@ module TE_and_SRSC (
     input [23:0] input_pixel_8,
     input [23:0] input_pixel_9,          // 3x3 window input
     
-    input [7:0]  A_R, A_G, A_B,          // Atmospheric Light Values
+    input  [7:0] A_R, A_G, A_B,          // Atmospheric Light Values
     input [15:0] Inv_AR, Inv_AG, Inv_AB, // Inverse Atmospheric Light Values(Q0.16)
 
     output [7:0] J_R, J_G, J_B,          // Output corrected pixels
@@ -147,6 +147,8 @@ module TE_and_SRSC (
     //===========================================
     // P0 BLOCKS FOR MEAN FILTERING
     Block_P0 MeanFilter_Red (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
         .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
         .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
@@ -155,6 +157,8 @@ module TE_and_SRSC (
     );
                    
     Block_P0 MeanFilter_Green (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
         .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
         .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
@@ -163,6 +167,8 @@ module TE_and_SRSC (
     );
                    
     Block_P0 MeanFilter_Blue (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
         .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
         .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
@@ -172,6 +178,8 @@ module TE_and_SRSC (
                    
     // P1 BLOCKS FOR EDGE PRESERVING (VERTICAL AND HORIZONTAL EDGES)
     Block_P1 EdgePreservingFilter_VH_Red (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
         .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
         .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
@@ -180,6 +188,8 @@ module TE_and_SRSC (
     );
                    
     Block_P1 EdgePreservingFilter_VH_Green (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
         .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
         .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
@@ -188,6 +198,8 @@ module TE_and_SRSC (
     );
                    
     Block_P1 EdgePreservingFilter_VH_Blue (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
         .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
         .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
@@ -197,6 +209,8 @@ module TE_and_SRSC (
                    
     // P2 BLOCKS FOR EDGE PRESERVING (DIAGONAL EDGES)
     Block_P2 EdgePreservingFilter_D_Red (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
         .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
         .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
@@ -205,6 +219,8 @@ module TE_and_SRSC (
     );
                    
     Block_P2 EdgePreservingFilter_D_Green (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
         .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
         .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
@@ -213,6 +229,8 @@ module TE_and_SRSC (
     );
                    
     Block_P2 EdgePreservingFilter_D_Blue (
+        .clk(clk), .rst(rst),
+        
         .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
         .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
         .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
