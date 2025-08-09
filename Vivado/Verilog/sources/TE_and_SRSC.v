@@ -472,7 +472,7 @@ module TE_and_SRSC (
     // Subtractor to compute final transmission value
     Subtractor Subtractor_TE (
         .in(pre_transmission),
-        .diff(transmission)
+        .out(transmission)
     );
     
     // SUBTRACTOR MODULES TO COMPUTE (|Ic - Ac|)
