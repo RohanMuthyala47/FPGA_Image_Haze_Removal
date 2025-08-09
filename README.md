@@ -163,12 +163,11 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## IP
 
-<img width="1563" height="721" alt="Screenshot 2025-07-21 175931" src="https://github.com/user-attachments/assets/729c6edd-807f-416e-a179-26ccda339144" />
+<img width="1216" height="675" alt="Screenshot 2025-08-09 135758" src="https://github.com/user-attachments/assets/9e84e90f-8107-4c9b-b478-23ad2da632cb" />
 
-## Block Design
+## Block Diagram
 
-<img width="1325" height="464" alt="Screenshot 2025-08-03 181424" src="https://github.com/user-attachments/assets/40717955-2454-49c0-8725-ab403fe9c897" />
-
+<img width="1893" height="903" alt="Screenshot 2025-08-09 140851" src="https://github.com/user-attachments/assets/f43d95a3-38f9-4d19-a1f0-9dacdc62bb1d" />
 
 ## Utilization
 
