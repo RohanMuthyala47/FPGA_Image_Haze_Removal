@@ -10,7 +10,8 @@ module Multiplier (
 );
 
     parameter [15:0] MAX_OUTPUT = 16'd47415; // 0.725 in Q0.16
-    
+
+    // Pipeline registers
     reg [15:0] Ac_Inv_P;
     reg [7:0]  Pc_P;
     
