@@ -171,7 +171,7 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ## Utilization
 
-<img width="632" height="261" alt="image" src="https://github.com/user-attachments/assets/576bb79a-32da-4f11-a9b4-c98d1c1b4613" />
+<img width="498" height="263" alt="image" src="https://github.com/user-attachments/assets/c4b09319-388e-413b-81e2-6a7e7abc3e81" />
 
 ## Example Results
 
