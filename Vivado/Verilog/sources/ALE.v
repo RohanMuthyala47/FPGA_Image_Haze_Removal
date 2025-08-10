@@ -35,7 +35,7 @@ module ALE (
             pixel_counter <= 0;
             done_reg <= 0;
         end
-        else if (input_is_valid && !done_reg) begin
+        else if (Stage_2_valid && !done_reg) begin
             pixel_counter <= pixel_counter + 1;
             if (pixel_counter == (`Image_Size - 1)) begin
                 done_reg <= 1;                            // All pixels have been processed through the ALE module
@@ -104,7 +104,7 @@ module ALE (
         end
     end
     
-    // Delay the valid signal by 2 clock cycles
+    // Delay the output valid signal by 2 clock cycles
     reg Stage_1_valid, Stage_2_valid;
     always @(posedge clk)
     begin
@@ -126,8 +126,6 @@ module ALE (
     assign Inv_A_R = Inv_AR_P;
     assign Inv_A_G = Inv_AG_P;
     assign Inv_A_B = Inv_AB_P;
-    
-    assign output_is_valid = Stage_2_valid;
     
     assign done = done_reg;
 
