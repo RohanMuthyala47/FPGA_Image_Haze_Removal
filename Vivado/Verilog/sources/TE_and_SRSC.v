@@ -19,29 +19,8 @@ module TE_and_SRSC (
     input [15:0] Inv_AR, Inv_AG, Inv_AB, // Inverse Atmospheric Light Values(Q0.16)
 
     output [7:0] J_R, J_G, J_B,          // Output corrected pixels
-    output       output_valid,           // Output data valid signal
-    
-    output       done                    // Signal to indicate entire image has been processed
+    output       output_valid            // Output data valid signal
 );
-
-    reg [17:0] pixel_counter;
-    reg        done_reg;
-    
-    // Keep track of the number of pixels processed through the module
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            pixel_counter <= 0;
-            done_reg <= 0;
-        end
-        else if (input_is_valid && !done_reg) begin
-            pixel_counter <= pixel_counter + 1;
-            if (pixel_counter == (`Image_Size - 1)) begin
-                done_reg <= 1; // All pixels have been processed through the TE_SRSC module
-            end
-        end
-    end
-    
-    assign done = done_reg;
     
     // Pipeline the Center Pixel for SRSC
     reg [23:0] I_0, I_1, I_2;
