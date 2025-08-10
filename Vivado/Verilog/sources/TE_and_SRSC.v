@@ -112,27 +112,29 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==========================================================================
 
+    parameter OMEGA_D = 16;
+    
     // Diagonal, Vertical, Horizonal or no edge detected
     wire [1:0]  window_edge = (ed1_P | ed2_P | ed3_P);
-    
+
     // Filter Results
     wire [7:0]  p0_red_out, p0_green_out, p0_blue_out;
     wire [7:0]  p1_red_out, p1_green_out, p1_blue_out;
     wire [7:0]  p2_red_out, p2_green_out, p2_blue_out;
     
-    // Apply OMEGA (= 15/16) Scaling on the Inverse Atmospheric LIght values
+    // Apply OMEGA (ω = 15/16) Scaling on the Inverse Atmospheric LIght values
     // First divide the values by 16, then subtract this result from them while pipelining (x - x/16 = 15x/16)
-    wire [15:0] scaled_inv_ar1 = inv_ar1_P >> 4, 
-                scaled_inv_ag1 = inv_ag1_P >> 4, 
-                scaled_inv_ab1 = inv_ab1_P >> 4, 
+    wire [15:0] scaled_inv_ar1 = inv_ar1_P >> $clog2(OMEGA_D), 
+                scaled_inv_ag1 = inv_ag1_P >> $clog2(OMEGA_D), 
+                scaled_inv_ab1 = inv_ab1_P >> $clog2(OMEGA_D), 
                 
-                scaled_inv_ar2 = inv_ar2_P >> 4, 
-                scaled_inv_ag2 = inv_ag2_P >> 4, 
-                scaled_inv_ab2 = inv_ab2_P >> 4, 
+                scaled_inv_ar2 = inv_ar2_P >> $clog2(OMEGA_D), 
+                scaled_inv_ag2 = inv_ag2_P >> $clog2(OMEGA_D), 
+                scaled_inv_ab2 = inv_ab2_P >> $clog2(OMEGA_D), 
                 
-                scaled_inv_ar3 = inv_ar3_P >> 4, 
-                scaled_inv_ag3 = inv_ag3_P >> 4, 
-                scaled_inv_ab3 = inv_ab3_P >> 4;
+                scaled_inv_ar3 = inv_ar3_P >> $clog2(OMEGA_D), 
+                scaled_inv_ag3 = inv_ag3_P >> $clog2(OMEGA_D), 
+                scaled_inv_ab3 = inv_ab3_P >> $clog2(OMEGA_D);
     
     // Pipeline Registers for stage 5
     reg [1:0]   window_edge_P;
@@ -738,32 +740,32 @@ module TE_and_SRSC (
     // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.2/0.3)
     LUT_03 A_R_Correction (
         .x(A_R_P2),
-        .y_q8_8(A_R_Corrected)
+        .y(A_R_Corrected)
     );
     
     LUT_03 A_G_Correction (
         .x(A_G_P2),
-        .y_q8_8(A_G_Corrected)
+        .y(A_G_Corrected)
     );
     
     LUT_03 A_B_Correction (
         .x(A_B_P2),
-        .y_q8_8(A_B_Corrected)
+        .y(A_B_Corrected)
     );
     
     LUT_07 J_R_Correction (
         .x(Sum_Red),
-        .y_q8_8(J_R_Corrected)
+        .y(J_R_Corrected)
     );
     
     LUT_07 J_G_Correction (
         .x(Sum_Green),
-        .y_q8_8(J_G_Corrected)
+        .y(J_G_Corrected)
     );
     
     LUT_07 J_B_Correction (
         .x(Sum_Blue),
-        .y_q8_8(J_B_Corrected)
+        .y(J_B_Corrected)
     );
                     
     // MULTIPLIER MODULES TO COMPUTE Ac^β * Jc^(1-β)
