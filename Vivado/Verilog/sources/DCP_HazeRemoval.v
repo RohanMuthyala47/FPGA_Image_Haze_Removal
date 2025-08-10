@@ -86,7 +86,6 @@ module DCP_HazeRemoval (
     end
 
     wire TE_SRSC_clk;
-    wire TE_SRSC_done;
     wire TE_SRSC_enable = ALE_done & enable;
     
     // Output Signals
@@ -108,9 +107,7 @@ module DCP_HazeRemoval (
         .Inv_AR(Inv_AR), .Inv_AG(Inv_AG), .Inv_AB(Inv_AB),
         
         .J_R(J_R), .J_G(J_G), .J_B(J_B),
-        .output_valid(M_AXIS_TVALID),
-        
-        .done(TE_SRSC_done)
+        .output_valid(M_AXIS_TVALID)
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
