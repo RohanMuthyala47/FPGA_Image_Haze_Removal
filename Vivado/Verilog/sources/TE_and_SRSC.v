@@ -91,7 +91,7 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==========================================================================
 
-    parameter OMEGA_D = 16;
+    parameter OMEGA_D = 64;
     
     // Diagonal, Vertical, Horizonal or no edge detected
     wire [1:0]  window_edge = (ed1_P | ed2_P | ed3_P);
