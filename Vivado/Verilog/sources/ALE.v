@@ -4,7 +4,7 @@ module ALE (
     input         clk,
     input         rst,
     
-    input         input_is_valid,   // Input data valid signal
+    input         input_is_valid, // Input data valid signal
     input [23:0]  input_pixel_1,
     input [23:0]  input_pixel_2,
     input [23:0]  input_pixel_3,
@@ -13,17 +13,17 @@ module ALE (
     input [23:0]  input_pixel_6,
     input [23:0]  input_pixel_7,
     input [23:0]  input_pixel_8,
-    input [23:0]  input_pixel_9,    // 3x3 window input
+    input [23:0]  input_pixel_9,  // 3x3 window input
     
     output [7:0]  A_R,
     output [7:0]  A_G,
-    output [7:0]  A_B,              // Atmospheric Light Values
+    output [7:0]  A_B,            // Atmospheric Light Values
     
     output [15:0] Inv_A_R,
     output [15:0] Inv_A_G,
-    output [15:0] Inv_A_B,          // Inverse Atmospheric Light Values(Q0.16)
+    output [15:0] Inv_A_B,        // Inverse Atmospheric Light Values(Q0.16)
     
-    output        done              // Signal to indicate entire image has been processed
+    output        done            // Signal to indicate entire image has been processed
 );
 
     reg [17:0] pixel_counter;
@@ -35,7 +35,7 @@ module ALE (
             pixel_counter <= 0;
             done_reg <= 0;
         end
-        else if (Stage_2_valid && !done_reg) begin
+        else if (Stage_2_valid) begin
             pixel_counter <= pixel_counter + 1;
             if (pixel_counter == (`Image_Size - 1)) begin
                 done_reg <= 1;                            // All pixels have been processed through the ALE module
@@ -129,9 +129,9 @@ module ALE (
     
     assign done = done_reg;
 
-/////////////////////////////////////////////////////////////////////////////////
-// BLOCK INSTANCES
-/////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
+    // BLOCK INSTANCES
+    /////////////////////////////////////////////////////////////////////////////////
 
     // Find the minimum of each of the color channel inputs
     ALE_Minimum_9 Min_Red (
