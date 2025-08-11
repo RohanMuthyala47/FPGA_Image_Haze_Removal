@@ -25,7 +25,7 @@ module TE_and_SRSC (
     // Pipeline the Center Pixel for SRSC
     reg [23:0] I_0, I_1, I_2;
     
-    // Pipeline Atmospheric Light for SRSC
+    // Pipeline Atmospheric Light values for SRSC
     reg [7:0] A_R0, A_G0, A_B0;
     reg [7:0] A_R1, A_G1, A_B1;
     reg [7:0] A_R2, A_G2, A_B2;
@@ -240,7 +240,7 @@ module TE_and_SRSC (
         end
         else begin
             window_edge_P <= window_edge;
-            //Apply the caling factor ω to the Inverse Atmospheric Light values
+            // Apply the scaling factor ω to the Inverse Atmospheric Light values
             inv_ar1_P1 <= inv_ar1_P - scaled_inv_ar1; inv_ag1_P1 <= inv_ag1_P - scaled_inv_ag1; inv_ab1_P1 <= inv_ab1_P - scaled_inv_ab1;
             inv_ar2_P1 <= inv_ar2_P - scaled_inv_ar2; inv_ag2_P1 <= inv_ag2_P - scaled_inv_ag2; inv_ab2_P1 <= inv_ab2_P - scaled_inv_ab2;
             inv_ar3_P1 <= inv_ar3_P - scaled_inv_ar3; inv_ag3_P1 <= inv_ag3_P - scaled_inv_ag3; inv_ab3_P1 <= inv_ab3_P - scaled_inv_ab3;
@@ -419,7 +419,7 @@ module TE_and_SRSC (
     // Transmission value in Q0.16
     wire [15:0] transmission;
     
-    // Compute (Ic - Ac)
+    // Compute (|Ic - Ac|)
     wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
     wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
     
@@ -538,7 +538,7 @@ module TE_and_SRSC (
     wire [15:0] inverse_transmission;
     reg [15:0]  inverse_transmission_P;
 
-    // Compute (Ic-Ac)*(1/T)
+    // Compute (|Ic-Ac|)*(1/T)
     wire [7:0]  Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
 
     // Pipeline Registers for stage 7
@@ -554,7 +554,7 @@ module TE_and_SRSC (
         .y(inverse_transmission)
     );
                 
-    // MULTIPLIER MODULES TO COMPUTE (Ic-Ac)*(1/t)
+    // MULTIPLIER MODULES TO COMPUTE (|Ic-Ac|)*(1/T)
     Multiplier_SRSC Mult_Red (
         .Inv_Trans(inverse_transmission_P),
         .Ic_minus_Ac(IR_minus_AR_P),
@@ -624,11 +624,11 @@ module TE_and_SRSC (
     reg [7:0]  Mult_Red_P, Mult_Green_P, Mult_Blue_P;
     reg        stage_9_valid;
     
-    // Compute Ac +/- (|I-A|/t)
+    // Compute Ac +/- (|Ic-Ac|/T)
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
 
     //===========================================
-    // ADDER BLOCKS TO COMPUTE Ac +/- (|I-A|/t)
+    // ADDER BLOCKS TO COMPUTE Ac +/- (|Ic-Ac|/T)
     Adder_SRSC Add_Red (
         .Ac(A_R_P2),
         .Ic(I_R3),
@@ -716,7 +716,7 @@ module TE_and_SRSC (
     wire [7:0] SC_R, SC_G, SC_B;
     
     //===========================================
-    // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.2/0.3)
+    // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.3)
     LUT_03 A_R_Correction (
         .x(A_R_P2),
         .y(A_R_Corrected)
