@@ -13,7 +13,7 @@ module ED_Top (
     output [1:0] ED1_out, ED2_out, ED3_out
 );
     
-    ED Red_Edges_Detection (
+    ED Red_Edge_Detection (
         .input_pixel_1(input_pixel_1[23:16]),
         .input_pixel_2(input_pixel_2[23:16]),
         .input_pixel_3(input_pixel_3[23:16]),
@@ -27,7 +27,7 @@ module ED_Top (
         .ED_out(ED1_out)
     );
         
-    ED Green_Edges_Detection (
+    ED Green_Edge_Detection (
         .input_pixel_1(input_pixel_1[15:8]),
         .input_pixel_2(input_pixel_2[15:8]),
         .input_pixel_3(input_pixel_3[15:8]),
@@ -41,7 +41,7 @@ module ED_Top (
         .ED_out(ED2_out)
     );
         
-    ED Blue_Edges_Detection (
+    ED Blue_Edge_Detection (
         .input_pixel_1(input_pixel_1[7:0]),
         .input_pixel_2(input_pixel_2[7:0]),
         .input_pixel_3(input_pixel_3[7:0]),
