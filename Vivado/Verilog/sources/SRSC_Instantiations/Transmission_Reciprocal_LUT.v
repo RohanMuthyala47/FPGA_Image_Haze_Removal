@@ -2,11 +2,9 @@ module Trans_LUT (
     input      [15:0] x, // Q0.16 Transmission value input (unsigned)
     output reg [15:0] y  // Q2.14 Inverse Transmission value output (unsigned)
 );
-
-    wire [11:0] index = x[15:4];
     
     always @(*) begin
-        casez(index)
+        casez(x[15:4])
             12'd   0: y = 16'h4000;
             12'd   1: y = 16'hFFFF;
             12'd   2: y = 16'hFFFF;
@@ -4103,8 +4101,7 @@ module Trans_LUT (
             12'd4093: y = 16'h400C;
             12'd4094: y = 16'h4008;
             12'd4095: y = 16'h4004;
-            default: y = 16'h0000;
+            default:  y = 16'h0000;
         endcase
     end
-    
 endmodule
