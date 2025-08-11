@@ -34,7 +34,7 @@ module TE_and_SRSC (
     // STAGE 4 LOGIC
     //==========================================================================
     
-    // Detect the type of edge in the windows
+    // Detect the type of edge in the 3x3 window
     wire [1:0] ed1, ed2, ed3;
     
     // Pipeline Registers
@@ -45,7 +45,7 @@ module TE_and_SRSC (
     reg        stage_4_valid;
     
     //===========================================
-    // Detect the type of edges
+    // Detect the type of edge in the 3x3 window
     ED_Top EdgeDetection (
         .input_pixel_1(input_pixel_1), .input_pixel_2(input_pixel_2), .input_pixel_3(input_pixel_3),
         .input_pixel_4(input_pixel_4),                                .input_pixel_6(input_pixel_6), 
@@ -101,8 +101,8 @@ module TE_and_SRSC (
     wire [7:0]  p1_red_out, p1_green_out, p1_blue_out;
     wire [7:0]  p2_red_out, p2_green_out, p2_blue_out;
     
-    // Apply OMEGA (ω = 15/16) Scaling on the Inverse Atmospheric LIght values
-    // First divide the values by 16, then subtract this result from them while pipelining (x - x/16 = 15x/16)
+    // Apply OMEGA (ω = 63/64) Scaling on the Inverse Atmospheric Light values
+    // First divide the values by 64, then subtract this result from the values (x - x/64 = 63x/64)
     wire [15:0] scaled_inv_ar1 = inv_ar1_P >> $clog2(OMEGA_D), 
                 scaled_inv_ag1 = inv_ag1_P >> $clog2(OMEGA_D), 
                 scaled_inv_ab1 = inv_ab1_P >> $clog2(OMEGA_D), 
@@ -240,7 +240,7 @@ module TE_and_SRSC (
         end
         else begin
             window_edge_P <= window_edge;
-                   
+            //Apply the caling factor ω to the Inverse Atmospheric Light values
             inv_ar1_P1 <= inv_ar1_P - scaled_inv_ar1; inv_ag1_P1 <= inv_ag1_P - scaled_inv_ag1; inv_ab1_P1 <= inv_ab1_P - scaled_inv_ab1;
             inv_ar2_P1 <= inv_ar2_P - scaled_inv_ar2; inv_ag2_P1 <= inv_ag2_P - scaled_inv_ag2; inv_ab2_P1 <= inv_ab2_P - scaled_inv_ab2;
             inv_ar3_P1 <= inv_ar3_P - scaled_inv_ar3; inv_ag3_P1 <= inv_ag3_P - scaled_inv_ag3; inv_ab3_P1 <= inv_ab3_P - scaled_inv_ab3;
@@ -299,7 +299,7 @@ module TE_and_SRSC (
         .min_val(cmp_p2)
     );
     
-    // Multiplexers to choose minimum in each of P0, P1, P2
+    // Multiplexers to choose minimum of the filter values
     Mux_1 P0_Mux (
         .a(p0_red_P),
         .b(p0_green_P) ,
@@ -330,7 +330,7 @@ module TE_and_SRSC (
         .out(minimum_p2)
     );
     
-    // Multiplexers to choose minimum of atmospheric light values
+    // Multiplexers to choose minimum of Atmospheric Light values
     Mux_2 InvA_0_Mux (
         .a(inv_ar1_P1),
         .b(inv_ag1_P1),
@@ -361,7 +361,7 @@ module TE_and_SRSC (
         .out(min_inv_atm2)
     );
     
-    // Multiplier modules to compute Pc * 1/Ac
+    // Multiplier modules to compute Pc * ω/Ac
     Multiplier Multiply_P0 (
         .clk(clk), .rst(rst),
         
