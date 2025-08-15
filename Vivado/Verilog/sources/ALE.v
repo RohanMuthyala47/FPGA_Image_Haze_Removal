@@ -35,7 +35,7 @@ module ALE (
             pixel_counter <= 0;
             done_reg <= 0;
         end
-        else if (Stage_2_valid) begin
+        else if (input_is_valid) begin
             pixel_counter <= pixel_counter + 1;
             if (pixel_counter == (`Image_Size - 1)) begin
                 done_reg <= 1;                            // All pixels have been processed through the ALE module
