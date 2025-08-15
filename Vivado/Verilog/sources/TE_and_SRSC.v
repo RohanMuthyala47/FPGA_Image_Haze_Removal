@@ -705,15 +705,12 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 10 LOGIC
     //==========================================================================
-    reg [7:0] J_R_P, J_G_P, J_B_P;
-    reg       stage_10_valid;
+    
+    reg         stage_10_valid;
     
     // Outputs of Look-Up Tables for Saturation Corection
     wire [15:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [15:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
-    
-    // Product of corrected Ac and Jc
-    wire [7:0] SC_R, SC_G, SC_B;
     
     //===========================================
     // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.3)
@@ -749,43 +746,31 @@ module TE_and_SRSC (
                     
     // MULTIPLIER MODULES TO COMPUTE Ac^β * Jc^(1-β)
     Saturation_Correction_Multiplier Saturation_Correction_Red (
+        .clk(clk), .rst(rst),
         .x1(A_R_Corrected), .x2(J_R_Corrected),
-        .result(SC_R)
+        .result(J_R)
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Green (
+        .clk(clk), .rst(rst),
         .x1(A_G_Corrected), .x2(J_G_Corrected),
-        .result(SC_G)
+        .result(J_G)
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Blue (
+        .clk(clk), .rst(rst),
         .x1(A_B_Corrected), .x2(J_B_Corrected),
-        .result(SC_B)
+        .result(J_B)
     );
     //===========================================
     
     // Update stage 10 pipeline registers
     always @(posedge clk) begin
-        if (rst) begin
-            J_R_P <= 0;
-            J_G_P <= 0;
-            J_B_P <= 0;
-            
+        if (rst)
             stage_10_valid <= 0;
-        end
-        else begin
-            J_R_P <= SC_R;
-            J_G_P <= SC_G;
-            J_B_P <= SC_B;
-            
+        else
             stage_10_valid <= stage_9_valid;
-        end
     end
-    
-    // Output assignments
-    assign J_R = J_R_P;
-    assign J_G = J_G_P;
-    assign J_B = J_B_P;
     
     assign output_valid = stage_10_valid;
 
