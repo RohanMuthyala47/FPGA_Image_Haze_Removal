@@ -21,10 +21,9 @@ module DCP_HazeRemoval (
     
     output reg    o_intr         // Interrupt signal sent to DMA to indicate ALE processing is done
 );
-
-    assign S_AXIS_TREADY = 1'b1; // Always ready to accept data
     
-    assign M_AXIS_TLAST = 1'b0;  // Continuous stream
+    wire axis_prog_full;
+    assign S_AXIS_TREADY = !axis_prog_full;
 
     // 3x3 Window of RGB pixels generated from Line Buffers
     wire [23:0] Pixel_00, Pixel_01, Pixel_02;
@@ -90,7 +89,7 @@ module DCP_HazeRemoval (
     
     // Output Signals
     wire [7:0] J_R, J_G, J_B;
-    assign M_AXIS_TDATA = {8'h00, J_R, J_G, J_B};
+    wire output_valid;
     
     // Instance of Transmission Estimation, Scene Recovery and Saturation Correction
     TE_and_SRSC TE_SRSC (
@@ -107,7 +106,7 @@ module DCP_HazeRemoval (
         .Inv_AR(Inv_AR), .Inv_AG(Inv_AG), .Inv_AB(Inv_AB),
         
         .J_R(J_R), .J_G(J_G), .J_B(J_B),
-        .output_valid(M_AXIS_TVALID)
+        .output_valid(output_valid)
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -128,6 +127,24 @@ module DCP_HazeRemoval (
         .rst(~ARESETn),
         
         .clk_gated(TE_SRSC_clk)
+    );
+    
+    OutputBuffer OutputBuffer (
+        .wr_rst_busy(),                        // output wire wr_rst_busy
+        .rd_rst_busy(),                        // output wire rd_rst_busy
+        
+        .s_aclk(ACLK),                         // input wire s_aclk
+        .s_aresetn(ARESETn),                   // input wire s_aresetn
+        
+        .s_axis_tvalid(output_valid),          // input wire s_axis_tvalid
+        .s_axis_tready(),                      // output wire s_axis_tready
+        .s_axis_tdata({8'd0, J_R, J_G, J_B}), // input wire [31 : 0] s_axis_tdata
+        
+        .m_axis_tvalid(M_AXIS_TVALID),         // output wire m_axis_tvalid
+        .m_axis_tready(M_AXIS_TREADY),         // input wire m_axis_tready
+        .m_axis_tdata(M_AXIS_TDATA),           // output wire [31 : 0] m_axis_tdata
+        
+        .axis_prog_full(axis_prog_full)        // output wire axis_prog_full
     );
 
 endmodule
