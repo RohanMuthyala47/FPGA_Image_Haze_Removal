@@ -24,7 +24,7 @@ module Haze_Removal_TB;
     wire        o_intr;
 
 
-    // Instantiate the ALE_TE_Top module
+    // Top module Instance
     DCP_HazeRemoval dut(
         .ACLK(ACLK),
         .ARESETn(ARESETn),
