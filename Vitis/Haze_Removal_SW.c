@@ -1,4 +1,3 @@
-
 #include "xaxidma.h"
 #include "xparameters.h"
 #include "sleep.h"
@@ -8,35 +7,19 @@
 #include "ImageData_RGB.h"
 #include "xuartps.h"
 
-#define imageSize 512*512*3
+#define NO_PIXELS 512*512*3
 
 #define IMG_WIDTH        512
 #define IMG_HEIGHT       512
-#define NUM_PIXELS       (IMG_WIDTH * IMG_HEIGHT)
-#define BYTES_PER_PIXEL  3
-#define WORD_SIZE        4  // 32-bit AXI stream word
+#define IMG_SIZE       (IMG_WIDTH * IMG_HEIGHT)
+#define NO_OF_PASSES 2
 
-#define CHUNK_SIZE 256
-
-u32 formattedImageData[NUM_PIXELS];
-
-
-//u32 checkHalted(u32 baseAddress,u32 offset);
 
 XScuGic IntcInstance;
-static void imageProcISR(void *CallBackRef);
 static void dmaReceiveISR(void *CallBackRef);
 int done = 0;
 
 int main(){
-
-	// Format imageData into 32-bit RGB words
-	for (int i = 0; i < NUM_PIXELS; i++) {
-	    u8 r = imageData[3 * i];
-	    u8 g = imageData[3 * i + 1];
-	    u8 b = imageData[3 * i + 2];
-	    formattedImageData[i] = (r << 16) | (g << 8) | b;
-	}
 
 
     u32 status;
@@ -48,11 +31,11 @@ int main(){
 	//Initialize uart
 	myUartConfig = XUartPs_LookupConfig(XPAR_PS7_UART_1_DEVICE_ID);
 	status = XUartPs_CfgInitialize(&myUart, myUartConfig, myUartConfig->BaseAddress);
-	if(status != XST_SUCCESS)
-		print("Uart initialization failed...\n\r");
-	status = XUartPs_SetBaudRate(&myUart, 115200);
-	if(status != XST_SUCCESS)
-		print("Baudrate init failed....\n\r");
+//	if(status != XST_SUCCESS)
+//		print("Uart initialization failed...\n\r");
+	status = XUartPs_SetBaudRate(&myUart, 230400);
+//	if(status != XST_SUCCESS)
+//		print("Baudrate init failed....\n\r");
 
 	XAxiDma_Config *myDmaConfig;
 	XAxiDma myDma;
@@ -76,14 +59,6 @@ int main(){
 		return -1;
 	}
 
-	XScuGic_SetPriorityTriggerType(&IntcInstance,XPAR_FABRIC_DCP_HAZEREMOVAL_0_O_INTR_INTR,0xA0,3);
-	status = XScuGic_Connect(&IntcInstance,XPAR_FABRIC_DCP_HAZEREMOVAL_0_O_INTR_INTR,(Xil_InterruptHandler)imageProcISR,(void *)&myDma);
-	if(status != XST_SUCCESS){
-		xil_printf("Interrupt connection failed");
-		return -1;
-	}
-	XScuGic_Enable(&IntcInstance,XPAR_FABRIC_DCP_HAZEREMOVAL_0_O_INTR_INTR);
-
 	XScuGic_SetPriorityTriggerType(&IntcInstance,XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR,0xA1,3);
 	status = XScuGic_Connect(&IntcInstance,XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR,(Xil_InterruptHandler)dmaReceiveISR,(void *)&myDma);
 	if(status != XST_SUCCESS){
@@ -97,65 +72,35 @@ int main(){
 	Xil_ExceptionEnable();
 
 
-	status = XAxiDma_SimpleTransfer(&myDma, (u32)formattedImageData, NUM_PIXELS * WORD_SIZE, XAXIDMA_DEVICE_TO_DMA);
-	status = XAxiDma_SimpleTransfer(&myDma, (u32)formattedImageData, NUM_PIXELS * WORD_SIZE, XAXIDMA_DMA_TO_DEVICE);
+	status = XAxiDma_SimpleTransfer(&myDma,(u32)imageData, IMG_SIZE * sizeof(u32), XAXIDMA_DEVICE_TO_DMA);
+
+	status = XAxiDma_SimpleTransfer(&myDma,(u32)imageData, IMG_SIZE * sizeof(u32), XAXIDMA_DMA_TO_DEVICE);
+
+//	status = XAxiDma_SimpleTransfer(&myDma, (u32)imageData, (IMG_SIZE * 2) * sizeof(u32), XAXIDMA_DMA_TO_DEVICE);
+
 	if(status != XST_SUCCESS){
 		print("DMA initialization failed\n");
 		return -1;
 	}
 
+    while(!done){}
 
-    while(!done){
+    u8 modifiedData[NO_PIXELS];
 
-    }
-
-
-	u8 uartBuffer[imageSize];  // 512x512x3 = 786432 bytes
-
-	for (int i = 0; i < NUM_PIXELS; i++) {
-	    u32 pixel = formattedImageData[i];
-	    uartBuffer[3 * i + 0] = (pixel >> 16) & 0xFF; // R
-	    uartBuffer[3 * i + 1] = (pixel >> 8)  & 0xFF; // G
-	    uartBuffer[3 * i + 2] = pixel         & 0xFF; // B
+	int i;
+	for (i = 0; i < NO_PIXELS; i = i+3) {
+		modifiedData[i] = (u8)(imageData[i/3] >> 16);
+		modifiedData[i+1] = (u8)(imageData[i/3] >> 8);
+		modifiedData[i+2] = (u8)(imageData[i/3]);
 	}
 
-
-	while (totalTransmittedBytes < imageSize) {
-	    int remaining = imageSize - totalTransmittedBytes;
-	    int chunkSize = (remaining > CHUNK_SIZE) ? CHUNK_SIZE : remaining;
-
-	    transmittedBytes = XUartPs_Send(&myUart, &uartBuffer[totalTransmittedBytes], chunkSize);
-	    totalTransmittedBytes += transmittedBytes;
-
-	    // Optional: wait until current transmission completes
-	    //while (XUartPs_IsSending(&myUart));
-
-	    // Optional: very small delay if needed
-	    usleep(1000);  // Much smaller than 1000 us
+	while(totalTransmittedBytes < NO_PIXELS){
+		transmittedBytes =  XUartPs_Send(&myUart,(u8*)&modifiedData[totalTransmittedBytes],1);
+		totalTransmittedBytes += transmittedBytes;
+		usleep(1000);
 	}
 
-
 }
-
-
-u32 checkIdle(u32 baseAddress,u32 offset){
-	u32 status;
-	status = (XAxiDma_ReadReg(baseAddress,offset))&XAXIDMA_IDLE_MASK;
-	return status;
-}
-
-
-static void imageProcISR(void *CallBackRef){
-
-	int status;
-	XScuGic_Disable(&IntcInstance,XPAR_FABRIC_DCP_HAZEREMOVAL_0_O_INTR_INTR);
-	status = checkIdle(XPAR_AXI_DMA_0_BASEADDR,0x4);
-	while(status == 0)
-		status = checkIdle(XPAR_AXI_DMA_0_BASEADDR,0x4);
-	status = XAxiDma_SimpleTransfer((XAxiDma *)CallBackRef, (u32)formattedImageData, NUM_PIXELS * WORD_SIZE, XAXIDMA_DMA_TO_DEVICE);
-	XScuGic_Enable(&IntcInstance,XPAR_FABRIC_DCP_HAZEREMOVAL_0_O_INTR_INTR);
-}
-
 
 static void dmaReceiveISR(void *CallBackRef){
 	XAxiDma_IntrDisable((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);
@@ -163,4 +108,3 @@ static void dmaReceiveISR(void *CallBackRef){
 	done = 1;
 	XAxiDma_IntrEnable((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);
 }
-
