@@ -4,22 +4,16 @@ module TE_and_SRSC (
     input        clk,
     input        rst,
     
-    input        input_is_valid,         // Input data valid signal
-    input [23:0] input_pixel_1,
-    input [23:0] input_pixel_2,
-    input [23:0] input_pixel_3,
-    input [23:0] input_pixel_4,
-    input [23:0] input_pixel_5,
-    input [23:0] input_pixel_6,
-    input [23:0] input_pixel_7,
-    input [23:0] input_pixel_8,
-    input [23:0] input_pixel_9,          // 3x3 window input
+    input        input_valid,                                 // Input data valid signal
+    input [23:0] input_pixel_1, input_pixel_2, input_pixel_3,
+                 input_pixel_4, input_pixel_5, input_pixel_6,
+                 input_pixel_7, input_pixel_8, input_pixel_9, // 3x3 window input
     
-    input  [7:0] A_R, A_G, A_B,          // Atmospheric Light Values
-    input [15:0] Inv_AR, Inv_AG, Inv_AB, // Inverse Atmospheric Light Values(Q0.16)
+    input  [7:0] A_R, A_G, A_B,                               // Atmospheric Light Values
+    input [15:0] Inv_AR, Inv_AG, Inv_AB,                      // Inverse Atmospheric Light Values(Q0.16)
 
-    output [7:0] J_R, J_G, J_B,          // Output corrected pixels
-    output       output_valid            // Output data valid signal
+    output [7:0] J_R, J_G, J_B,                               // Output corrected pixels
+    output       output_valid                                 // Output data valid signal
 );
     
     // Pipeline the Center Pixel for SRSC
