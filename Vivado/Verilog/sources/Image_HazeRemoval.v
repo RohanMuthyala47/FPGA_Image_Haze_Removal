@@ -1,5 +1,5 @@
 // Top Module which connects Window Generator, Clock Gating Cell, ALE, TE and SRSC modules
-module DCP_HazeRemoval (
+module Image_HazeRemoval (
     // AXI4-Stream Global Signals
     input         ACLK,          // Global clock 
     input         ARESETn,       // Global reset signal
@@ -10,16 +10,14 @@ module DCP_HazeRemoval (
     // AXI4-Stream Slave Interface
     input [31:0]  S_AXIS_TDATA,  // Input pixel stream
     input         S_AXIS_TVALID, // Input valid signal
-    input         S_AXIS_TLAST,
+    input         S_AXIS_TLAST,  // Unused signal
     output        S_AXIS_TREADY,
     
     // AXI4-Stream Master Interface
     output [31:0] M_AXIS_TDATA,  // Output pixel stream
     output        M_AXIS_TVALID, // Output valid signal
-    output        M_AXIS_TLAST,
-    input         M_AXIS_TREADY,
-    
-    output reg    o_intr         // Interrupt signal sent to DMA to indicate ALE processing is done
+    output        M_AXIS_TLAST,  // Unused signal
+    input         M_AXIS_TREADY
 );
     
     wire axis_prog_full;
@@ -70,19 +68,6 @@ module DCP_HazeRemoval (
         
         .done(ALE_done)
     );
-    
-    // ALE processing done signal
-    reg ALE_done_reg;
-
-    always @(posedge ACLK or negedge ARESETn) begin
-        if (!ARESETn) begin
-            ALE_done_reg <= 0;
-            o_intr <= 0;
-        end else begin
-            ALE_done_reg <= ALE_done;
-            o_intr <= ALE_done & ~ALE_done_reg; // Rising edge detection
-        end
-    end
 
     wire TE_SRSC_clk;
     wire TE_SRSC_enable = ALE_done & enable;
@@ -138,7 +123,7 @@ module DCP_HazeRemoval (
         
         .s_axis_tvalid(output_valid),          // input wire s_axis_tvalid
         .s_axis_tready(),                      // output wire s_axis_tready
-        .s_axis_tdata({8'd0, J_R, J_G, J_B}), // input wire [31 : 0] s_axis_tdata
+        .s_axis_tdata({8'd0, J_R, J_G, J_B}),  // input wire [31 : 0] s_axis_tdata
         
         .m_axis_tvalid(M_AXIS_TVALID),         // output wire m_axis_tvalid
         .m_axis_tready(M_AXIS_TREADY),         // input wire m_axis_tready
