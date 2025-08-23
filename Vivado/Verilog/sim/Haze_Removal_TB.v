@@ -20,14 +20,12 @@ module Haze_Removal_TB;
     wire        M_AXIS_TVALID;
     wire        M_AXIS_TLAST;
     reg         M_AXIS_TREADY;
-    
-    wire        o_intr;
-
 
     // Top module Instance
-    DCP_HazeRemoval dut(
+    Image_HazeRemoval DUT(
         .ACLK(ACLK),
         .ARESETn(ARESETn),
+        
         .enable(enable),
     
         .S_AXIS_TDATA(S_AXIS_TDATA),
@@ -38,9 +36,7 @@ module Haze_Removal_TB;
         .M_AXIS_TDATA(M_AXIS_TDATA),
         .M_AXIS_TVALID(M_AXIS_TVALID),
         .M_AXIS_TLAST(M_AXIS_TLAST),
-        .M_AXIS_TREADY(M_AXIS_TREADY),
-        
-        .o_intr(o_intr)
+        .M_AXIS_TREADY(M_AXIS_TREADY)
     );
 
     // Clock generation
@@ -67,7 +63,7 @@ module Haze_Removal_TB;
                 $fread(bmpdata, file1);
                 $fclose(file1);
                 
-                // Extract BMP header information (little-endian)
+                // Extract BMP header information
                 bmp_size       = {bmpdata[5], bmpdata[4], bmpdata[3], bmpdata[2]};
                 bmp_start_pos  = {bmpdata[13], bmpdata[12], bmpdata[11], bmpdata[10]};
                 bmp_width      = {bmpdata[21], bmpdata[20], bmpdata[19], bmpdata[18]};
@@ -135,7 +131,7 @@ module Haze_Removal_TB;
         ARESETn = 1;
 
         // --------------------------
-        // Pass 1: Feed image to ALE
+        // Pass 1: Pass image through ALE
         // --------------------------
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // Blue
@@ -149,22 +145,15 @@ module Haze_Removal_TB;
         #10;
         
         // ------------------------------
-        // Pass 2: Feed image to TE and SRSC
+        // Pass 2: Pass image through TE and SRSC
         // ------------------------------
-
-        READ_FILE;
-        #10;
       
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // Blue
             S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // Green
             S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // Red
             
-            $fwrite(file3, "%0d,%0d,%0d,", 
-                        bmpdata[i],        // Blue
-                        bmpdata[i + 1],    // Green
-                        bmpdata[i + 2]     // Red
-                    );
+            $fwrite(file3, "%0d, ", {8'h00, bmpdata[i], bmpdata[i + 1], bmpdata[i + 2]});
             
             #10;
             S_AXIS_TVALID = 1;
@@ -176,7 +165,6 @@ module Haze_Removal_TB;
         WRITE_FILE;
         
         #100;
-        S_AXIS_TLAST = 1;
         $fclose(file3);
         
         $stop;
