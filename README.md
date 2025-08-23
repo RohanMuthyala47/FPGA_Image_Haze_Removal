@@ -32,7 +32,7 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 - Accelerate the Dark Channel Prior based haze removal algorithm using FPGA for real-time performance.
 - Modular Verilog Implementation of each processing stage: Atmospheric Light Estimation, Transmission Estimation, Scene Recovery and Saturation Correction.
 - Optimize for low-latency and energy efficiency using pipelining, parallelism and Clock Gating techniques
-- Enable deployment on embedded platforms (Zynq SoC) with AXI-stream interface.
+- Enable deployment on embedded platforms (Zynq SoC) with AXI4-stream interface.
 ---
 
 ## Algorithm Overview
@@ -41,7 +41,7 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 
 1. **Atmospheric Light Estimation**  
 2. **Transmission Estimation**  
-3. **Scene Radiance Recovery**
+3. **Scene Recovery and Saturation Correction**
 
 ---
 
@@ -52,12 +52,12 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### 1. **WindowGenerator**
 
 - Extracts 3×3 RGB window using 2 line buffers  
-- Outputs 9 pixels (in1 to in9) in parallel  
+- Outputs 9 pixels in parallel  
 - Easily scalable to generate larger windows
 
 ### 2. **ALE (Atmospheric Light Estimation)**
 
-- Computes per-pixel minimum(R, G, B)  
+- Computes per-pixel minimum (R, G, B)  
 - Performs 3×3 spatial minimum using comparator trees
 - Computes the dark channel per 3x3 RGB window
 - Selects brightest pixel from the dark channel of the frame 
@@ -76,7 +76,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 - Computes:  
   `J(x) = {(I(x) - A) / max(t(x), t₀)} + A`  
 - Handles division using reciprocal lookup  
-- Ensures `t(x) ≥ t₀ = 0.275` (Q0.16)  
+- Ensures `t(x) ≥ t₀ = 0.325` (Q0.16)  
 - Produces a sharp output image with the haze eliminated
 
 ---
@@ -86,30 +86,29 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### **Pipeline Flow**
 
 ```
-WindowGenerator → DarkChannel → ALE → TE_and_SRSC
+WindowGenerator → DarkChannel → ALE → TE → SRSC
 ```
 
 ### **Interface**
 
-- **Input:** RGB pixel stream from UART  
-- **Output:** Dehazed RGB pixel stream  
+- **Input:** RGB pixel stream to WindowGenerator
+- **Output:** Corrected RGB pixel stream  
 
 ### **Features:**
 
 - Valid signal-based flow control  
 - Modular and synthesizable design  
 - Fully stream-based datapath
-- Pipeline Stalling to obtain the final Atmospheric Light value
+- Pipeline Stalling to obtain the final Atmospheric Light values
 - Clock Gating technique to reduce power consumption
 ---
 
 ## Testbench (Top_TB)
 
-- Reads BMP file (`input.bmp`) and extracts pixel data  
-- Drives the dehazing pipeline and captures results  
-- Writes output to BMP file (`output.bmp`)  
-- Parses BMP header and maintains padding  
-- Simulates full system operation with `$fread` / `$fwrite`
+- Reads BMP file and extracts pixel data  
+- Drives the pipeline and captures results
+- Writes output to BMP file
+- Parses BMP header and maintains padding
 
 ---
 
@@ -117,9 +116,9 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 - 3×3 sliding window for local filtering  
 - Dark channel estimation with comparator trees  
-- Fixed-point division and multiplication  
-- Transmission floor control (`t₀ = 0.275`)  
-- Fully pipelined 10-stage architecture
+- Fixed-point multiplication and shifting operations to reduce hardware and execution time
+- Transmission floor control (`t₀ = 0.325`)  
+- Fully pipelined 11-stage architecture
 - Clock Gating for the ALE and TE_SRSC modules to reduce power consumption
 - Synthesizable on ZedBoard FPGA  
 - Modular, reusable Verilog architecture  
@@ -130,15 +129,13 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 ## Fixed-Point Arithmetic
 
 - **Format:** Q0.16 (16-bit signed/unsigned)  
-- **Division:**  
-  `recip_t = 2^16 / t`  
-- **Arithmetic Units:** Signed adders, clamping logic, LUT-based reciprocal  
+- **Arithmetic Units:** Adders, Subtractors, Multipliers, LUT-based reciprocal 
 
 ---
 
 ## Testing and Simulation
 
-- **Tools Used:** Vivado Simulator, MATLAB, Pycharm
+- **Tools Used:** Vivado, Vitis, MATLAB, Pycharm
 - **BMP I/O:**  
   - Header parsed and preserved  
   - Input and output streams verified  
@@ -149,13 +146,13 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 
 ---
 
-## UART Communication on ZedBoard
+### Hardware-Software Co-Design:
 
-### Implementation:
-
-- Custom serial protocol over UART  
-- Image streamed pixel-wise (RGB) from host to FPGA  
-- Processed dehazed image returned via UART
+- Stored the Input Image in DDR
+- Transferred Image Data from DDR to IP using DMA and AXI-4 Stream Interface 
+- Transferred the corrected pixel stream back to DDR using DMA and AXI-4 Stream Interface
+- Sent the pixel stream to PC via UART
+- Interrupt Service Routine indicates when the entire operation in complete
 
 ---
 
@@ -201,15 +198,6 @@ WindowGenerator → DarkChannel → ALE → TE_and_SRSC
 - MATLAB Simulink, HDL Coder
 - Tera Term for Serial Communication with PC via UART
   
----
-
-## Future Work
-
-- Optimize fixed-point dynamic range  
-- Add gamma correction and contrast enhancement  
-- Real-time camera input
-- Video Processing
-
 ---
 
 ## References
