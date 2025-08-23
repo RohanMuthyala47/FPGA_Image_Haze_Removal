@@ -1,27 +1,21 @@
 // Mean Filter applied when no edges are detected
 module Block_P0 (
-    input clk, rst, 
+    input        clk, rst, 
     
-    input  [7:0] in1,
-    input  [7:0] in2,
-    input  [7:0] in3,
-    input  [7:0] in4,
-    input  [7:0] in5,
-    input  [7:0] in6,
-    input  [7:0] in7,
-    input  [7:0] in8,
-    input  [7:0] in9,
+    input  [7:0] in1, in2, in3,
+                 in4, in5, in6,
+                 in7, in8, in9,
     
     output [7:0] p0_result
 );
     
     // Pipeline Registers
-    reg [7:0] in1_P, in2_P, in3_P, 
-              in4_P, in5_P, in6_P, 
-              in7_P, in8_P, in9_P;
+    reg   [7:0] in1_P, in2_P, in3_P, 
+                in4_P, in5_P, in6_P, 
+                in7_P, in8_P, in9_P;
     
-    wire [9:0]  sum1, sum2, sum3;
-    wire [14:0] product;
+    wire  [9:0] sum1, sum2, sum3;
+    wire [11:0] sum;
     
     always @(posedge clk) begin
         if(rst) begin
@@ -40,8 +34,8 @@ module Block_P0 (
     assign sum2 = in4_P + in5_P + in6_P;
     assign sum3 = in7_P + in8_P + in9_P;
     
-    assign product = ((sum1 + sum2 + sum3) << 4) - ((sum1 + sum2 + sum3) << 1);
-    // Mutiply by 14 and then divide by 128 -> 14/128 = 1/9 (approx.)
-    assign p0_result = product >> 7;
+    assign sum = sum1 + sum2 + sum3;
+    
+    assign p0_result = (sum >> 3) - (sum >> 6); // x/8 - x/64 = 7x/64 ~= x/9
     
 endmodule
