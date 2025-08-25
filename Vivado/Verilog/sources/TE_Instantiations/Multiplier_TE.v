@@ -1,5 +1,5 @@
 // Compute ω * Pc / Ac
-module Multiplier (
+module Multiplier_TE (
     input         clk,
     input         rst,
     
