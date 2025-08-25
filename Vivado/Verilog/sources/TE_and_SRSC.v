@@ -28,33 +28,25 @@ module TE_and_SRSC (
     // STAGE 4 LOGIC
     //==========================================================================
     
-    // Detect the type of edge in the 3x3 window
-    wire [1:0] ed1, ed2, ed3;
-    
     // Pipeline Registers
-    reg [1:0]  ed1_P, ed2_P, ed3_P;
+    reg [23:0] I1_P, I2_P, I3_P,
+               I4_P,       I6_P,
+               I7_P, I8_P, I9_P;
+    
     reg [15:0] inv_ar1_P, inv_ag1_P, inv_ab1_P,
                inv_ar2_P, inv_ag2_P, inv_ab2_P,
-               inv_ar3_P, inv_ag3_P, inv_ab3_P;  
+               inv_ar3_P, inv_ag3_P, inv_ab3_P;
+    
     reg        stage_4_valid;
     
-    //===========================================
-    // Detect the type of edge in the 3x3 window
-    ED_Top EdgeDetection (
-        .input_pixel_1(input_pixel_1), .input_pixel_2(input_pixel_2), .input_pixel_3(input_pixel_3),
-        .input_pixel_4(input_pixel_4),                                .input_pixel_6(input_pixel_6), 
-        .input_pixel_7(input_pixel_7), .input_pixel_8(input_pixel_8), .input_pixel_9(input_pixel_9),
-        
-        .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
-    );
     //===========================================
   
     // Update Stage 4 Pipeline Registers
     always @(posedge clk) begin
         if (rst) begin
-            ed1_P <= 0; 
-            ed2_P <= 0; 
-            ed3_P <= 0;
+            I1_P <= 0; I2_P <= 0; I3_P <= 0;
+            I4_P <= 0;            I6_P <= 0;
+            I7_P <= 0; I8_P <= 0; I9_P <= 0;
                 
             inv_ar1_P <= 0; inv_ag1_P <= 0; inv_ab1_P <= 0;
             inv_ar2_P <= 0; inv_ag2_P <= 0; inv_ab2_P <= 0;
@@ -66,9 +58,9 @@ module TE_and_SRSC (
             stage_4_valid <= 0;
         end
         else begin
-            ed1_P <= ed1; 
-            ed2_P <= ed2; 
-            ed3_P <= ed3; 
+            I1_P <= input_pixel_1; I2_P <= input_pixel_2; I3_P <= input_pixel_3;
+            I4_P <= input_pixel_4;                        I6_P <= input_pixel_6;
+            I7_P <= input_pixel_7; I8_P <= input_pixel_8; I9_P <= input_pixel_9;
                     
             inv_ar1_P <= Inv_AR; inv_ag1_P <= Inv_AG; inv_ab1_P <= Inv_AB;
             inv_ar2_P <= Inv_AR; inv_ag2_P <= Inv_AG; inv_ab2_P <= Inv_AB;
@@ -77,53 +69,49 @@ module TE_and_SRSC (
             I_0 <= input_pixel_5;
             A_R0 <= A_R; A_G0 <= A_G; A_B0 <= A_B;
                     
-            stage_4_valid <= input_is_valid;
+            stage_4_valid <= input_valid;
         end
     end
         
     //==========================================================================
     // STAGE 5 LOGIC
     //==========================================================================
-
-    parameter OMEGA_D = 64;
     
-    // Diagonal, Vertical, Horizonal or no edge detected
-    wire [1:0]  window_edge = (ed1_P | ed2_P | ed3_P);
+    // ω = 63/64
+    parameter OMEGA_D = 64;
 
     // Filter Results
     wire [7:0]  p0_red_out, p0_green_out, p0_blue_out;
     wire [7:0]  p1_red_out, p1_green_out, p1_blue_out;
     wire [7:0]  p2_red_out, p2_green_out, p2_blue_out;
     
-    // Apply OMEGA (ω = 63/64) Scaling on the Inverse Atmospheric Light values
-    // First divide the values by 64, then subtract this result from the values (x - x/64 = 63x/64)
-    wire [15:0] scaled_inv_ar1 = inv_ar1_P >> $clog2(OMEGA_D), 
-                scaled_inv_ag1 = inv_ag1_P >> $clog2(OMEGA_D), 
-                scaled_inv_ab1 = inv_ab1_P >> $clog2(OMEGA_D), 
-                
-                scaled_inv_ar2 = inv_ar2_P >> $clog2(OMEGA_D), 
-                scaled_inv_ag2 = inv_ag2_P >> $clog2(OMEGA_D), 
-                scaled_inv_ab2 = inv_ab2_P >> $clog2(OMEGA_D), 
-                
-                scaled_inv_ar3 = inv_ar3_P >> $clog2(OMEGA_D), 
-                scaled_inv_ag3 = inv_ag3_P >> $clog2(OMEGA_D), 
-                scaled_inv_ab3 = inv_ab3_P >> $clog2(OMEGA_D);
-    
     // Pipeline Registers for stage 5
-    reg [1:0]   window_edge_P;
+    reg [1:0]   ed1_P, ed2_P, ed3_P;
+    
     reg [15:0]  inv_ar1_P1, inv_ag1_P1, inv_ab1_P1,
                 inv_ar2_P1, inv_ag2_P1, inv_ab2_P1,
                 inv_ar3_P1, inv_ag3_P1, inv_ab3_P1;
+    
     reg [7:0]   p0_red_P, p0_green_P, p0_blue_P,
                 p1_red_P, p1_green_P, p1_blue_P,
                 p2_red_P, p2_green_P, p2_blue_P;
+    
     reg         stage_5_valid;
   
     //===========================================
+    // Detect the type of edge in the 3x3 window
+    ED_Top EdgeDetection (
+        .input_pixel_1(I1_P), .input_pixel_2(I2_P), .input_pixel_3(I3_P),
+        .input_pixel_4(I4_P),                       .input_pixel_6(I6_P), 
+        .input_pixel_7(I7_P), .input_pixel_8(I8_P), .input_pixel_9(I9_P),
+        
+        .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
+    );
+    
     // P0 BLOCKS FOR MEAN FILTERING
     Block_P0 MeanFilter_Red (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
         .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
         .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
@@ -133,7 +121,7 @@ module TE_and_SRSC (
                    
     Block_P0 MeanFilter_Green (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
         .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
         .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
@@ -143,7 +131,7 @@ module TE_and_SRSC (
                    
     Block_P0 MeanFilter_Blue (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
         .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
         .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
@@ -154,7 +142,7 @@ module TE_and_SRSC (
     // P1 BLOCKS FOR EDGE PRESERVING (VERTICAL AND HORIZONTAL EDGES)
     Block_P1 EdgePreservingFilter_VH_Red (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
         .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
         .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
@@ -164,7 +152,7 @@ module TE_and_SRSC (
                    
     Block_P1 EdgePreservingFilter_VH_Green (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
         .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
         .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
@@ -174,7 +162,7 @@ module TE_and_SRSC (
                    
     Block_P1 EdgePreservingFilter_VH_Blue (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
         .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
         .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
@@ -185,7 +173,7 @@ module TE_and_SRSC (
     // P2 BLOCKS FOR EDGE PRESERVING (DIAGONAL EDGES)
     Block_P2 EdgePreservingFilter_D_Red (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
         .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
         .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
@@ -195,7 +183,7 @@ module TE_and_SRSC (
                    
     Block_P2 EdgePreservingFilter_D_Green (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
         .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
         .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
@@ -205,7 +193,7 @@ module TE_and_SRSC (
                    
     Block_P2 EdgePreservingFilter_D_Blue (
         .clk(clk), .rst(rst),
-        
+
         .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
         .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
         .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
@@ -217,8 +205,8 @@ module TE_and_SRSC (
     // Update Stage 5 Pipeline Registers 
     always @(posedge clk) begin
         if (rst) begin
-            window_edge_P <= 0;
-                           
+            ed1_P <= 0; ed2_P <= 0; ed3_P <= 0;
+            
             inv_ar1_P1 <= 0; inv_ag1_P1 <= 0; inv_ab1_P1 <= 0;
             inv_ar2_P1 <= 0; inv_ag2_P1 <= 0; inv_ab2_P1 <= 0;
             inv_ar3_P1 <= 0; inv_ag3_P1 <= 0; inv_ab3_P1 <= 0;
@@ -233,11 +221,19 @@ module TE_and_SRSC (
             stage_5_valid <= 0;
         end
         else begin
-            window_edge_P <= window_edge;
-            // Apply the scaling factor ω to the Inverse Atmospheric Light values
-            inv_ar1_P1 <= inv_ar1_P - scaled_inv_ar1; inv_ag1_P1 <= inv_ag1_P - scaled_inv_ag1; inv_ab1_P1 <= inv_ab1_P - scaled_inv_ab1;
-            inv_ar2_P1 <= inv_ar2_P - scaled_inv_ar2; inv_ag2_P1 <= inv_ag2_P - scaled_inv_ag2; inv_ab2_P1 <= inv_ab2_P - scaled_inv_ab2;
-            inv_ar3_P1 <= inv_ar3_P - scaled_inv_ar3; inv_ag3_P1 <= inv_ag3_P - scaled_inv_ag3; inv_ab3_P1 <= inv_ab3_P - scaled_inv_ab3;
+            ed1_P <= ed1; ed2_P <= ed2; ed3_P <= ed3;
+            // Apply the scaling factor ω = 63/64 to the Inverse Atmospheric Light values
+            inv_ar1_P1 <= inv_ar1_P - (inv_ar1_P >> $clog2(OMEGA_D));
+            inv_ag1_P1 <= inv_ag1_P - (inv_ag1_P >> $clog2(OMEGA_D));
+            inv_ab1_P1 <= inv_ab1_P - (inv_ab1_P >> $clog2(OMEGA_D));
+            
+            inv_ar2_P1 <= inv_ar2_P - (inv_ar2_P >> $clog2(OMEGA_D));
+            inv_ag2_P1 <= inv_ag2_P - (inv_ag2_P >> $clog2(OMEGA_D));
+            inv_ab2_P1 <= inv_ab2_P - (inv_ab2_P >> $clog2(OMEGA_D));
+            
+            inv_ar3_P1 <= inv_ar3_P - (inv_ar3_P >> $clog2(OMEGA_D));
+            inv_ag3_P1 <= inv_ag3_P - (inv_ag3_P >> $clog2(OMEGA_D));
+            inv_ab3_P1 <= inv_ab3_P - (inv_ab3_P >> $clog2(OMEGA_D));
             
             p0_red_P <= p0_red_out; p0_green_P <= p0_green_out; p0_blue_P <= p0_blue_out;
             p1_red_P <= p1_red_out; p1_green_P <= p1_green_out; p1_blue_P <= p1_blue_out;
@@ -254,7 +250,13 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 6 LOGIC
     //==========================================================================
-
+    
+    // Detect the type of edge in the 3x3 window
+    wire [1:0] ed1, ed2, ed3;
+        
+    // Diagonal, Vertical, Horizonal or no edge detected
+    wire [1:0]  window_edge = (ed1_P > ed2_P) ? ((ed1_P > ed3_P) ? ed1_P : ed3_P) : ((ed2_P > ed3_P) ? ed2_P : ed3_P);
+    
     // Select signals for minimum in each of the filter results
     wire [1:0]  cmp_p0, cmp_p1, cmp_p2;
     
@@ -264,40 +266,33 @@ module TE_and_SRSC (
     wire [15:0] prod0, prod1, prod2;
 
     // Pipeline Registers for stage 6
-    reg [1:0]   window_edge_P1;
+    reg [1:0]   window_edge_P;
+    
     reg         stage_6_valid;
 
     //===========================================
     // Comparators to choose the minimum value in each filter
     Comparator_Minimum Min_P0_CMP (
-        .red(p0_red_P),
-        .green(p0_green_P),
-        .blue(p0_blue_P),
+        .red(p0_red_P), .green(p0_green_P), .blue(p0_blue_P),
         
         .min_val(cmp_p0)
     );
     
     Comparator_Minimum Min_P1_CMP (
-        .red(p1_red_P),
-        .green(p1_green_P),
-        .blue(p1_blue_P),
+        .red(p1_red_P), .green(p1_green_P), .blue(p1_blue_P),
         
         .min_val(cmp_p1)
     );
     
     Comparator_Minimum Min_P2_CMP (
-        .red(p2_red_P),
-        .green(p2_green_P),
-        .blue(p2_blue_P),
+        .red(p2_red_P), .green(p2_green_P), .blue(p2_blue_P),
           
         .min_val(cmp_p2)
     );
     
     // Multiplexers to choose minimum of the filter values
     Mux_1 P0_Mux (
-        .a(p0_red_P),
-        .b(p0_green_P) ,
-        .c(p0_blue_P),
+        .a(p0_red_P), .b(p0_green_P), .c(p0_blue_P),
         
         .sel(cmp_p0),
         
@@ -305,9 +300,7 @@ module TE_and_SRSC (
     );
     
     Mux_1 P1_Mux (
-        .a(p1_red_P),
-        .b(p1_green_P),
-        .c(p1_blue_P),
+        .a(p1_red_P), .b(p1_green_P), .c(p1_blue_P),
         
         .sel(cmp_p1),
         
@@ -315,9 +308,7 @@ module TE_and_SRSC (
     );
     
     Mux_1 P2_Mux (
-        .a(p2_red_P),
-        .b(p2_green_P),
-        .c(p2_blue_P),
+        .a(p2_red_P), .b(p2_green_P), .c(p2_blue_P),
         
         .sel(cmp_p2),
         
@@ -326,9 +317,7 @@ module TE_and_SRSC (
     
     // Multiplexers to choose minimum of Atmospheric Light values
     Mux_2 InvA_0_Mux (
-        .a(inv_ar1_P1),
-        .b(inv_ag1_P1),
-        .c(inv_ab1_P1),
+        .a(inv_ar1_P1), .b(inv_ag1_P1), .c(inv_ab1_P1),
         
         .sel(cmp_p0),
         
@@ -336,9 +325,7 @@ module TE_and_SRSC (
     );
     
     Mux_2 InvA_1_Mux (
-        .a(inv_ar2_P1),
-        .b(inv_ag2_P1),
-        .c(inv_ab2_P1),
+        .a(inv_ar2_P1), .b(inv_ag2_P1), .c(inv_ab2_P1),
         
         .sel(cmp_p1),
         
@@ -346,17 +333,15 @@ module TE_and_SRSC (
     );
     
     Mux_2 InvA_2_Mux (
-        .a(inv_ar3_P1),
-        .b(inv_ag3_P1),
-        .c(inv_ab3_P1),
+        .a(inv_ar3_P1), .b(inv_ag3_P1), .c(inv_ab3_P1),
         
         .sel(cmp_p2),
         
         .out(min_inv_atm2)
     );
     
-    // Multiplier modules to compute Pc * ω/Ac
-    Multiplier Multiply_P0 (
+    // Multiplier modules to compute Pc * ?/Ac
+    Multiplier_TE Multiply_P0 (
         .clk(clk), .rst(rst),
         
         .Ac_Inv(min_inv_atm0),
@@ -365,7 +350,7 @@ module TE_and_SRSC (
         .product(prod0)
     );
     
-    Multiplier Multiply_P1 (
+    Multiplier_TE Multiply_P1 (
         .clk(clk), .rst(rst),
         
         .Ac_Inv(min_inv_atm1),
@@ -374,7 +359,7 @@ module TE_and_SRSC (
         .product(prod1)
     );
     
-    Multiplier multiply_P2 (
+    Multiplier_TE Multiply_P2 (
         .clk(clk), .rst(rst),
         
         .Ac_Inv(min_inv_atm2),
@@ -387,7 +372,7 @@ module TE_and_SRSC (
     // Update Stage 6 Pipeline Registers
     always @(posedge clk) begin
         if (rst) begin
-            window_edge_P1 <= 0;
+            window_edge_P <= 0;
             
             I_2 <= 0;
             A_R2 <= 0; A_G2 <= 0; A_B2 <= 0;
@@ -395,7 +380,7 @@ module TE_and_SRSC (
             stage_6_valid <= 0;
         end
         else begin
-            window_edge_P1 <= window_edge_P;
+            window_edge_P <= window_edge;
             
             I_2 <= I_1;
             A_R2 <= A_R1; A_G2 <= A_G1; A_B2 <= A_B1;
@@ -416,36 +401,31 @@ module TE_and_SRSC (
     // Compute (|Ic - Ac|)
     wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
     wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
+    wire [7:0] I_R = I_2[23:16], I_G = I_2[15:8], I_B = I_2[7:0];
     
     // Pipeline Registers for stage 7
     reg [15:0]  transmission_P;
+    
     reg [7:0]   A_R_P, A_G_P, A_B_P;
+    reg [7:0]   I_R_P, I_G_P, I_B_P;
+    
     reg [7:0]   IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
     reg         add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
-    reg         stage_7_valid;
     
-    // Extract RGB components from pipelined center pixel
-    wire [7:0]  I_R = I_2[23:16],
-                I_G = I_2[15:8],
-                I_B = I_2[7:0];
-            
-    // Further pipeline Center Pixel for the Adder module
-    reg [7:0]   I_R1, I_G1, I_B1,
-                I_R2, I_G2, I_B2,
-                I_R3, I_G3, I_B3;
+    reg         stage_7_valid;
 
     //===========================================
     // Multiplexer to choose between the Multiplier outputs based on the edge detected
-    Stage_7_Mux Stage_7_Mux (
+    Pre_Transmission_Mux Pre_Transmission_Mux (
         .a(prod0), .b(prod1), .c(prod2),
         
-        .sel(window_edge_P1),
+        .sel(window_edge_P),
         
         .out(pre_transmission)
     );
             
     // Subtractor to compute final transmission value
-    Subtractor Subtractor_TE (
+    Subtractor_TE Subtractor_TE (
         .in(pre_transmission),
         .out(transmission)
     );
@@ -488,9 +468,9 @@ module TE_and_SRSC (
             A_G_P <= 0;
             A_B_P <= 0;
             
-            I_R1 <= 0;
-            I_G1 <= 0;
-            I_B1 <= 0;
+            I_R_P <= 0;
+            I_G_P <= 0;
+            I_B_P <= 0;
             
             IR_minus_AR_P <= 0;
             IG_minus_AG_P <= 0;
@@ -509,9 +489,9 @@ module TE_and_SRSC (
             A_G_P <= A_G2;
             A_B_P <= A_B2;
             
-            I_R1 <= I_R;
-            I_G1 <= I_G;
-            I_B1 <= I_B;
+            I_R_P <= I_R;
+            I_G_P <= I_G;
+            I_B_P <= I_B;
             
             IR_minus_AR_P <= IR_minus_AR;
             IG_minus_AG_P <= IG_minus_AG;
@@ -530,80 +510,87 @@ module TE_and_SRSC (
     //==========================================================================
                 
     wire [15:0] inverse_transmission;
-    reg [15:0]  inverse_transmission_P;
 
     // Compute (|Ic-Ac|)*(1/T)
-    wire [7:0]  Diff_R_times_T, Diff_G_times_T, Diff_B_times_T;
+    wire [7:0]  IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
 
-    // Pipeline Registers for stage 7
+    // Pipeline Registers for stage 8
     reg [7:0]   A_R_P1, A_G_P1, A_B_P1;
+    reg [7:0]   I_R_P1, I_G_P1, I_B_P1;
+    
     reg         add_or_sub_R_P1, add_or_sub_G_P1, add_or_sub_B_P1;
+    reg [7:0]   Mult_Red_P, Mult_Green_P, Mult_Blue_P;
+    
     reg         stage_8_valid;
     
     //===========================================
     // TRANSMISSION RECIPROCAL LOOKUP TABLE
-    Trans_LUT Transmission_Reciprocal_LUT (
-        .x(transmission_P),
+    Transmission_Reciprocal_LUT Transmission_Reciprocal_LUT (
+        .in(transmission_P),
                         
-        .y(inverse_transmission)
+        .out(inverse_transmission)
     );
                 
     // MULTIPLIER MODULES TO COMPUTE (|Ic-Ac|)*(1/T)
     Multiplier_SRSC Mult_Red (
-        .Inv_Trans(inverse_transmission_P),
+        .Inv_Trans(inverse_transmission),
         .Ic_minus_Ac(IR_minus_AR_P),
         
-        .result(Diff_R_times_T)
+        .result(IR_minus_AR_x_T)
     );
                         
     Multiplier_SRSC Mult_Green (
-        .Inv_Trans(inverse_transmission_P),
+        .Inv_Trans(inverse_transmission),
         .Ic_minus_Ac(IG_minus_AG_P),
         
-        .result(Diff_G_times_T)
+        .result(IG_minus_AG_x_T)
     );
                     
     Multiplier_SRSC Mult_Blue (
-        .Inv_Trans(inverse_transmission_P),
+        .Inv_Trans(inverse_transmission),
         .Ic_minus_Ac(IB_minus_AB_P),
         
-        .result(Diff_B_times_T)
+        .result(IB_minus_AB_x_T)
     );
     //===========================================
     
     // Update stage 8 pipeline registers
     always @(posedge clk) begin
-        if (rst) begin
+        if (rst) begin        
             A_R_P1 <= 0;
             A_G_P1 <= 0;
             A_B_P1 <= 0;
             
-            I_R2 <= 0;
-            I_G2 <= 0;
-            I_B2 <= 0;
+            I_R_P1 <= 0;
+            I_G_P1 <= 0;
+            I_B_P1 <= 0;
             
             add_or_sub_R_P1 <= 0;
             add_or_sub_G_P1 <= 0;
             add_or_sub_B_P1 <= 0;
             
-            inverse_transmission_P <= 0;
+            Mult_Red_P <= 0;
+            Mult_Green_P <= 0;
+            Mult_Blue_P <= 0;
             
             stage_8_valid <= 0;
         end
-        else begin
+        else begin       
             A_R_P1 <= A_R_P;
             A_G_P1 <= A_G_P;
             A_B_P1 <= A_B_P;
             
-            I_R2 <= I_R1;
-            I_G2 <= I_G1;
-            I_B2 <= I_B1;
+            I_R_P1 <= I_R_P;
+            I_G_P1 <= I_G_P;
+            I_B_P1 <= I_B_P;
             
             add_or_sub_R_P1 <= add_or_sub_R_P;
             add_or_sub_G_P1 <= add_or_sub_G_P;
             add_or_sub_B_P1 <= add_or_sub_B_P;
             
-            inverse_transmission_P <= inverse_transmission;
+            Mult_Red_P <= IR_minus_AR_x_T;
+            Mult_Green_P <= IG_minus_AG_x_T;
+            Mult_Blue_P <= IB_minus_AB_x_T;
             
             stage_8_valid <= stage_7_valid;
         end
@@ -613,42 +600,43 @@ module TE_and_SRSC (
     // STAGE 9 LOGIC
     //==========================================================================
     
-    reg [7:0]  A_R_P2, A_G_P2, A_B_P2;
-    reg        add_or_sub_R_P2, add_or_sub_G_P2, add_or_sub_B_P2;
-    reg [7:0]  Mult_Red_P, Mult_Green_P, Mult_Blue_P;
-    reg        stage_9_valid;
-    
     // Compute Ac +/- (|Ic-Ac|/T)
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
-
+    
+    // Pipeline Registers for stage 9
+    reg [7:0]  A_R_P2, A_G_P2, A_B_P2;
+    reg [7:0]  J_R_Uncorrected, J_G_Uncorrected, J_B_Uncorrected;
+    
+    reg        stage_9_valid;
+    
     //===========================================
     // ADDER BLOCKS TO COMPUTE Ac +/- (|Ic-Ac|/T)
     Adder_SRSC Add_Red (
-        .Ac(A_R_P2),
-        .Ic(I_R3),
+        .Ac(A_R_P1),
+        .Ic(I_R_P1),
         .Multiplier_out(Mult_Red_P),
         
-        .add_or_sub(add_or_sub_R_P2),
+        .add_or_sub(add_or_sub_R_P1),
         
         .out(Sum_Red)
     );
                         
     Adder_SRSC Add_Green (
-        .Ac(A_G_P2),
-        .Ic(I_G3),
+        .Ac(A_G_P1),
+        .Ic(I_G_P1),
         .Multiplier_out(Mult_Green_P),
         
-        .add_or_sub(add_or_sub_G_P2),
+        .add_or_sub(add_or_sub_G_P1),
         
         .out(Sum_Green)
     );
                         
     Adder_SRSC Add_Blue (
-        .Ac(A_B_P2),
-        .Ic(I_B3),
+        .Ac(A_B_P1),
+        .Ic(I_B_P1),
         .Multiplier_out(Mult_Blue_P),
         
-        .add_or_sub(add_or_sub_B_P2),
+        .add_or_sub(add_or_sub_B_P1),
         
         .out(Sum_Blue)
     );
@@ -661,17 +649,9 @@ module TE_and_SRSC (
             A_G_P2 <= 0;
             A_B_P2 <= 0;
             
-            I_R3 <= 0;
-            I_G3 <= 0;
-            I_B3 <= 0;
-            
-            add_or_sub_R_P2 <= 0;
-            add_or_sub_G_P2 <= 0;
-            add_or_sub_B_P2 <= 0;
-            
-            Mult_Red_P <= 0;
-            Mult_Green_P <= 0;
-            Mult_Blue_P <= 0;
+            J_R_Uncorrected <= 0;
+            J_G_Uncorrected <= 0;
+            J_B_Uncorrected <= 0;
             
             stage_9_valid <= 0;
         end
@@ -680,17 +660,9 @@ module TE_and_SRSC (
             A_G_P2 <= A_G_P1;
             A_B_P2 <= A_B_P1;
             
-            I_R3 <= I_R2;
-            I_G3 <= I_G2;
-            I_B3 <= I_B2;
-            
-            add_or_sub_R_P2 <= add_or_sub_R_P1;
-            add_or_sub_G_P2 <= add_or_sub_G_P1;
-            add_or_sub_B_P2 <= add_or_sub_B_P1;
-            
-            Mult_Red_P <= Diff_R_times_T;
-            Mult_Green_P <= Diff_G_times_T;
-            Mult_Blue_P <= Diff_B_times_T;
+            J_R_Uncorrected <= Sum_Red;
+            J_G_Uncorrected <= Sum_Green;
+            J_B_Uncorrected <= Sum_Blue;
             
             stage_9_valid <= stage_8_valid;
         end
@@ -700,11 +672,12 @@ module TE_and_SRSC (
     // STAGE 10 LOGIC
     //==========================================================================
     
-    reg         stage_10_valid;
-    
     // Outputs of Look-Up Tables for Saturation Corection
     wire [15:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [15:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
+
+    // Pipeline Registers for stage 10
+    reg       stage_10_valid;
     
     //===========================================
     // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.3)
@@ -724,17 +697,17 @@ module TE_and_SRSC (
     );
     
     LUT_07 J_R_Correction (
-        .x(Sum_Red),
+        .x(J_R_Uncorrected),
         .y(J_R_Corrected)
     );
     
     LUT_07 J_G_Correction (
-        .x(Sum_Green),
+        .x(J_G_Uncorrected),
         .y(J_G_Corrected)
     );
     
     LUT_07 J_B_Correction (
-        .x(Sum_Blue),
+        .x(J_B_Uncorrected),
         .y(J_B_Corrected)
     );
                     
@@ -760,12 +733,15 @@ module TE_and_SRSC (
     
     // Update stage 10 pipeline registers
     always @(posedge clk) begin
-        if (rst)
+        if (rst) begin
             stage_10_valid <= 0;
-        else
+        end
+        else begin
             stage_10_valid <= stage_9_valid;
+        end
     end
-    
+
+    // Stage 11 assignments
     assign output_valid = stage_10_valid;
 
 endmodule
