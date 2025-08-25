@@ -1,5 +1,5 @@
 // Compute T(x) = 1 - ω * min(Pc / Ac)
-module Subtractor (
+module Subtractor_TE (
     input  [15:0] in, // ω * min(Pc / Ac) : c ∈ {R, G, B}
     
     output [15:0] out // Transmission value in Q0.16
