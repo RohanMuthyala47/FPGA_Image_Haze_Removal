@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module Haze_Removal_TB;
+module Image_HazeRemoval_TB;
     
     // AXI4-Stream Global Signals
     reg         ACLK;
