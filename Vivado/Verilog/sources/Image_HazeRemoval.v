@@ -1,4 +1,4 @@
-// Top Module which connects Window Generator, Clock Gating Cell, ALE, TE and SRSC modules
+// Top Module
 module Image_HazeRemoval (
     // AXI4-Stream Global Signals
     input         ACLK,          // Global clock 
