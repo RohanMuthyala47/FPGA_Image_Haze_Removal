@@ -55,7 +55,7 @@ module Image_HazeRemoval_TB;
     task READ_FILE;
         integer file1;
         begin 
-            file1 = $fopen("canyon_512.bmp", "rb");
+            file1 = $fopen("test_image.bmp", "rb");
             if (file1 == 0) begin
                 $display("Error: Cannot open BMP file.");
                 $finish;
@@ -113,7 +113,9 @@ module Image_HazeRemoval_TB;
         end
     endtask
     
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     // Main test sequence
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     initial begin
         file3 = $fopen("ImageData_RGB.h", "w");
         
@@ -131,7 +133,7 @@ module Image_HazeRemoval_TB;
         ARESETn = 1;
 
         // --------------------------
-        // Pass 1: Pass image through ALE
+        // Pass image through ALE
         // --------------------------
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // Blue
@@ -140,12 +142,13 @@ module Image_HazeRemoval_TB;
             #10;
             S_AXIS_TVALID = 1;
         end
-        
+
+        #10;
         S_AXIS_TVALID = 0;
         #10;
         
         // ------------------------------
-        // Pass 2: Pass image through TE and SRSC
+        // Pass image through TE and SRSC
         // ------------------------------
       
         for (i = bmp_start_pos; i < bmp_size; i = i + 3) begin
@@ -158,11 +161,12 @@ module Image_HazeRemoval_TB;
             #10;
             S_AXIS_TVALID = 1;
         end
-        
+
+        #10;
         S_AXIS_TVALID = 0;
-        // Write output file
+        
         #100;
-        WRITE_FILE;
+        WRITE_FILE; // Write output file
         
         #100;
         $fclose(file3);
