@@ -4,26 +4,20 @@ module ALE (
     input         clk,
     input         rst,
     
-    input         input_is_valid, // Input data valid signal
-    input [23:0]  input_pixel_1,
-    input [23:0]  input_pixel_2,
-    input [23:0]  input_pixel_3,
-    input [23:0]  input_pixel_4,
-    input [23:0]  input_pixel_5,
-    input [23:0]  input_pixel_6,
-    input [23:0]  input_pixel_7,
-    input [23:0]  input_pixel_8,
-    input [23:0]  input_pixel_9,  // 3x3 window input
+    input         input_valid,                                  // Input data valid signal
+    input [23:0]  input_pixel_1, input_pixel_2, input_pixel_3,
+                  input_pixel_4, input_pixel_5, input_pixel_6,
+                  input_pixel_7, input_pixel_8, input_pixel_9,  // 3x3 window input
     
     output [7:0]  A_R,
     output [7:0]  A_G,
-    output [7:0]  A_B,            // Atmospheric Light Values
+    output [7:0]  A_B,                                          // Atmospheric Light Values
     
     output [15:0] Inv_A_R,
     output [15:0] Inv_A_G,
-    output [15:0] Inv_A_B,        // Inverse Atmospheric Light Values(Q0.16)
+    output [15:0] Inv_A_B,                                      // Inverse Atmospheric Light Values(Q0.16)
     
-    output        done            // Signal to indicate entire image has been processed
+    output        ALE_done                                      // Signal to indicate entire image has been processed through ALE
 );
 
     reg [17:0] pixel_counter;
@@ -35,7 +29,7 @@ module ALE (
             pixel_counter <= 0;
             done_reg <= 0;
         end
-        else if (input_is_valid) begin
+        else if (input_valid) begin
             pixel_counter <= pixel_counter + 1;
             if (pixel_counter == (`Image_Size - 1)) begin
                 done_reg <= 1;                            // All pixels have been processed through the ALE module
@@ -104,20 +98,6 @@ module ALE (
         end
     end
     
-    // Delay the output valid signal by 2 clock cycles
-    reg Stage_1_valid, Stage_2_valid;
-    always @(posedge clk)
-    begin
-        if(rst) begin
-            Stage_1_valid <= 0;
-            Stage_2_valid <= 0;
-        end
-        else begin
-            Stage_1_valid <= input_is_valid;
-            Stage_2_valid <= Stage_1_valid;
-        end
-    end
-    
     // Output wire assignments
     assign A_R = AR_P;
     assign A_G = AG_P;
@@ -127,7 +107,7 @@ module ALE (
     assign Inv_A_G = Inv_AG_P;
     assign Inv_A_B = Inv_AB_P;
     
-    assign done = done_reg;
+    assign ALE_done = done_reg;
 
     /////////////////////////////////////////////////////////////////////////////////
     // BLOCK INSTANCES
