@@ -7,7 +7,7 @@ module Transmission_Reciprocal_LUT (
         if(in < 'd4096)
              out <= 14'h3FFF;
         else begin
-        case(in)
+        casez(in)
             14'd 4097: out = 14'h3FFC;
             14'd 4098: out = 14'h3FF8;
             14'd 4099: out = 14'h3FF4;
