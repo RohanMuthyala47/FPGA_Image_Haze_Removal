@@ -1,4 +1,4 @@
-module ATM_LUT (
+module ALE_LUT (
     input      [7:0]  in_val,
     output reg [15:0] out_val
 );
