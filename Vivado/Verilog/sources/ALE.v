@@ -148,19 +148,19 @@ module ALE (
     );
     
     // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.16 format
-    ATM_LUT Inverse_Red (
+    ALE_LUT Inverse_AR (
         .in_val(Dark_channel_Red),
         
         .out_val(LUT_Inv_AR)
     );
     
-    ATM_LUT Inverse_Green (
+    ALE_LUT Inverse_AG (
         .in_val(Dark_channel_Green),
         
         .out_val(LUT_Inv_AG)
     );
     
-    ATM_LUT Inverse_Blue (
+    ALE_LUT Inverse_AB (
         .in_val(Dark_channel_Blue),
         
         .out_val(LUT_Inv_AB)
