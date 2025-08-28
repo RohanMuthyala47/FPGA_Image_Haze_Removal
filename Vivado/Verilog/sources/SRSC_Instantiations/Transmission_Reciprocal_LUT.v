@@ -1,6 +1,6 @@
 module Transmission_Reciprocal_LUT (
     input      [13:0] in,  // Q0.14 input (unsigned)
-    output reg [13:0] out  // Q2.12 reciprocal output (unsigned, 14-bit)
+    output reg [13:0] out  // Q2.12 reciprocal output (unsigned)
 );
 
     always @(*) begin
