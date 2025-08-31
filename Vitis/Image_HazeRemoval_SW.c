@@ -144,11 +144,11 @@ int main() {
         FinalData[i+2] = (u8)(imageData[i/3]);                                                       // Blue pixel value
     }
 
-//    while (TotalBytesSent < NUMBER_OF_BYTES) {
-//        BurstSize       = XUartPs_Send(&UART_Instance, (u8*)&FinalData[TotalBytesSent], BURST_SIZE); // Send data over UART
-//        TotalBytesSent += BurstSize;
-//        usleep(1000);
-//    }
+   while (TotalBytesSent < NUMBER_OF_BYTES) {
+       BurstSize       = XUartPs_Send(&UART_Instance, (u8*)&FinalData[TotalBytesSent], BURST_SIZE);  // Send data over UART
+       TotalBytesSent += BurstSize;
+       usleep(1000);
+   }
 
     printf("Execution Time = %f ms \n\r", ((EndTime - StartTime) * 1000) / COUNTS_PER_SECOND);       // Display the execution time in milliseconds
 
@@ -158,10 +158,10 @@ int main() {
 
 // Interrupt service routine for when all the processed data is transferred back to DDR
 static void ProcessingCompleteISR(void *CallBackRef) {
-    XAxiDma_IntrDisable((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA); // Disable interrupt
-    XAxiDma_IntrAckIrq((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);  // Acknowledge interrupt
+    XAxiDma_IntrDisable((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);        // Disable interrupt
+    XAxiDma_IntrAckIrq((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);         // Acknowledge interrupt
 
-    ProcessingComplete = 1;                                                                   // Flag completion
+    ProcessingComplete = 1;                                                                          // Flag completion
 
-    XAxiDma_IntrEnable((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);  // Re-enable interrupt
+    XAxiDma_IntrEnable((XAxiDma *)CallBackRef, XAXIDMA_IRQ_IOC_MASK, XAXIDMA_DEVICE_TO_DMA);         // Re-enable interrupt
 }
