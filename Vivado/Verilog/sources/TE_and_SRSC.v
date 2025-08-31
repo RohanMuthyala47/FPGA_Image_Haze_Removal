@@ -65,7 +65,7 @@ module TE_and_SRSC (
             inv_ar1_P <= Inv_AR; inv_ag1_P <= Inv_AG; inv_ab1_P <= Inv_AB;
             inv_ar2_P <= Inv_AR; inv_ag2_P <= Inv_AG; inv_ab2_P <= Inv_AB;
             inv_ar3_P <= Inv_AR; inv_ag3_P <= Inv_AG; inv_ab3_P <= Inv_AB;
-                    
+
             I_0 <= input_pixel_5;
             A_R0 <= A_R; A_G0 <= A_G; A_B0 <= A_B;
                     
@@ -77,7 +77,7 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==========================================================================
     
-    // ω = 63/64
+    // ? = 63/64
     parameter OMEGA_D = 64;
     
     // Detect the type of edge in the 3x3 window
@@ -225,7 +225,7 @@ module TE_and_SRSC (
         end
         else begin
             ed1_P <= ed1; ed2_P <= ed2; ed3_P <= ed3;
-            // Apply the scaling factor ω = 63/64 to the Inverse Atmospheric Light values
+            // Apply the scaling factor ? = 63/64 to the Inverse Atmospheric Light values
             inv_ar1_P1 <= inv_ar1_P - (inv_ar1_P >> $clog2(OMEGA_D));
             inv_ag1_P1 <= inv_ag1_P - (inv_ag1_P >> $clog2(OMEGA_D));
             inv_ab1_P1 <= inv_ab1_P - (inv_ab1_P >> $clog2(OMEGA_D));
@@ -395,7 +395,7 @@ module TE_and_SRSC (
     
     // Transmission before subtracting it from 1
     wire [13:0] pre_transmission;
-    // Transmission value in Q0.14
+    // Transmission value in Q0.16
     wire [13:0] transmission;
     
     // Compute (|Ic - Ac|)
@@ -694,7 +694,7 @@ module TE_and_SRSC (
         .out(Sum_Blue)
     );
     
-    // LOOK-UP TABLES TO COMPUTE Ac^β AND Jc^(1 - β) (β = 0.3)
+    // LOOK-UP TABLES TO COMPUTE Ac ^ ? AND Jc ^ (1 - ?) (? = 0.3)
     LUT_035 A_R_Correction (
         .in(A_R_P2),
         .out(A_R_Corrected)
@@ -725,7 +725,7 @@ module TE_and_SRSC (
         .out(J_B_Corrected)
     );
                     
-    // MULTIPLIER MODULES TO COMPUTE Ac^β * Jc^(1-β)
+    // MULTIPLIER MODULES TO COMPUTE Ac^? * Jc^(1-?)
     Saturation_Correction_Multiplier Saturation_Correction_Red (
         .clk(clk), .rst(rst),
         
@@ -761,7 +761,7 @@ module TE_and_SRSC (
         end
     end
 
-    // Output Assignment
+    // Stage 11 assignments
     assign output_valid = stage_10_valid;
 
 endmodule
