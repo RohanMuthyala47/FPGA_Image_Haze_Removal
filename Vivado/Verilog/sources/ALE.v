@@ -4,20 +4,26 @@ module ALE (
     input         clk,
     input         rst,
     
-    input         input_valid,                                  // Input data valid signal
-    input [23:0]  input_pixel_1, input_pixel_2, input_pixel_3,
-                  input_pixel_4, input_pixel_5, input_pixel_6,
-                  input_pixel_7, input_pixel_8, input_pixel_9,  // 3x3 window input
+    input         input_valid, // Input data valid signal
+    input [23:0]  input_pixel_1,
+    input [23:0]  input_pixel_2,
+    input [23:0]  input_pixel_3,
+    input [23:0]  input_pixel_4,
+    input [23:0]  input_pixel_5,
+    input [23:0]  input_pixel_6,
+    input [23:0]  input_pixel_7,
+    input [23:0]  input_pixel_8,
+    input [23:0]  input_pixel_9,  // 3x3 window input
     
     output [7:0]  A_R,
     output [7:0]  A_G,
-    output [7:0]  A_B,                                          // Atmospheric Light Values
+    output [7:0]  A_B,            // Atmospheric Light Values
     
     output [15:0] Inv_A_R,
     output [15:0] Inv_A_G,
-    output [15:0] Inv_A_B,                                      // Inverse Atmospheric Light Values(Q0.16)
+    output [15:0] Inv_A_B,        // Inverse Atmospheric Light Values(Q0.16)
     
-    output        ALE_done                                      // Signal to indicate entire image has been processed through ALE
+    output        ALE_done            // Signal to indicate entire image has been processed
 );
 
     reg [17:0] pixel_counter;
@@ -148,19 +154,19 @@ module ALE (
     );
     
     // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.16 format
-    ALE_LUT Inverse_AR (
+    ATM_LUT Inverse_Red (
         .in_val(Dark_channel_Red),
         
         .out_val(LUT_Inv_AR)
     );
     
-    ALE_LUT Inverse_AG (
+    ATM_LUT Inverse_Green (
         .in_val(Dark_channel_Green),
         
         .out_val(LUT_Inv_AG)
     );
     
-    ALE_LUT Inverse_AB (
+    ATM_LUT Inverse_Blue (
         .in_val(Dark_channel_Blue),
         
         .out_val(LUT_Inv_AB)
