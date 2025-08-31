@@ -1,4 +1,4 @@
-// Top Module
+// Top Module 
 module Image_HazeRemoval (
     // AXI4-Stream Global Signals
     input         ACLK,          // Global clock 
@@ -10,18 +10,19 @@ module Image_HazeRemoval (
     // AXI4-Stream Slave Interface
     input [31:0]  S_AXIS_TDATA,  // Input pixel stream
     input         S_AXIS_TVALID, // Input valid signal
-    input         S_AXIS_TLAST,  // Unused signal
+    // input         S_AXIS_TLAST,  // Unused signal
     output        S_AXIS_TREADY,
     
     // AXI4-Stream Master Interface
     output [31:0] M_AXIS_TDATA,  // Output pixel stream
     output        M_AXIS_TVALID, // Output valid signal
-    output        M_AXIS_TLAST,  // Unused signal
+    // output        M_AXIS_TLAST,  // Unused signal
     input         M_AXIS_TREADY
 );
     
-    wire axis_prog_full;
-    assign S_AXIS_TREADY = !axis_prog_full;
+    wire IP_CLK;
+    
+    assign S_AXIS_TREADY = M_AXIS_TREADY;
 
     // 3x3 Window of RGB pixels generated from Line Buffers
     wire [23:0] Pixel_00, Pixel_01, Pixel_02;
@@ -33,7 +34,7 @@ module Image_HazeRemoval (
 
     // Instance of 3x3 Window Generator
     WindowGeneratorTop WindowGenerator (
-        .clk(ACLK),
+        .clk(IP_CLK),
         .rst(~ARESETn),
         
         .input_pixel(S_AXIS_TDATA[23:0]),
@@ -47,7 +48,7 @@ module Image_HazeRemoval (
     
     wire ALE_clk;
     wire ALE_done;
-    wire ALE_enable = ~ALE_done & enable;
+    wire ALE_enable = ~ALE_done;
 
     wire [7:0] A_R, A_G, A_B;
     wire [15:0] Inv_AR, Inv_AG, Inv_AB;
@@ -57,7 +58,7 @@ module Image_HazeRemoval (
         .clk(ALE_clk),
         .rst(~ARESETn),
         
-        .input_is_valid(window_valid & ALE_enable),
+        .input_valid(window_valid),
         .input_pixel_1(Pixel_00), .input_pixel_2(Pixel_01), .input_pixel_3(Pixel_02),
         .input_pixel_4(Pixel_10), .input_pixel_5(Pixel_11), .input_pixel_6(Pixel_12),
         .input_pixel_7(Pixel_20), .input_pixel_8(Pixel_21), .input_pixel_9(Pixel_22),
@@ -66,22 +67,23 @@ module Image_HazeRemoval (
         
         .Inv_A_R(Inv_AR), .Inv_A_G(Inv_AG), .Inv_A_B(Inv_AB),
         
-        .done(ALE_done)
+        .ALE_done(ALE_done)
     );
 
     wire TE_SRSC_clk;
-    wire TE_SRSC_enable = ALE_done & enable;
+    wire TE_SRSC_enable = ALE_done;
     
     // Output Signals
     wire [7:0] J_R, J_G, J_B;
     wire output_valid;
+    assign M_AXIS_TDATA = {8'd0, J_R, J_G, J_B};
     
     // Instance of Transmission Estimation, Scene Recovery and Saturation Correction
     TE_and_SRSC TE_SRSC (
         .clk(TE_SRSC_clk),
         .rst(~ARESETn),
         
-        .input_is_valid(window_valid & TE_SRSC_enable),
+        .input_valid(window_valid),
         .input_pixel_1(Pixel_00), .input_pixel_2(Pixel_01), .input_pixel_3(Pixel_02),
         .input_pixel_4(Pixel_10), .input_pixel_5(Pixel_11), .input_pixel_6(Pixel_12),
         .input_pixel_7(Pixel_20), .input_pixel_8(Pixel_21), .input_pixel_9(Pixel_22),
@@ -91,45 +93,38 @@ module Image_HazeRemoval (
         .Inv_AR(Inv_AR), .Inv_AG(Inv_AG), .Inv_AB(Inv_AB),
         
         .J_R(J_R), .J_G(J_G), .J_B(J_B),
-        .output_valid(output_valid)
+        .output_valid(M_AXIS_TVALID)
     );
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    // Clock Gating Cells for ALE AND TE_SRSC
+    // Clock Gating Cells
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Clock_Gating_Cell ALE_CGC (
+    // Image Haze Removal Core enable
+    Clock_Gating_Cell Core_Enable (
         .clk(ACLK),
+        .clk_enable(enable),
+        .rst(~ARESETn),
+        
+        .clk_gated(IP_CLK)
+    );
+
+    // ALE module enable
+    Clock_Gating_Cell ALE_CGC (
+        .clk(IP_CLK),
         .clk_enable(ALE_enable),
         .rst(~ARESETn),
         
         .clk_gated(ALE_clk)
     );
-    
+
+    // TE and SRSC module enable
     Clock_Gating_Cell TE_SRSC_CGC (
-        .clk(ACLK),
+        .clk(IP_CLK),
         .clk_enable(TE_SRSC_enable),
         .rst(~ARESETn),
         
         .clk_gated(TE_SRSC_clk)
-    );
-    
-    OutputBuffer OutputBuffer (
-        .wr_rst_busy(),                        // output wire wr_rst_busy
-        .rd_rst_busy(),                        // output wire rd_rst_busy
-        
-        .s_aclk(ACLK),                         // input wire s_aclk
-        .s_aresetn(ARESETn),                   // input wire s_aresetn
-        
-        .s_axis_tvalid(output_valid),          // input wire s_axis_tvalid
-        .s_axis_tready(),                      // output wire s_axis_tready
-        .s_axis_tdata({8'd0, J_R, J_G, J_B}),  // input wire [31 : 0] s_axis_tdata
-        
-        .m_axis_tvalid(M_AXIS_TVALID),         // output wire m_axis_tvalid
-        .m_axis_tready(M_AXIS_TREADY),         // input wire m_axis_tready
-        .m_axis_tdata(M_AXIS_TDATA),           // output wire [31 : 0] m_axis_tdata
-        
-        .axis_prog_full(axis_prog_full)        // output wire axis_prog_full
     );
 
 endmodule
