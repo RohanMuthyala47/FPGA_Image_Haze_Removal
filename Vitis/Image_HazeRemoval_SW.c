@@ -3,16 +3,18 @@
 #include "xaxidma.h"
 #include "xscugic.h"
 #include "xuartps.h"
+#include "xtime_l.h"
 
 #include "sleep.h"
 #include "xil_cache.h"
 #include "xil_io.h"
+#include <stdio.h>
 
 #include "TestImage.h"
 
 
 #define BAUD_RATE        115200
-#define BURST_SIZE       1
+#define BURST_SIZE       128
 
 #define NUMBER_OF_BYTES  512*512*3
 #define IMG_WIDTH        512
@@ -35,6 +37,7 @@ int main() {
     u32 TotalBytesSent = 0;
     u32 BurstSize      = 0;
 
+    XTime StartTime, EndTime;
 
     //*************************************************************************************************************************************************//
     //                            Initialize and Configure UART
@@ -51,7 +54,7 @@ int main() {
     }
 
     status = XUartPs_SetBaudRate(&UART_Instance, BAUD_RATE);                                    // Set UART baud rate
- 
+
     if (status != XST_SUCCESS) {
         xil_printf("Baud Rate initialization failed\n");
         return -1;
@@ -89,9 +92,9 @@ int main() {
     }
 
     XScuGic_SetPriorityTriggerType(&Intr_Instance, XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR, 0xA1, 3); // Set priority and trigger
-    status = XScuGic_Connect(&Intr_Instance, 
-                             XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR, 
-                             (Xil_InterruptHandler)ProcessingCompleteISR, 
+    status = XScuGic_Connect(&Intr_Instance,
+                             XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR,
+                             (Xil_InterruptHandler)ProcessingCompleteISR,
                              (void *)&DMA_Instance);                                                  // Connect ISR
 
     if (status != XST_SUCCESS) {
@@ -102,8 +105,8 @@ int main() {
     XScuGic_Enable(&Intr_Instance, XPAR_FABRIC_AXI_DMA_0_S2MM_INTROUT_INTR);                          // Enable interrupt
 
     Xil_ExceptionInit();                                                                              // Initialize exceptions
-    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT, 
-                                 (Xil_ExceptionHandler)XScuGic_InterruptHandler, 
+    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+                                 (Xil_ExceptionHandler)XScuGic_InterruptHandler,
                                  (void *)&Intr_Instance);                                             // Register exception handler
     Xil_ExceptionEnable();                                                                            // Enable exceptions
 
@@ -112,18 +115,18 @@ int main() {
     //                            Send and receive data to and from Image Processing IP
     //*************************************************************************************************************************************************//
 
+    XTime_GetTime(&StartTime);
+
     // Configure Transmit and Receive Lines
-    status = XAxiDma_SimpleTransfer(&DMA_Instance, 
-                                    (u32)imageData, 
-                                    IMG_SIZE * sizeof(u32), 
+    status = XAxiDma_SimpleTransfer(&DMA_Instance,
+                                    (u32)imageData,
+                                    IMG_SIZE * sizeof(u32),
                                     XAXIDMA_DEVICE_TO_DMA);                                          // Configure S2MM (IP -> DDR)
 
-    status = XAxiDma_SimpleTransfer(&DMA_Instance, 
-                                    (u32)imageData, 
-                                    IMG_SIZE * sizeof(u32), 
+    status = XAxiDma_SimpleTransfer(&DMA_Instance,
+                                    (u32)imageData,
+                                    IMG_SIZE * NO_OF_PASSES * sizeof(u32),
                                     XAXIDMA_DMA_TO_DEVICE);                                          // Configure MM2S (DDR -> IP)
-
-    //status = XAxiDma_SimpleTransfer(&DMA_Instance, (u32)imageData, (NO_OF_PASSES) * sizeof(u32), XAXIDMA_DMA_TO_DEVICE);
 
     if (status != XST_SUCCESS) {
         xil_printf("DMA initialization failed\n");
@@ -132,6 +135,7 @@ int main() {
 
     while (!ProcessingComplete) { }                                                                  // Wait until processing is complete
 
+    XTime_GetTime(&EndTime);
 
     // Convert the output data to an 8 bit stream so that it can be transferred via UART
     for (i = 0; i < NUMBER_OF_BYTES; i = i + 3) {
@@ -140,11 +144,13 @@ int main() {
         FinalData[i+2] = (u8)(imageData[i/3]);                                                       // Blue pixel value
     }
 
-    while (TotalBytesSent < NUMBER_OF_BYTES) {
-        BurstSize       = XUartPs_Send(&UART_Instance, (u8*)&FinalData[TotalBytesSent], BURST_SIZE); // Send data over UART
-        TotalBytesSent += BurstSize;
-        usleep(1000);
-    }
+//    while (TotalBytesSent < NUMBER_OF_BYTES) {
+//        BurstSize       = XUartPs_Send(&UART_Instance, (u8*)&FinalData[TotalBytesSent], BURST_SIZE); // Send data over UART
+//        TotalBytesSent += BurstSize;
+//        usleep(1000);
+//    }
+
+    printf("Execution Time = %f ms \n\r", ((EndTime - StartTime) * 1000) / COUNTS_PER_SECOND);       // Display the execution time in milliseconds
 
     return 1;
 }
