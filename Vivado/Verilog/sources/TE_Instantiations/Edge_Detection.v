@@ -1,4 +1,5 @@
 module ED (
+    input input_valid,
     input  [7:0] input_pixel_1, input_pixel_2, input_pixel_3,
                  input_pixel_4,                input_pixel_6,
                  input_pixel_7, input_pixel_8, input_pixel_9,
