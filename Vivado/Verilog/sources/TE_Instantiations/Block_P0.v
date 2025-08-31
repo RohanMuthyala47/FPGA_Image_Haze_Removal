@@ -36,6 +36,6 @@ module Block_P0 (
     
     assign sum = sum1 + sum2 + sum3;
     
-    assign p0_result = (sum >> 3) - (sum >> 6); // x/8 - x/64 = 7x/64 ~= x/9
+    assign p0_result = (sum >> 3) - (sum >> 6); // 1/8 - 1/64 = 7/64 ~= 1/9
     
 endmodule
