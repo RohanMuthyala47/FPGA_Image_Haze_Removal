@@ -15,375 +15,219 @@ module TE_and_SRSC (
     output [7:0] J_R, J_G, J_B,                               // Output corrected pixels
     output       output_valid                                 // Output data valid signal
 );
-    
+
     // Pipeline the Center Pixel for SRSC
-    reg [23:0] I_0, I_1, I_2;
+    reg [23:0] I_0_P, I_1_P, I_2_P;
     
     // Pipeline Atmospheric Light values for SRSC
-    reg [7:0] A_R0, A_G0, A_B0;
-    reg [7:0] A_R1, A_G1, A_B1;
-    reg [7:0] A_R2, A_G2, A_B2;
+    reg [7:0] A_R0_P, A_G0_P, A_B0_P;
+    reg [7:0] A_R1_P, A_G1_P, A_B1_P;
+    reg [7:0] A_R2_P, A_G2_P, A_B2_P;
     
-    //==========================================================================
+    //==================================================================================
     // STAGE 4 LOGIC
-    //==========================================================================
+    //==================================================================================
+    
+    // Detect the type of edge in the 3x3 window
+    wire [1:0] ed1, ed2, ed3;
     
     // Pipeline Registers
+    reg [1:0] window_edge_P;
+    
+    reg [15:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
+    
     reg [23:0] I1_P, I2_P, I3_P,
-               I4_P,       I6_P,
+               I4_P, I5_P, I6_P,
                I7_P, I8_P, I9_P;
-    
-    reg [15:0] inv_ar1_P, inv_ag1_P, inv_ab1_P,
-               inv_ar2_P, inv_ag2_P, inv_ab2_P,
-               inv_ar3_P, inv_ag3_P, inv_ab3_P;
-    
+               
     reg        stage_4_valid;
     
     //===========================================
-  
+    // Detect the type of edge in the 3x3 window
+    ED_Top EdgeDetection (
+        .input_pixel_1(input_pixel_1), .input_pixel_2(input_pixel_2), .input_pixel_3(input_pixel_3),
+        .input_pixel_4(input_pixel_4),                                .input_pixel_6(input_pixel_6), 
+        .input_pixel_7(input_pixel_7), .input_pixel_8(input_pixel_8), .input_pixel_9(input_pixel_9),
+        
+        .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
+    );
+    //===========================================
+    
     // Update Stage 4 Pipeline Registers
     always @(posedge clk) begin
         if (rst) begin
+            window_edge_P <= 0;
+        
             I1_P <= 0; I2_P <= 0; I3_P <= 0;
-            I4_P <= 0;            I6_P <= 0;
+            I4_P <= 0; I5_P <= 0; I6_P <= 0;
             I7_P <= 0; I8_P <= 0; I9_P <= 0;
                 
-            inv_ar1_P <= 0; inv_ag1_P <= 0; inv_ab1_P <= 0;
-            inv_ar2_P <= 0; inv_ag2_P <= 0; inv_ab2_P <= 0;
-            inv_ar3_P <= 0; inv_ag3_P <= 0; inv_ab3_P <= 0;
+            Inv_AR_P <= 0; Inv_AG_P <= 0; Inv_AB_P <= 0;
                     
-            I_0 <= 0;
-            A_R0 <= 0; A_G0 <= 0; A_B0 <= 0;
+            I_0_P <= 0;
+            A_R0_P <= 0; A_G0_P <= 0; A_B0_P <= 0;
                     
             stage_4_valid <= 0;
         end
         else begin
+            window_edge_P <= (ed1 > ed2) ? ((ed1 > ed3) ? ed1 : ed3) : ((ed2 > ed3) ? ed2 : ed3);
+        
             I1_P <= input_pixel_1; I2_P <= input_pixel_2; I3_P <= input_pixel_3;
-            I4_P <= input_pixel_4;                        I6_P <= input_pixel_6;
+            I4_P <= input_pixel_4; I5_P <= input_pixel_5; I6_P <= input_pixel_6;
             I7_P <= input_pixel_7; I8_P <= input_pixel_8; I9_P <= input_pixel_9;
                     
-            inv_ar1_P <= Inv_AR; inv_ag1_P <= Inv_AG; inv_ab1_P <= Inv_AB;
-            inv_ar2_P <= Inv_AR; inv_ag2_P <= Inv_AG; inv_ab2_P <= Inv_AB;
-            inv_ar3_P <= Inv_AR; inv_ag3_P <= Inv_AG; inv_ab3_P <= Inv_AB;
+            Inv_AR_P <= Inv_AR; Inv_AG_P <= Inv_AG; Inv_AB_P <= Inv_AB;
 
-            I_0 <= input_pixel_5;
-            A_R0 <= A_R; A_G0 <= A_G; A_B0 <= A_B;
+            I_0_P <= input_pixel_5;
+            A_R0_P <= A_R; A_G0_P <= A_G; A_B0_P <= A_B;
                     
             stage_4_valid <= input_valid;
         end
     end
-        
-    //==========================================================================
+    
+    //==================================================================================
     // STAGE 5 LOGIC
-    //==========================================================================
+    //==================================================================================
     
     // ? = 63/64
-    parameter OMEGA_D = 64;
+    parameter OMEGA_D = 4;
     
-    // Detect the type of edge in the 3x3 window
-    wire [1:0] ed1, ed2, ed3;
-
-    // Filter Results
-    wire [7:0]  p0_red_out, p0_green_out, p0_blue_out;
-    wire [7:0]  p1_red_out, p1_green_out, p1_blue_out;
-    wire [7:0]  p2_red_out, p2_green_out, p2_blue_out;
+    wire [7:0] filtered_pixel_red, filtered_pixel_green, filtered_pixel_blue;
     
-    // Pipeline Registers for stage 5
-    reg [1:0]   ed1_P, ed2_P, ed3_P;
+    // Pipeline Registers
+    reg [15:0] Inv_AR_P1, Inv_AG_P1, Inv_AB_P1;
     
-    reg [15:0]  inv_ar1_P1, inv_ag1_P1, inv_ab1_P1,
-                inv_ar2_P1, inv_ag2_P1, inv_ab2_P1,
-                inv_ar3_P1, inv_ag3_P1, inv_ab3_P1;
+    reg [7:0] filtered_pixel_red_P, filtered_pixel_green_P, filtered_pixel_blue_P;
     
-    reg [7:0]   p0_red_P, p0_green_P, p0_blue_P,
-                p1_red_P, p1_green_P, p1_blue_P,
-                p2_red_P, p2_green_P, p2_blue_P;
+    reg stage_5_valid;
     
-    reg         stage_5_valid;
-  
     //===========================================
-    // Detect the type of edge in the 3x3 window
-    ED_Top EdgeDetection (
-        .input_pixel_1(I1_P), .input_pixel_2(I2_P), .input_pixel_3(I3_P),
-        .input_pixel_4(I4_P),                       .input_pixel_6(I6_P), 
-        .input_pixel_7(I7_P), .input_pixel_8(I8_P), .input_pixel_9(I9_P),
-        
-        .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
-    );
+    // Filter blocks to apply Gaussian Filter or Mean Filter based on the edge detected
+    WindowFilter Red_WindowFilter (
+        .window_edge(window_edge_P),
     
-    // P0 BLOCKS FOR MEAN FILTERING
-    Block_P0 MeanFilter_Red (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
-        .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
-        .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
-                       
-        .p0_result(p0_red_out)
-    );
-                   
-    Block_P0 MeanFilter_Green (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
-        .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
-        .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
-                       
-        .p0_result(p0_green_out)
-    );
-                   
-    Block_P0 MeanFilter_Blue (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
-        .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
-        .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
-                       
-        .p0_result(p0_blue_out)
-    );
-                   
-    // P1 BLOCKS FOR EDGE PRESERVING (VERTICAL AND HORIZONTAL EDGES)
-    Block_P1 EdgePreservingFilter_VH_Red (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
-        .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
-        .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
-                       
-        .p1_result(p1_red_out)
-    );
-                   
-    Block_P1 EdgePreservingFilter_VH_Green (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
-        .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
-        .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
-                       
-        .p1_result(p1_green_out)
-    );
-                   
-    Block_P1 EdgePreservingFilter_VH_Blue (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
-        .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
-        .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
+        .input_pixel_1(I1_P[23:16]), .input_pixel_2(I2_P[23:16]), .input_pixel_3(I3_P[23:16]),
+        .input_pixel_4(I4_P[23:16]), .input_pixel_5(I5_P[23:16]), .input_pixel_6(I6_P[23:16]),
+        .input_pixel_7(I7_P[23:16]), .input_pixel_8(I8_P[23:16]), .input_pixel_9(I9_P[23:16]),
         
-        .p1_result(p1_blue_out)
+        .filtered_pixel(filtered_pixel_red)
     );
                    
-    // P2 BLOCKS FOR EDGE PRESERVING (DIAGONAL EDGES)
-    Block_P2 EdgePreservingFilter_D_Red (
-        .clk(clk), .rst(rst),
+    WindowFilter Green_WindowFilter (
+        .window_edge(window_edge_P),
 
-        .in1(input_pixel_1[23:16]), .in2(input_pixel_2[23:16]), .in3(input_pixel_3[23:16]),
-        .in4(input_pixel_4[23:16]), .in5(input_pixel_5[23:16]), .in6(input_pixel_6[23:16]),
-        .in7(input_pixel_7[23:16]), .in8(input_pixel_8[23:16]), .in9(input_pixel_9[23:16]),
+        .input_pixel_1(I1_P[15:8]), .input_pixel_2(I2_P[15:8]), .input_pixel_3(I3_P[15:8]),
+        .input_pixel_4(I4_P[15:8]), .input_pixel_5(I5_P[15:8]), .input_pixel_6(I6_P[15:8]),
+        .input_pixel_7(I7_P[15:8]), .input_pixel_8(I8_P[15:8]), .input_pixel_9(I9_P[15:8]),
         
-        .p2_result(p2_red_out)
+        .filtered_pixel(filtered_pixel_green)
     );
                    
-    Block_P2 EdgePreservingFilter_D_Green (
-        .clk(clk), .rst(rst),
+    WindowFilter Blue_WindowFilter (
+        .window_edge(window_edge_P),
 
-        .in1(input_pixel_1[15:8]), .in2(input_pixel_2[15:8]), .in3(input_pixel_3[15:8]),
-        .in4(input_pixel_4[15:8]), .in5(input_pixel_5[15:8]), .in6(input_pixel_6[15:8]),
-        .in7(input_pixel_7[15:8]), .in8(input_pixel_8[15:8]), .in9(input_pixel_9[15:8]),
-        
-        .p2_result(p2_green_out)
-    );
-                   
-    Block_P2 EdgePreservingFilter_D_Blue (
-        .clk(clk), .rst(rst),
-
-        .in1(input_pixel_1[7:0]), .in2(input_pixel_2[7:0]), .in3(input_pixel_3[7:0]),
-        .in4(input_pixel_4[7:0]), .in5(input_pixel_5[7:0]), .in6(input_pixel_6[7:0]),
-        .in7(input_pixel_7[7:0]), .in8(input_pixel_8[7:0]), .in9(input_pixel_9[7:0]),
+        .input_pixel_1(I1_P[7:0]), .input_pixel_2(I2_P[7:0]), .input_pixel_3(I3_P[7:0]),
+        .input_pixel_4(I4_P[7:0]), .input_pixel_5(I5_P[7:0]), .input_pixel_6(I6_P[7:0]),
+        .input_pixel_7(I7_P[7:0]), .input_pixel_8(I8_P[7:0]), .input_pixel_9(I9_P[7:0]),
                        
-        .p2_result(p2_blue_out)
+        .filtered_pixel(filtered_pixel_blue)
     );
     //===========================================
-  
+    
     // Update Stage 5 Pipeline Registers 
     always @(posedge clk) begin
         if (rst) begin
-            ed1_P <= 0; ed2_P <= 0; ed3_P <= 0;
             
-            inv_ar1_P1 <= 0; inv_ag1_P1 <= 0; inv_ab1_P1 <= 0;
-            inv_ar2_P1 <= 0; inv_ag2_P1 <= 0; inv_ab2_P1 <= 0;
-            inv_ar3_P1 <= 0; inv_ag3_P1 <= 0; inv_ab3_P1 <= 0;
+            Inv_AR_P1 <= 0; Inv_AG_P1 <= 0; Inv_AB_P1 <= 0;
             
-            p0_red_P <= 0; p0_green_P <= 0; p0_blue_P <= 0;
-            p1_red_P <= 0; p1_green_P <= 0; p1_blue_P <= 0;
-            p2_red_P <= 0; p2_green_P <= 0; p2_blue_P <= 0;
+            filtered_pixel_red_P <= 0; filtered_pixel_green_P <= 0; filtered_pixel_blue_P <= 0;
             
-            I_1 <= 0;
-            A_R1 <= 0; A_G1 <= 0; A_B1 <= 0;
+            I_1_P <= 0;
+            A_R1_P <= 0; A_G1_P <= 0; A_B1_P <= 0;
             
             stage_5_valid <= 0;
         end
         else begin
-            ed1_P <= ed1; ed2_P <= ed2; ed3_P <= ed3;
             // Apply the scaling factor ? = 63/64 to the Inverse Atmospheric Light values
-            inv_ar1_P1 <= inv_ar1_P - (inv_ar1_P >> $clog2(OMEGA_D));
-            inv_ag1_P1 <= inv_ag1_P - (inv_ag1_P >> $clog2(OMEGA_D));
-            inv_ab1_P1 <= inv_ab1_P - (inv_ab1_P >> $clog2(OMEGA_D));
+            Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> OMEGA_D);
+            Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> OMEGA_D);
+            Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> OMEGA_D);
             
-            inv_ar2_P1 <= inv_ar2_P - (inv_ar2_P >> $clog2(OMEGA_D));
-            inv_ag2_P1 <= inv_ag2_P - (inv_ag2_P >> $clog2(OMEGA_D));
-            inv_ab2_P1 <= inv_ab2_P - (inv_ab2_P >> $clog2(OMEGA_D));
-            
-            inv_ar3_P1 <= inv_ar3_P - (inv_ar3_P >> $clog2(OMEGA_D));
-            inv_ag3_P1 <= inv_ag3_P - (inv_ag3_P >> $clog2(OMEGA_D));
-            inv_ab3_P1 <= inv_ab3_P - (inv_ab3_P >> $clog2(OMEGA_D));
-            
-            p0_red_P <= p0_red_out; p0_green_P <= p0_green_out; p0_blue_P <= p0_blue_out;
-            p1_red_P <= p1_red_out; p1_green_P <= p1_green_out; p1_blue_P <= p1_blue_out;
-            p2_red_P <= p2_red_out; p2_green_P <= p2_green_out; p2_blue_P <= p2_blue_out;
+            filtered_pixel_red_P <= filtered_pixel_red;
+            filtered_pixel_green_P <= filtered_pixel_green;
+            filtered_pixel_blue_P <= filtered_pixel_blue;
                                 
-            I_1 <= I_0;
+            I_1_P <= I_0_P;
                                 
-            A_R1 <= A_R0; A_G1 <= A_G0; A_B1 <= A_B0;
+            A_R1_P <= A_R0_P; A_G1_P <= A_G0_P; A_B1_P <= A_B0_P;
                                 
             stage_5_valid <= stage_4_valid;
         end
     end
-   
+    
     //==========================================================================
     // STAGE 6 LOGIC
     //==========================================================================
-        
-    // Diagonal, Vertical, Horizonal or no edge detected
-    wire [1:0]  window_edge = (ed1_P > ed2_P) ? ((ed1_P > ed3_P) ? ed1_P : ed3_P) : ((ed2_P > ed3_P) ? ed2_P : ed3_P);
     
-    // Select signals for minimum in each of the filter results
-    wire [1:0]  cmp_p0, cmp_p1, cmp_p2;
+    // Select signal for minimum filter result
+    wire  [1:0] min_val_sel;
     
-    wire [15:0] min_inv_atm0, min_inv_atm1, min_inv_atm2;
-    wire [7:0]  minimum_p0, minimum_p1, minimum_p2;
+    wire [7:0] min_Fc;
+    
+    wire [15:0] min_Ac;
         
-    wire [13:0] prod0, prod1, prod2;
-
-    // Pipeline Registers for stage 6
-    reg [1:0]   window_edge_P;
+    wire [13:0] product;
     
     reg         stage_6_valid;
-
+    
     //===========================================
-    // Comparators to choose the minimum value in each filter
-    Comparator_Minimum Min_P0_CMP (
-        .red(p0_red_P), .green(p0_green_P), .blue(p0_blue_P),
+    // Comparator to determine the minimum value of the filter results
+    Comparator_Minimum Minimum_Filter_Select (
+        .red(filtered_pixel_red_P), .green(filtered_pixel_green_P), .blue(filtered_pixel_blue_P),
         
-        .min_val(cmp_p0)
+        .min_val_sel(min_val_sel)
     );
     
-    Comparator_Minimum Min_P1_CMP (
-        .red(p1_red_P), .green(p1_green_P), .blue(p1_blue_P),
+    // Multiplexer to choose minimum of the filter results
+    Filter_Result_Multiplexer Minimum_Filtered_Pixel_Result (
+        .F_R(filtered_pixel_red_P), .F_G(filtered_pixel_green_P), .F_B(filtered_pixel_blue_P),
         
-        .min_val(cmp_p1)
+        .sel(min_val_sel),
+        
+        .Fc(min_Fc)
     );
     
-    Comparator_Minimum Min_P2_CMP (
-        .red(p2_red_P), .green(p2_green_P), .blue(p2_blue_P),
-          
-        .min_val(cmp_p2)
+    // Multiplexer to choose minimum of Atmospheric Light values
+    Inv_Ac_Multiplexer Minimum_Inv_ALE_Value (
+        .Inv_AR(Inv_AR_P1), .Inv_AG(Inv_AG_P1), .Inv_AB(Inv_AB_P1),
+        
+        .sel(min_val_sel),
+        
+        .Inv_Ac(min_Ac)
     );
     
-    // Multiplexers to choose minimum of the filter values
-    Mux_1 P0_Mux (
-        .a(p0_red_P), .b(p0_green_P), .c(p0_blue_P),
-        
-        .sel(cmp_p0),
-        
-        .out(minimum_p0)
-    );
-    
-    Mux_1 P1_Mux (
-        .a(p1_red_P), .b(p1_green_P), .c(p1_blue_P),
-        
-        .sel(cmp_p1),
-        
-        .out(minimum_p1)
-    );
-    
-    Mux_1 P2_Mux (
-        .a(p2_red_P), .b(p2_green_P), .c(p2_blue_P),
-        
-        .sel(cmp_p2),
-        
-        .out(minimum_p2)
-    );
-    
-    // Multiplexers to choose minimum of Atmospheric Light values
-    Mux_2 InvA_0_Mux (
-        .a(inv_ar1_P1), .b(inv_ag1_P1), .c(inv_ab1_P1),
-        
-        .sel(cmp_p0),
-        
-        .out(min_inv_atm0)
-    );
-    
-    Mux_2 InvA_1_Mux (
-        .a(inv_ar2_P1), .b(inv_ag2_P1), .c(inv_ab2_P1),
-        
-        .sel(cmp_p1),
-        
-        .out(min_inv_atm1)
-    );
-    
-    Mux_2 InvA_2_Mux (
-        .a(inv_ar3_P1), .b(inv_ag3_P1), .c(inv_ab3_P1),
-        
-        .sel(cmp_p2),
-        
-        .out(min_inv_atm2)
-    );
-    
-    // Multiplier modules to compute Pc * ?/Ac
-    Multiplier_TE Multiply_P0 (
+    // Multiplier modules to compute Fc * ?/Ac
+    Multiplier_TE Fc_InvAc_Multiplier (
         .clk(clk), .rst(rst),
         
-        .Ac_Inv(min_inv_atm0),
-        .Pc(minimum_p0),
+        .Fc(min_Fc),
+        .Inv_Ac(min_Ac),
         
-        .product(prod0)
-    );
-    
-    Multiplier_TE Multiply_P1 (
-        .clk(clk), .rst(rst),
-        
-        .Ac_Inv(min_inv_atm1),
-        .Pc(minimum_p1),
-        
-        .product(prod1)
-    );
-    
-    Multiplier_TE Multiply_P2 (
-        .clk(clk), .rst(rst),
-        
-        .Ac_Inv(min_inv_atm2),
-        .Pc(minimum_p2),
-        
-        .product(prod2)
+        .product(product)
     );
     //===========================================
     
     // Update Stage 6 Pipeline Registers
     always @(posedge clk) begin
         if (rst) begin
-            window_edge_P <= 0;
-            
-            I_2 <= 0;
-            A_R2 <= 0; A_G2 <= 0; A_B2 <= 0;
+            I_2_P <= 0;
+            A_R2_P <= 0; A_G2_P <= 0; A_B2_P <= 0;
             
             stage_6_valid <= 0;
         end
         else begin
-            window_edge_P <= window_edge;
-            
-            I_2 <= I_1;
-            A_R2 <= A_R1; A_G2 <= A_G1; A_B2 <= A_B1;
+            I_2_P <= I_1_P;
+            A_R2_P <= A_R1_P; A_G2_P <= A_G1_P; A_B2_P <= A_B1_P;
             
             stage_6_valid <= stage_5_valid;
         end
@@ -392,16 +236,13 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 7 LOGIC
     //==========================================================================
-    
-    // Transmission before subtracting it from 1
-    wire [13:0] pre_transmission;
-    // Transmission value in Q0.16
+    // Transmission value in Q0.14
     wire [13:0] transmission;
     
     // Compute (|Ic - Ac|)
     wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
     wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
-    wire [7:0] I_R = I_2[23:16], I_G = I_2[15:8], I_B = I_2[7:0];
+    wire [7:0] I_R = I_2_P[23:16], I_G = I_2_P[15:8], I_B = I_2_P[7:0];
     
     // Pipeline Registers for stage 7
     reg [13:0]  transmission_P;
@@ -413,27 +254,19 @@ module TE_and_SRSC (
     reg         add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
     
     reg         stage_7_valid;
-
+    
     //===========================================
-    // Multiplexer to choose between the Multiplier outputs based on the edge detected
-    Pre_Transmission_Mux Pre_Transmission_Mux (
-        .a(prod0), .b(prod1), .c(prod2),
-        
-        .sel(window_edge_P),
-        
-        .out(pre_transmission)
-    );
             
     // Subtractor to compute final transmission value
     Subtractor_TE Subtractor_TE (
-        .in(pre_transmission),
+        .in(product),
         .out(transmission)
     );
     
     // SUBTRACTOR MODULES TO COMPUTE (|Ic - Ac|)
     Subtractor_SRSC Sub_Red (
         .Ic(I_R),
-        .Ac(A_R2),
+        .Ac(A_R2_P),
         
         .diff(IR_minus_AR),
         
@@ -442,7 +275,7 @@ module TE_and_SRSC (
                 
     Subtractor_SRSC Sub_Green (
         .Ic(I_G),
-        .Ac(A_G2),
+        .Ac(A_G2_P),
         
         .diff(IG_minus_AG),
         
@@ -451,7 +284,7 @@ module TE_and_SRSC (
             
     Subtractor_SRSC Sub_Blue (
         .Ic(I_B),
-        .Ac(A_B2),
+        .Ac(A_B2_P),
         
         .diff(IB_minus_AB),
         
@@ -485,9 +318,9 @@ module TE_and_SRSC (
         else begin
             transmission_P <= transmission;
             
-            A_R_P <= A_R2;
-            A_G_P <= A_G2;
-            A_B_P <= A_B2;
+            A_R_P <= A_R2_P;
+            A_G_P <= A_G2_P;
+            A_B_P <= A_B2_P;
             
             I_R_P <= I_R;
             I_G_P <= I_G;
@@ -695,32 +528,32 @@ module TE_and_SRSC (
     );
     
     // LOOK-UP TABLES TO COMPUTE Ac ^ ? AND Jc ^ (1 - ?) (? = 0.3)
-    LUT_035 A_R_Correction (
+    LUT_03 A_R_Correction (
         .in(A_R_P2),
         .out(A_R_Corrected)
     );
     
-    LUT_035 A_G_Correction (
+    LUT_03 A_G_Correction (
         .in(A_G_P2),
         .out(A_G_Corrected)
     );
     
-    LUT_035 A_B_Correction (
+    LUT_03 A_B_Correction (
         .in(A_B_P2),
         .out(A_B_Corrected)
     );
     
-    LUT_065 J_R_Correction (
+    LUT_07 J_R_Correction (
         .in(Sum_Red),
         .out(J_R_Corrected)
     );
     
-    LUT_065 J_G_Correction (
+    LUT_07 J_G_Correction (
         .in(Sum_Green),
         .out(J_G_Corrected)
     );
     
-    LUT_065 J_B_Correction (
+    LUT_07 J_B_Correction (
         .in(Sum_Blue),
         .out(J_B_Corrected)
     );
