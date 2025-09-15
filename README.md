@@ -167,7 +167,7 @@ WindowGenerator → ALE → TE → SRSC
 
 | Input Image | Result Image |
 |-------------|--------------|
-| ![canyon_512](https://github.com/user-attachments/assets/b0f36204-ad30-4f53-a093-c8c53ff24914) | ![result_image](https://github.com/user-attachments/assets/daacf042-d2f1-4e66-9532-7a9a8ad99873) |
+| ![canyon_512](https://github.com/user-attachments/assets/b0f36204-ad30-4f53-a093-c8c53ff24914) | ![result_image](https://github.com/user-attachments/assets/2a35c13e-4176-4630-ad66-9814118e3f8d) |
 
 
 | Input Image | Result Image | 
