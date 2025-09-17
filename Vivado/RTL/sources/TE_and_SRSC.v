@@ -89,7 +89,7 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==================================================================================
     
-    // ? = 63/64
+    // ω = 15/16
     parameter OMEGA_D = 4;
     
     wire [7:0] filtered_pixel_red, filtered_pixel_green, filtered_pixel_blue;
@@ -148,7 +148,7 @@ module TE_and_SRSC (
             stage_5_valid <= 0;
         end
         else begin
-            // Apply the scaling factor ? = 63/64 to the Inverse Atmospheric Light values
+            // Apply the scaling factor ω = 63/64 to the Inverse Atmospheric Light values
             Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> OMEGA_D);
             Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> OMEGA_D);
             Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> OMEGA_D);
@@ -189,7 +189,7 @@ module TE_and_SRSC (
     );
     
     // Multiplexer to choose minimum of the filter results
-    Filter_Result_Multiplexer Minimum_Filtered_Pixel_Result (
+    Fc_Multiplexer Minimum_Filtered_Pixel_Result (
         .F_R(filtered_pixel_red_P), .F_G(filtered_pixel_green_P), .F_B(filtered_pixel_blue_P),
         
         .sel(min_val_sel),
@@ -206,7 +206,7 @@ module TE_and_SRSC (
         .Inv_Ac(min_Ac)
     );
     
-    // Multiplier modules to compute Fc * ?/Ac
+    // Multiplier modules to compute Fc * ω/Ac
     Multiplier_TE Fc_InvAc_Multiplier (
         .clk(clk), .rst(rst),
         
@@ -527,7 +527,7 @@ module TE_and_SRSC (
         .out(Sum_Blue)
     );
     
-    // LOOK-UP TABLES TO COMPUTE Ac ^ ? AND Jc ^ (1 - ?) (? = 0.3)
+    // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.3)
     LUT_03 A_R_Correction (
         .in(A_R_P2),
         .out(A_R_Corrected)
@@ -558,7 +558,7 @@ module TE_and_SRSC (
         .out(J_B_Corrected)
     );
                     
-    // MULTIPLIER MODULES TO COMPUTE Ac^? * Jc^(1-?)
+    // MULTIPLIER MODULES TO COMPUTE Ac^β * Jc^(1-β)
     Saturation_Correction_Multiplier Saturation_Correction_Red (
         .clk(clk), .rst(rst),
         
