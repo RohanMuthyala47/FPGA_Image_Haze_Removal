@@ -21,7 +21,7 @@ module Multiplier_SRSC (
         end
     end
     
-    // Q8.0 * Q2.10 = Q10.10
+    // Q8.0 * Q2.12 = Q10.10
     wire [19:0] mult_result = Ic_minus_Ac_P * Inv_Trans_P[13:2];
     
     // Scale down to 8-bit range
