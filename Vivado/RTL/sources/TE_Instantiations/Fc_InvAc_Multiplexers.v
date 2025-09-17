@@ -1,5 +1,5 @@
 // Multiplexer to choose minimum Filtered Pixel Value
-module Filter_Result_Multiplexer (
+module Fc_Multiplexer (
     input  [7:0] F_R, F_G, F_B,
     input  [1:0] sel,
     
