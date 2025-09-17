@@ -5,10 +5,10 @@ module Adder_SRSC (
     
     input        add_or_sub,
 
-    output [7:0] out
+    output [7:0] sum
 );
     
-    assign out = add_or_sub ? (Ic > Ac) ? (Ac - Multiplier_out) : (Ac + Multiplier_out) :
-                                          (Ac > Multiplier_out) ? (Ac - Multiplier_out) : 8'd0;
+    assign sum = add_or_sub ? (Ic > Ac) ? (Ac - Multiplier_out) : (Ac + Multiplier_out) :
+                                          (Ac > Multiplier_out) ? (Ac - Multiplier_out) : 0;
 
 endmodule
