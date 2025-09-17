@@ -17,12 +17,14 @@ module TE_and_SRSC (
 );
 
     // Pipeline the Center Pixel for SRSC
-    reg [23:0] I_0_P, I_1_P, I_2_P;
+    reg [23:0] I_P, I_P1, I_P2, I_P3, I_P4;
     
     // Pipeline Atmospheric Light values for SRSC
-    reg [7:0] A_R0_P, A_G0_P, A_B0_P;
-    reg [7:0] A_R1_P, A_G1_P, A_B1_P;
-    reg [7:0] A_R2_P, A_G2_P, A_B2_P;
+    reg [7:0] A_R_P, A_G_P, A_B_P;
+    reg [7:0] A_R_P1, A_G_P1, A_B_P1;
+    reg [7:0] A_R_P2, A_G_P2, A_B_P2;
+    reg [7:0] A_R_P3, A_G_P3, A_B_P3;
+    reg [7:0] A_R_P4, A_G_P4, A_B_P4;
     
     //==================================================================================
     // STAGE 4 LOGIC
@@ -64,8 +66,8 @@ module TE_and_SRSC (
                 
             Inv_AR_P <= 0; Inv_AG_P <= 0; Inv_AB_P <= 0;
                     
-            I_0_P <= 0;
-            A_R0_P <= 0; A_G0_P <= 0; A_B0_P <= 0;
+            I_P <= 0;
+            A_R_P <= 0; A_G_P <= 0; A_B_P <= 0;
                     
             stage_4_valid <= 0;
         end
@@ -78,8 +80,8 @@ module TE_and_SRSC (
                     
             Inv_AR_P <= Inv_AR; Inv_AG_P <= Inv_AG; Inv_AB_P <= Inv_AB;
 
-            I_0_P <= input_pixel_5;
-            A_R0_P <= A_R; A_G0_P <= A_G; A_B0_P <= A_B;
+            I_P <= input_pixel_5;
+            A_R_P <= A_R; A_G_P <= A_G; A_B_P <= A_B;
                     
             stage_4_valid <= input_valid;
         end
@@ -89,7 +91,7 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==================================================================================
     
-    // ω = 15/16
+    // ? = 63/64
     parameter OMEGA_D = 4;
     
     wire [7:0] filtered_pixel_red, filtered_pixel_green, filtered_pixel_blue;
@@ -142,13 +144,13 @@ module TE_and_SRSC (
             
             filtered_pixel_red_P <= 0; filtered_pixel_green_P <= 0; filtered_pixel_blue_P <= 0;
             
-            I_1_P <= 0;
-            A_R1_P <= 0; A_G1_P <= 0; A_B1_P <= 0;
+            I_P1 <= 0;
+            A_R_P1 <= 0; A_G_P1 <= 0; A_B_P1 <= 0;
             
             stage_5_valid <= 0;
         end
         else begin
-            // Apply the scaling factor ω = 63/64 to the Inverse Atmospheric Light values
+            // Apply the scaling factor ? = 63/64 to the Inverse Atmospheric Light values
             Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> OMEGA_D);
             Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> OMEGA_D);
             Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> OMEGA_D);
@@ -157,9 +159,9 @@ module TE_and_SRSC (
             filtered_pixel_green_P <= filtered_pixel_green;
             filtered_pixel_blue_P <= filtered_pixel_blue;
                                 
-            I_1_P <= I_0_P;
+            I_P1 <= I_P;
                                 
-            A_R1_P <= A_R0_P; A_G1_P <= A_G0_P; A_B1_P <= A_B0_P;
+            A_R_P1 <= A_R_P; A_G_P1 <= A_G_P; A_B_P1 <= A_B_P;
                                 
             stage_5_valid <= stage_4_valid;
         end
@@ -177,6 +179,15 @@ module TE_and_SRSC (
     wire [15:0] min_Ac;
         
     wire [13:0] product;
+        
+    // Compute (Ic - Ac)
+    wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
+    wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
+    wire [7:0]  I_R = I_P1[23:16], I_G = I_P1[15:8], I_B = I_P1[7:0];
+        
+    // Pipeline Registers for stage 6
+    reg  [7:0]  IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
+    reg         add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
     
     reg         stage_6_valid;
     
@@ -189,7 +200,7 @@ module TE_and_SRSC (
     );
     
     // Multiplexer to choose minimum of the filter results
-    Fc_Multiplexer Minimum_Filtered_Pixel_Result (
+    Filter_Result_Multiplexer Minimum_Filtered_Pixel_Result (
         .F_R(filtered_pixel_red_P), .F_G(filtered_pixel_green_P), .F_B(filtered_pixel_blue_P),
         
         .sel(min_val_sel),
@@ -206,7 +217,7 @@ module TE_and_SRSC (
         .Inv_Ac(min_Ac)
     );
     
-    // Multiplier modules to compute Fc * ω/Ac
+    // Multiplier modules to compute Fc * ?/Ac
     Multiplier_TE Fc_InvAc_Multiplier (
         .clk(clk), .rst(rst),
         
@@ -215,19 +226,69 @@ module TE_and_SRSC (
         
         .product(product)
     );
+    
+    // SUBTRACTOR MODULES TO COMPUTE (|Ic - Ac|)
+    Subtractor_SRSC Sub_Red (
+        .Ic(I_R),
+        .Ac(A_R_P1),
+            
+        .Ic_minus_Ac(IR_minus_AR),
+            
+        .add_or_sub(add_or_sub_R)
+    );
+                    
+    Subtractor_SRSC Sub_Green (
+        .Ic(I_G),
+        .Ac(A_G_P1),
+            
+        .Ic_minus_Ac(IG_minus_AG),
+            
+        .add_or_sub(add_or_sub_G)
+    );
+                
+    Subtractor_SRSC Sub_Blue (
+        .Ic(I_B),
+        .Ac(A_B_P1),
+            
+        .Ic_minus_Ac(IB_minus_AB),
+            
+        .add_or_sub(add_or_sub_B)
+    );
     //===========================================
     
     // Update Stage 6 Pipeline Registers
     always @(posedge clk) begin
         if (rst) begin
-            I_2_P <= 0;
-            A_R2_P <= 0; A_G2_P <= 0; A_B2_P <= 0;
+            I_P2 <= 0;
             
+            A_R_P2 <= 0;
+            A_G_P2 <= 0;
+            A_B_P2 <= 0;
+                        
+            IR_minus_AR_P <= 0;
+            IG_minus_AG_P <= 0;
+            IB_minus_AB_P <= 0;
+                        
+            add_or_sub_R_P <= 0;
+            add_or_sub_G_P <= 0;
+            add_or_sub_B_P <= 0;
+
             stage_6_valid <= 0;
         end
         else begin
-            I_2_P <= I_1_P;
-            A_R2_P <= A_R1_P; A_G2_P <= A_G1_P; A_B2_P <= A_B1_P;
+            I_P2 <= I_P1;
+            
+            A_R_P2 <= A_R_P1;
+            A_G_P2 <= A_G_P1;
+            A_B_P2 <= A_B_P1;
+                        
+            IR_minus_AR_P <= IR_minus_AR;
+            IG_minus_AG_P <= IG_minus_AG;
+            IB_minus_AB_P <= IB_minus_AB;
+                       
+            add_or_sub_R_P <= add_or_sub_R;
+            add_or_sub_G_P <= add_or_sub_G;
+            add_or_sub_B_P <= add_or_sub_B;
             
             stage_6_valid <= stage_5_valid;
         end
@@ -236,365 +297,247 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 7 LOGIC
     //==========================================================================
-    // Transmission value in Q0.14
-    wire [13:0] transmission;
     
-    // Compute (|Ic - Ac|)
-    wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
-    wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
-    wire [7:0] I_R = I_2_P[23:16], I_G = I_2_P[15:8], I_B = I_2_P[7:0];
+    wire [13:0] inverse_transmission;
+    
+    // Compute (|Ic-Ac|)*(1/T)
+    wire [7:0]  IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
     
     // Pipeline Registers for stage 7
-    reg [13:0]  transmission_P;
-    
-    reg [7:0]   A_R_P, A_G_P, A_B_P;
-    reg [7:0]   I_R_P, I_G_P, I_B_P;
-    
-    reg [7:0]   IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
-    reg         add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
+    reg         add_or_sub_R_P1, add_or_sub_G_P1, add_or_sub_B_P1;
     
     reg         stage_7_valid;
     
     //===========================================
-            
-    // Subtractor to compute final transmission value
-    Subtractor_TE Subtractor_TE (
-        .in(product),
-        .out(transmission)
-    );
-    
-    // SUBTRACTOR MODULES TO COMPUTE (|Ic - Ac|)
-    Subtractor_SRSC Sub_Red (
-        .Ic(I_R),
-        .Ac(A_R2_P),
-        
-        .diff(IR_minus_AR),
-        
-        .add_or_sub(add_or_sub_R)
-    );
-                
-    Subtractor_SRSC Sub_Green (
-        .Ic(I_G),
-        .Ac(A_G2_P),
-        
-        .diff(IG_minus_AG),
-        
-        .add_or_sub(add_or_sub_G)
-    );
-            
-    Subtractor_SRSC Sub_Blue (
-        .Ic(I_B),
-        .Ac(A_B2_P),
-        
-        .diff(IB_minus_AB),
-        
-        .add_or_sub(add_or_sub_B)
-    );
-    //===========================================
-    
-    // Update Stage 7 Pipeline Registers
-    always @(posedge clk) begin
-        if (rst) begin
-            transmission_P <= 0;
-            
-            A_R_P <= 0;
-            A_G_P <= 0;
-            A_B_P <= 0;
-            
-            I_R_P <= 0;
-            I_G_P <= 0;
-            I_B_P <= 0;
-            
-            IR_minus_AR_P <= 0;
-            IG_minus_AG_P <= 0;
-            IB_minus_AB_P <= 0;
-            
-            add_or_sub_R_P <= 0;
-            add_or_sub_G_P <= 0;
-            add_or_sub_B_P <= 0;
-            
-            stage_7_valid <= 0;
-        end
-        else begin
-            transmission_P <= transmission;
-            
-            A_R_P <= A_R2_P;
-            A_G_P <= A_G2_P;
-            A_B_P <= A_B2_P;
-            
-            I_R_P <= I_R;
-            I_G_P <= I_G;
-            I_B_P <= I_B;
-            
-            IR_minus_AR_P <= IR_minus_AR;
-            IG_minus_AG_P <= IG_minus_AG;
-            IB_minus_AB_P <= IB_minus_AB;
-            
-            add_or_sub_R_P <= add_or_sub_R;
-            add_or_sub_G_P <= add_or_sub_G;
-            add_or_sub_B_P <= add_or_sub_B;
-            
-            stage_7_valid <= stage_6_valid;
-        end
-    end
-                
-    //==========================================================================
-    // STAGE 8 LOGIC
-    //==========================================================================
-                
-    wire [13:0] inverse_transmission;
-
-    // Compute (|Ic-Ac|)*(1/T)
-    wire [7:0]  IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
-
-    // Pipeline Registers for stage 8
-    reg [7:0]   A_R_P1, A_G_P1, A_B_P1;
-    reg [7:0]   I_R_P1, I_G_P1, I_B_P1;
-    
-    reg         add_or_sub_R_P1, add_or_sub_G_P1, add_or_sub_B_P1;
-    
-    reg         stage_8_valid;
-    
-    //===========================================
     // TRANSMISSION RECIPROCAL LOOKUP TABLE
     Transmission_Reciprocal_LUT Transmission_Reciprocal_LUT (
-        .in(transmission_P),
-                        
-        .out(inverse_transmission)
-    );
-                
-    // MULTIPLIER MODULES TO COMPUTE (|Ic-Ac|)*(1/T)
-    Multiplier_SRSC Mult_Red (
-        .clk(clk), .rst(rst),
-        
-        .Inv_Trans(inverse_transmission),
-        .Ic_minus_Ac(IR_minus_AR_P),
-        
-        .result(IR_minus_AR_x_T)
-    );
-                        
-    Multiplier_SRSC Mult_Green (
-        .clk(clk), .rst(rst),
-        
-        .Inv_Trans(inverse_transmission),
-        .Ic_minus_Ac(IG_minus_AG_P),
-        
-        .result(IG_minus_AG_x_T)
+      .in(product),
+                            
+      .out(inverse_transmission)
     );
                     
-    Multiplier_SRSC Mult_Blue (
-        .clk(clk), .rst(rst),
-        
-        .Inv_Trans(inverse_transmission),
-        .Ic_minus_Ac(IB_minus_AB_P),
-        
-        .result(IB_minus_AB_x_T)
+    // MULTIPLIER MODULES TO COMPUTE (|Ic-Ac|)*(1/T)
+    Multiplier_SRSC Multiplier_SRSC_Red (
+      .clk(clk), .rst(rst),
+            
+      .Inv_Trans(inverse_transmission),
+      .Ic_minus_Ac(IR_minus_AR_P),
+            
+      .result(IR_minus_AR_x_T)
+    );
+                            
+    Multiplier_SRSC Multiplier_SRSC_Green (
+      .clk(clk), .rst(rst),
+            
+      .Inv_Trans(inverse_transmission),
+      .Ic_minus_Ac(IG_minus_AG_P),
+            
+      .result(IG_minus_AG_x_T)
+    );
+                        
+    Multiplier_SRSC Multiplier_SRSC_Blue (
+      .clk(clk), .rst(rst),
+            
+      .Inv_Trans(inverse_transmission),
+      .Ic_minus_Ac(IB_minus_AB_P),
+            
+      .result(IB_minus_AB_x_T)
     );
     //===========================================
-    
-    // Update stage 8 pipeline registers
+        
+    // Update stage 7 pipeline registers
     always @(posedge clk) begin
-        if (rst) begin        
-            A_R_P1 <= 0;
-            A_G_P1 <= 0;
-            A_B_P1 <= 0;
-            
-            I_R_P1 <= 0;
-            I_G_P1 <= 0;
-            I_B_P1 <= 0;
-            
+        if (rst) begin
+            I_P3 <= 0;
+      
+            A_R_P3 <= 0;
+            A_G_P3 <= 0;
+            A_B_P3 <= 0;
+
             add_or_sub_R_P1 <= 0;
             add_or_sub_G_P1 <= 0;
             add_or_sub_B_P1 <= 0;
-            
-            stage_8_valid <= 0;
+        
+            stage_7_valid <= 0;
         end
-        else begin       
-            A_R_P1 <= A_R_P;
-            A_G_P1 <= A_G_P;
-            A_B_P1 <= A_B_P;
-            
-            I_R_P1 <= I_R_P;
-            I_G_P1 <= I_G_P;
-            I_B_P1 <= I_B_P;
-            
+        else begin
+            I_P3 <= I_P2;
+      
+            A_R_P3 <= A_R_P2;
+            A_G_P3 <= A_G_P2;
+            A_B_P3 <= A_B_P2;
+
             add_or_sub_R_P1 <= add_or_sub_R_P;
             add_or_sub_G_P1 <= add_or_sub_G_P;
             add_or_sub_B_P1 <= add_or_sub_B_P;
             
-            stage_8_valid <= stage_7_valid;
+            stage_7_valid <= stage_6_valid;
         end
     end
-    
+
     //==========================================================================
-    // STAGE 9 LOGIC
+    // STAGE 8 LOGIC
     //==========================================================================
     
-    // Pipeline Registers for stage 9
-    reg [7:0]  A_R_P2, A_G_P2, A_B_P2;
-    reg [7:0]  I_R_P2, I_G_P2, I_B_P2;
+    // Pipeline Registers for stage 8
     reg [7:0]  Mult_Red_P, Mult_Green_P, Mult_Blue_P;
     
     reg        add_or_sub_R_P2, add_or_sub_G_P2, add_or_sub_B_P2;
     
-    reg        stage_9_valid;
-    
-    // Update stage 9 pipeline registers
+    reg        stage_8_valid;
+        
+    // Update stage 8 pipeline registers
     always @(posedge clk) begin
-        if (rst) begin
-            A_R_P2 <= 0;
-            A_G_P2 <= 0;
-            A_B_P2 <= 0;
-            
-            I_R_P2 <= 0;
-            I_G_P2 <= 0;
-            I_B_P2 <= 0;
-            
-            add_or_sub_R_P2 <= 0;
-            add_or_sub_G_P2 <= 0;
-            add_or_sub_B_P2 <= 0;
-            
-            Mult_Red_P <= 0;
-            Mult_Green_P <= 0;
-            Mult_Blue_P <= 0;
-            
-            stage_9_valid <= 0;
-        end
-        else begin
-            A_R_P2 <= A_R_P1;
-            A_G_P2 <= A_G_P1;
-            A_B_P2 <= A_B_P1;
-            
-            I_R_P2 <= I_R_P1;
-            I_G_P2 <= I_G_P1;
-            I_B_P2 <= I_B_P1;
-            
-            add_or_sub_R_P2 <= add_or_sub_R_P1;
-            add_or_sub_G_P2 <= add_or_sub_G_P1;
-            add_or_sub_B_P2 <= add_or_sub_B_P1;
-            
-            Mult_Red_P <= IR_minus_AR_x_T;
-            Mult_Green_P <= IG_minus_AG_x_T;
-            Mult_Blue_P <= IB_minus_AB_x_T;
-            
-            stage_9_valid <= stage_8_valid;
-        end
+      if (rst) begin
+        A_R_P4 <= 0;
+        A_G_P4 <= 0;
+        A_B_P4 <= 0;
+                
+        I_P4 <= 0;
+                
+        add_or_sub_R_P2 <= 0;
+        add_or_sub_G_P2 <= 0;
+        add_or_sub_B_P2 <= 0;
+                
+        Mult_Red_P <= 0;
+        Mult_Green_P <= 0;
+        Mult_Blue_P <= 0;
+                
+        stage_8_valid <= 0;
+      end
+      else begin
+        A_R_P4 <= A_R_P3;
+        A_G_P4 <= A_G_P3;
+        A_B_P4 <= A_B_P3;
+                
+        I_P4 <= I_P3;
+                
+        add_or_sub_R_P2 <= add_or_sub_R_P1;
+        add_or_sub_G_P2 <= add_or_sub_G_P1;
+        add_or_sub_B_P2 <= add_or_sub_B_P1;
+                
+        Mult_Red_P <= IR_minus_AR_x_T;
+        Mult_Green_P <= IG_minus_AG_x_T;
+        Mult_Blue_P <= IB_minus_AB_x_T;
+                
+        stage_8_valid <= stage_7_valid;
+      end
     end
-    
+        
     //==========================================================================
-    // STAGE 10 LOGIC
+    // STAGE 9 LOGIC
     //==========================================================================
-    
+        
     // Compute Ac +/- (|Ic-Ac|/T)
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
-    
+        
     // Outputs of Look-Up Tables for Saturation Corection
     wire [11:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [11:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
-
-    // Pipeline Registers for stage 10
-    reg       stage_10_valid;
     
+    // Pipeline Registers for stage 9
+    reg       stage_9_valid;
+        
     //===========================================
     // ADDER BLOCKS TO COMPUTE Ac +/- (|Ic-Ac|/T)
     Adder_SRSC Add_Red (
-        .Ac(A_R_P2),
-        .Ic(I_R_P2),
-        .Multiplier_out(Mult_Red_P),
-         
-        .add_or_sub(add_or_sub_R_P2),
-         
-        .out(Sum_Red)
+      .Ac(A_R_P4),
+      .Ic(I_P4[23:16]),
+      .Multiplier_out(Mult_Red_P),
+             
+      .add_or_sub(add_or_sub_R_P2),
+             
+      .sum(Sum_Red)
     );
-                         
+                             
     Adder_SRSC Add_Green (
-        .Ac(A_G_P2),
-        .Ic(I_G_P2),
-        .Multiplier_out(Mult_Green_P),
-         
-        .add_or_sub(add_or_sub_G_P2),
-         
-        .out(Sum_Green)
+      .Ac(A_G_P4),
+      .Ic(I_P4[15:8]),
+      .Multiplier_out(Mult_Green_P),
+      
+      .add_or_sub(add_or_sub_G_P2),
+             
+      .sum(Sum_Green)
     );
-                         
+                             
     Adder_SRSC Add_Blue (
-        .Ac(A_B_P2),
-        .Ic(I_B_P2),
-        .Multiplier_out(Mult_Blue_P),
-         
-        .add_or_sub(add_or_sub_B_P2),
-         
-        .out(Sum_Blue)
+      .Ac(A_B_P4),
+      .Ic(I_P4[7:0]),
+      .Multiplier_out(Mult_Blue_P),
+      
+      .add_or_sub(add_or_sub_B_P2),
+             
+      .sum(Sum_Blue)
     );
-    
-    // LOOK-UP TABLES TO COMPUTE Ac ^ β AND Jc ^ (1 - β) (β = 0.3)
+        
+    // LOOK-UP TABLES TO COMPUTE Ac ^ ? AND Jc ^ (1 - ?) (? = 0.3)
     LUT_03 A_R_Correction (
-        .in(A_R_P2),
-        .out(A_R_Corrected)
+      .in(A_R_P4),
+      .out(A_R_Corrected)
     );
-    
+        
     LUT_03 A_G_Correction (
-        .in(A_G_P2),
-        .out(A_G_Corrected)
+      .in(A_G_P4),
+      .out(A_G_Corrected)
     );
-    
+        
     LUT_03 A_B_Correction (
-        .in(A_B_P2),
-        .out(A_B_Corrected)
+      .in(A_B_P4),
+      .out(A_B_Corrected)
     );
     
     LUT_07 J_R_Correction (
-        .in(Sum_Red),
-        .out(J_R_Corrected)
+      .in(Sum_Red),
+      .out(J_R_Corrected)
     );
-    
+        
     LUT_07 J_G_Correction (
-        .in(Sum_Green),
-        .out(J_G_Corrected)
+      .in(Sum_Green),
+      .out(J_G_Corrected)
+    );
+        
+    LUT_07 J_B_Correction (
+      .in(Sum_Blue),
+      .out(J_B_Corrected)
     );
     
-    LUT_07 J_B_Correction (
-        .in(Sum_Blue),
-        .out(J_B_Corrected)
-    );
-                    
-    // MULTIPLIER MODULES TO COMPUTE Ac^β * Jc^(1-β)
+    // MULTIPLIER MODULES TO COMPUTE Ac^? * Jc^(1-?)
     Saturation_Correction_Multiplier Saturation_Correction_Red (
-        .clk(clk), .rst(rst),
-        
-        .x1(A_R_Corrected), .x2(J_R_Corrected),
-        
-        .result(J_R)
+      .clk(clk), .rst(rst),
+      
+      .x1(A_R_Corrected), .x2(J_R_Corrected),
+      
+      .result(J_R)
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Green (
-        .clk(clk), .rst(rst),
-        
-        .x1(A_G_Corrected), .x2(J_G_Corrected),
-        
-        .result(J_G)
+      .clk(clk), .rst(rst),
+            
+      .x1(A_G_Corrected), .x2(J_G_Corrected),
+            
+      .result(J_G)
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Blue (
-        .clk(clk), .rst(rst),
-        
-        .x1(A_B_Corrected), .x2(J_B_Corrected),
-        
-        .result(J_B)
+      .clk(clk), .rst(rst),
+    
+      .x1(A_B_Corrected), .x2(J_B_Corrected),
+            
+      .result(J_B)
     );
     //===========================================
-    
-    // Update stage 10 pipeline registers
+        
+    // Update stage 9 pipeline registers
     always @(posedge clk) begin
-        if (rst) begin
-            stage_10_valid <= 0;
-        end
-        else begin
-            stage_10_valid <= stage_9_valid;
-        end
+      if (rst) begin
+        stage_9_valid <= 0;
+      end
+      else begin
+        stage_9_valid <= stage_8_valid;
+      end
     end
-
-    // Stage 11 assignments
-    assign output_valid = stage_10_valid;
+    
+    // Stage 10 assignments
+    assign output_valid = stage_9_valid;
 
 endmodule
