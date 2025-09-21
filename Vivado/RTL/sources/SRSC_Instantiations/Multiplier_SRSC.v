@@ -2,7 +2,7 @@ module Multiplier_SRSC (
     input clk, rst,
     
     input  [7:0]  Ic_minus_Ac, // Q8.0
-    input  [9:0] Inv_Trans,   // Q2.10
+    input  [9:0] Inv_Trans,   // Q2.8
     
     output [7:0]  result       // Q8.0
 );
