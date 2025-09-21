@@ -298,7 +298,7 @@ module TE_and_SRSC (
     // STAGE 7 LOGIC
     //==========================================================================
     
-    wire [13:0] inverse_transmission;
+    wire [11:0] inverse_transmission;
     
     // Compute (|Ic-Ac|)*(1/T)
     wire [7:0]  IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
