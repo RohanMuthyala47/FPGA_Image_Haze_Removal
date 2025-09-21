@@ -21,7 +21,7 @@ module ALE (
     
     output [13:0] Inv_A_R,
     output [13:0] Inv_A_G,
-    output [13:0] Inv_A_B,        // Inverse Atmospheric Light Values (Q0.16)
+    output [13:0] Inv_A_B,        // Inverse Atmospheric Light Values (Q0.14)
     
     output        ALE_done            // Signal to indicate entire image has been processed
 );
@@ -153,7 +153,7 @@ module ALE (
         .minimum(Dark_channel)
     );
     
-    // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.16 format
+    // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.12 format
     Atmospheric_Light_Reciprocal_LUT Red_Atmospheric_Light_ReciprocalLUT (
         .in(Dark_channel_Red),
         
