@@ -190,7 +190,7 @@ module TE_and_SRSC (
     
     wire [13:0] min_Ac;
         
-    wire [13:0] product;
+    wire [11:0] product;
         
     // Compute (Ic - Ac)
     wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
@@ -310,7 +310,7 @@ module TE_and_SRSC (
     // STAGE 7 LOGIC
     //==========================================================================
     
-    wire [11:0] inverse_transmission;
+    wire [9:0] inverse_transmission;
     
     // Compute (|Ic-Ac|)*(1/T)
     wire [7:0]  IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
@@ -323,7 +323,7 @@ module TE_and_SRSC (
     //===========================================
     // TRANSMISSION RECIPROCAL LOOKUP TABLE
     Transmission_Reciprocal_LUT Transmission_Reciprocal_LUT (
-      .in(product),
+      .in(product[11:2]),
                             
       .out(inverse_transmission)
     );
@@ -444,8 +444,8 @@ module TE_and_SRSC (
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
         
     // Outputs of Look-Up Tables for Saturation Corection
-    wire [11:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
-    wire [11:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
+    wire [9:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
+    wire [9:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
     
     // Pipeline Registers for stage 9
     reg       stage_9_valid;
@@ -517,25 +517,25 @@ module TE_and_SRSC (
     Saturation_Correction_Multiplier Saturation_Correction_Red (
       .clk(clk), .rst(rst),
       
-      .x1(A_R_Corrected), .x2(J_R_Corrected),
+      .Ac(A_R_Corrected), .Jc(J_R_Corrected),
       
-      .result(J_R)
+      .Corrected_Pixel(J_R)
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Green (
       .clk(clk), .rst(rst),
             
-      .x1(A_G_Corrected), .x2(J_G_Corrected),
+      .Ac(A_G_Corrected), .Jc(J_G_Corrected),
             
-      .result(J_G)
+      .Corrected_Pixel(J_G)
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Blue (
       .clk(clk), .rst(rst),
     
-      .x1(A_B_Corrected), .x2(J_B_Corrected),
+      .Ac(A_B_Corrected), .Jc(J_B_Corrected),
             
-      .result(J_B)
+      .Corrected_Pixel(J_B)
     );
     //===========================================
         
