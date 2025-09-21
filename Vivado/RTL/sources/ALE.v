@@ -19,9 +19,9 @@ module ALE (
     output [7:0]  A_G,
     output [7:0]  A_B,            // Atmospheric Light Values
     
-    output [15:0] Inv_A_R,
-    output [15:0] Inv_A_G,
-    output [15:0] Inv_A_B,        // Inverse Atmospheric Light Values(Q0.16)
+    output [13:0] Inv_A_R,
+    output [13:0] Inv_A_G,
+    output [13:0] Inv_A_B,        // Inverse Atmospheric Light Values (Q0.16)
     
     output        ALE_done            // Signal to indicate entire image has been processed
 );
@@ -51,9 +51,9 @@ module ALE (
     
     always @(posedge clk) begin
         if(rst) begin
-            minimum_red_P <= 8'd0;
-            minimum_green_P <= 8'd0;
-            minimum_blue_P <= 8'd0;
+            minimum_red_P <= 0;
+            minimum_green_P <= 0;
+            minimum_blue_P <= 0;
         end
         else begin
             minimum_red_P <= minimum_red;
@@ -68,7 +68,7 @@ module ALE (
     // Pipeline Registers (Stage 2)
     reg [7:0]  Dark_channel_P;
     reg [7:0]  AR_P, AG_P, AB_P;
-    reg [15:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
+    reg [13:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
     
     wire [7:0] Dark_channel_Red, Dark_channel_Green, Dark_channel_Blue;
     
@@ -77,19 +77,19 @@ module ALE (
     assign Dark_channel_Blue = (Dark_channel > Dark_channel_P) ? minimum_blue_P : AB_P;
     
     // LUT outputs
-    wire [15:0] LUT_Inv_AR, LUT_Inv_AG, LUT_Inv_AB;
+    wire [13:0] LUT_Inv_AR, LUT_Inv_AG, LUT_Inv_AB;
     
     always @(posedge clk) begin
         if(rst) begin
             Dark_channel_P <= 8'd0;
             
-            AR_P <= 8'd0;
-            AG_P <= 8'd0;
-            AB_P <= 8'd0;
+            AR_P <= 0;
+            AG_P <= 0;
+            AB_P <= 0;
             
-            Inv_AR_P <= 16'd0;
-            Inv_AG_P <= 16'd0;
-            Inv_AB_P <= 16'd0;
+            Inv_AR_P <= 0;
+            Inv_AG_P <= 0;
+            Inv_AB_P <= 0;
         end
         else begin
             Dark_channel_P <= (Dark_channel > Dark_channel_P) ? Dark_channel : Dark_channel_P;
@@ -145,7 +145,7 @@ module ALE (
     );
     
     // Calculate minimum among the three channels to get Dark Channel
-    ALE_Minimum_3 Dark_Channel (
+    ALE_Minimum_3 Dark_Channel_Pixel (
         .R(minimum_red_P),
         .G(minimum_green_P), 
         .B(minimum_blue_P),
@@ -154,22 +154,22 @@ module ALE (
     );
     
     // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.16 format
-    ATM_LUT Inverse_Red (
-        .in_val(Dark_channel_Red),
+    Atmospheric_Light_Reciprocal_LUT Red_Atmospheric_Light_ReciprocalLUT (
+        .in(Dark_channel_Red),
         
-        .out_val(LUT_Inv_AR)
+        .out(LUT_Inv_AR)
     );
     
-    ATM_LUT Inverse_Green (
-        .in_val(Dark_channel_Green),
+    Atmospheric_Light_Reciprocal_LUT Green_Atmospheric_Light_ReciprocalLUT (
+        .in(Dark_channel_Green),
         
-        .out_val(LUT_Inv_AG)
+        .out(LUT_Inv_AG)
     );
     
-    ATM_LUT Inverse_Blue (
-        .in_val(Dark_channel_Blue),
+    Atmospheric_Light_Reciprocal_LUT Blue_Atmospheric_Light_ReciprocalLUT (
+        .in(Dark_channel_Blue),
         
-        .out_val(LUT_Inv_AB)
+        .out(LUT_Inv_AB)
     );
     
 endmodule
