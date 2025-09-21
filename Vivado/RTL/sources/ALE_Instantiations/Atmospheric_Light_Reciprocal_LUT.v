@@ -1,10 +1,10 @@
 module Atmospheric_Light_Reciprocal_LUT (
-    input       [7:0] in,  // Input Atmospheric Light Value Ac
-    output reg [13:0] out  // Atmospheric Light Reciprocal 1/Ac in Q0.14 fixed point format
+    input      [7:0] in,
+    output reg [13:0] out
 );
 
     always @(*) begin
-        casez (in)
+        case (in)
             8'd  1: out = 14'd16383;  // 1/1 ? 1.00000000
             8'd  2: out = 14'd 8192;  // 1/2 ? 0.50000000
             8'd  3: out = 14'd 5461;  // 1/3 ? 0.33333333
