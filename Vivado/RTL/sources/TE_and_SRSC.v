@@ -10,7 +10,7 @@ module TE_and_SRSC (
                  input_pixel_7, input_pixel_8, input_pixel_9, // 3x3 window input
     
     input  [7:0] A_R, A_G, A_B,                               // Atmospheric Light Values
-    input [15:0] Inv_AR, Inv_AG, Inv_AB,                      // Inverse Atmospheric Light Values(Q0.16)
+    input [13:0] Inv_AR, Inv_AG, Inv_AB,                      // Inverse Atmospheric Light Values(Q0.14)
 
     output [7:0] J_R, J_G, J_B,                               // Output corrected pixels
     output       output_valid                                 // Output data valid signal
@@ -36,7 +36,7 @@ module TE_and_SRSC (
     // Pipeline Registers
     reg [1:0] window_edge_P;
     
-    reg [15:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
+    reg [13:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
     
     reg [23:0] I1_P, I2_P, I3_P,
                I4_P, I5_P, I6_P,
@@ -97,7 +97,7 @@ module TE_and_SRSC (
     wire [7:0] filtered_pixel_red, filtered_pixel_green, filtered_pixel_blue;
     
     // Pipeline Registers
-    reg [15:0] Inv_AR_P1, Inv_AG_P1, Inv_AB_P1;
+    reg [13:0] Inv_AR_P1, Inv_AG_P1, Inv_AB_P1;
     
     reg [7:0] filtered_pixel_red_P, filtered_pixel_green_P, filtered_pixel_blue_P;
     
@@ -176,7 +176,7 @@ module TE_and_SRSC (
     
     wire [7:0] min_Fc;
     
-    wire [15:0] min_Ac;
+    wire [13:0] min_Ac;
         
     wire [13:0] product;
         
@@ -200,7 +200,7 @@ module TE_and_SRSC (
     );
     
     // Multiplexer to choose minimum of the filter results
-    Filter_Result_Multiplexer Minimum_Filtered_Pixel_Result (
+    Fc_Multiplexer Minimum_Filtered_Pixel_Value (
         .F_R(filtered_pixel_red_P), .F_G(filtered_pixel_green_P), .F_B(filtered_pixel_blue_P),
         
         .sel(min_val_sel),
