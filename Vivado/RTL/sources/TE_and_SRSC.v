@@ -31,10 +31,10 @@ module TE_and_SRSC (
     //==================================================================================
     
     // Detect the type of edge in the 3x3 window
-    wire [1:0] ed1, ed2, ed3;
+    wire       corner_pixels_weight, edge_pixels_weight, center_pixel_weight;
     
     // Pipeline Registers
-    reg [1:0] window_edge_P;
+    reg        corner_pixels_weight_P, edge_pixels_weight_P, center_pixel_weight_P;
     
     reg [13:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
     
@@ -46,19 +46,23 @@ module TE_and_SRSC (
     
     //===========================================
     // Detect the type of edge in the 3x3 window
-    ED_Top EdgeDetection (
+    FilterWeights_Estimation_Top Estimate_FilterWeights (
         .input_pixel_1(input_pixel_1), .input_pixel_2(input_pixel_2), .input_pixel_3(input_pixel_3),
         .input_pixel_4(input_pixel_4),                                .input_pixel_6(input_pixel_6), 
         .input_pixel_7(input_pixel_7), .input_pixel_8(input_pixel_8), .input_pixel_9(input_pixel_9),
         
-        .ED1_out(ed1), .ED2_out(ed2), .ED3_out(ed3)
+        .corner_pixels_weight(corner_pixels_weight),
+        .edge_pixels_weight(edge_pixels_weight),
+        .center_pixel_weight(center_pixel_weight)
     );
     //===========================================
     
     // Update Stage 4 Pipeline Registers
     always @(posedge clk) begin
         if (rst) begin
-            window_edge_P <= 0;
+            corner_pixels_weight_P <= 0;
+            edge_pixels_weight_P   <= 0;
+            center_pixel_weight_P  <= 0;
         
             I1_P <= 0; I2_P <= 0; I3_P <= 0;
             I4_P <= 0; I5_P <= 0; I6_P <= 0;
@@ -72,7 +76,9 @@ module TE_and_SRSC (
             stage_4_valid <= 0;
         end
         else begin
-            window_edge_P <= (ed1 > ed2) ? ((ed1 > ed3) ? ed1 : ed3) : ((ed2 > ed3) ? ed2 : ed3);
+            corner_pixels_weight_P <= corner_pixels_weight;
+            edge_pixels_weight_P   <= edge_pixels_weight;
+            center_pixel_weight_P  <= center_pixel_weight;
         
             I1_P <= input_pixel_1; I2_P <= input_pixel_2; I3_P <= input_pixel_3;
             I4_P <= input_pixel_4; I5_P <= input_pixel_5; I6_P <= input_pixel_6;
@@ -91,7 +97,7 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==================================================================================
     
-    // ? = 63/64
+    // ? = 15/16
     parameter OMEGA_D = 4;
     
     wire [7:0] filtered_pixel_red, filtered_pixel_green, filtered_pixel_blue;
@@ -106,7 +112,9 @@ module TE_and_SRSC (
     //===========================================
     // Filter blocks to apply Gaussian Filter or Mean Filter based on the edge detected
     WindowFilter Red_WindowFilter (
-        .window_edge(window_edge_P),
+        .w_corner(corner_pixels_weight_P),
+        .w_edge(edge_pixels_weight_P),
+        .w_center(center_pixel_weight_P),
     
         .input_pixel_1(I1_P[23:16]), .input_pixel_2(I2_P[23:16]), .input_pixel_3(I3_P[23:16]),
         .input_pixel_4(I4_P[23:16]), .input_pixel_5(I5_P[23:16]), .input_pixel_6(I6_P[23:16]),
@@ -116,7 +124,9 @@ module TE_and_SRSC (
     );
                    
     WindowFilter Green_WindowFilter (
-        .window_edge(window_edge_P),
+        .w_corner(corner_pixels_weight_P),
+        .w_edge(edge_pixels_weight_P),
+        .w_center(center_pixel_weight_P),
 
         .input_pixel_1(I1_P[15:8]), .input_pixel_2(I2_P[15:8]), .input_pixel_3(I3_P[15:8]),
         .input_pixel_4(I4_P[15:8]), .input_pixel_5(I5_P[15:8]), .input_pixel_6(I6_P[15:8]),
@@ -126,7 +136,9 @@ module TE_and_SRSC (
     );
                    
     WindowFilter Blue_WindowFilter (
-        .window_edge(window_edge_P),
+        .w_corner(corner_pixels_weight_P),
+        .w_edge(edge_pixels_weight_P),
+        .w_center(center_pixel_weight_P),
 
         .input_pixel_1(I1_P[7:0]), .input_pixel_2(I2_P[7:0]), .input_pixel_3(I3_P[7:0]),
         .input_pixel_4(I4_P[7:0]), .input_pixel_5(I5_P[7:0]), .input_pixel_6(I6_P[7:0]),
