@@ -190,7 +190,7 @@ module TE_and_SRSC (
     
     wire [13:0] min_Ac;
         
-    wire [11:0] product;
+    wire [9:0] product;
         
     // Compute (Ic - Ac)
     wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
@@ -323,7 +323,7 @@ module TE_and_SRSC (
     //===========================================
     // TRANSMISSION RECIPROCAL LOOKUP TABLE
     Transmission_Reciprocal_LUT Transmission_Reciprocal_LUT (
-      .in(product[11:2]),
+      .in(product),
                             
       .out(inverse_transmission)
     );
