@@ -1,23 +1,23 @@
-// Compute Ac^β * Jc^(1-β)
+// Compute Ac^Î² * Jc^(1-Î²)
 module Saturation_Correction_Multiplier (
-    input         clk, rst, 
-    input  [11:0] x1,       // Q3.9 format
-    input  [11:0] x2,       // Q6.6 format
-    output [7:0]  result    // *-bit result
+    input clk, rst, 
+    input   [9:0] Ac,       // Q3.7 format
+    input   [9:0] Jc,       // Q6.4 format
+    output  [7:0] Corrected_Pixel    // Unsigned 8-bit output
 );
     
-    reg [11:0] x1_P, x2_P;
+    reg [9:0] Ac_P, Jc_P;
     
-    wire [23:0] product;
+    wire [19:0] product;
     
     always @(posedge clk) begin
-            x1_P <= x1;
-            x2_P <= x2;
+            Ac_P <= Ac;
+            Jc_P <= Jc;
     end
     
-    assign product = x1_P * x2_P; // Q9.15
-    
+    assign product = Ac_P * Jc_P; // Q9.11
+
     // Scale down to 8 bit value
-    assign result = (product[23:15] > 8'd255) ? 8'd255 : product[22:15];
+    assign Corrected_Pixel = product[18:11];
     
 endmodule
