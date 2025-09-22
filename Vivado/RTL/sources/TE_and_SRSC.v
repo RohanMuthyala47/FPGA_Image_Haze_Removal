@@ -162,7 +162,7 @@ module TE_and_SRSC (
             stage_5_valid <= 0;
         end
         else begin
-            // Apply the scaling factor ? = 63/64 to the Inverse Atmospheric Light values
+            // Apply the scaling factor ? = 15/16 to the Inverse Atmospheric Light vValues
             Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> OMEGA_D);
             Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> OMEGA_D);
             Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> OMEGA_D);
