@@ -7,9 +7,9 @@ module Fc_Multiplexer (
 );
     
     assign Fc = (sel == 2'b00) ? F_R : 
-                 (sel == 2'b01) ? F_G : 
-                 (sel == 2'b10) ? F_B : 
-                 0;
+                (sel == 2'b01) ? F_G : 
+                (sel == 2'b10) ? F_B : 
+                0;
     
 endmodule
 
@@ -22,8 +22,8 @@ module Inv_Ac_Multiplexer (
 );
     
     assign Inv_Ac = (sel == 2'b00) ? Inv_AR : 
-                 (sel == 2'b01) ? Inv_AG : 
-                 (sel == 2'b10) ? Inv_AB : 
-                 0;
+                    (sel == 2'b01) ? Inv_AG : 
+                    (sel == 2'b10) ? Inv_AB : 
+                    0;
     
 endmodule
