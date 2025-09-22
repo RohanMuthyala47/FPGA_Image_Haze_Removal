@@ -4,7 +4,7 @@ module ALE (
     input         clk,
     input         rst,
     
-    input         input_valid, // Input data valid signal
+    input         input_valid,    // Input data valid signal
     input [23:0]  input_pixel_1,
     input [23:0]  input_pixel_2,
     input [23:0]  input_pixel_3,
@@ -23,7 +23,7 @@ module ALE (
     output [13:0] Inv_A_G,
     output [13:0] Inv_A_B,        // Inverse Atmospheric Light Values (Q0.14)
     
-    output        ALE_done            // Signal to indicate entire image has been processed
+    output        ALE_done        // Signal to indicate entire image has been processed
 );
 
     reg [17:0] pixel_counter;
@@ -38,7 +38,7 @@ module ALE (
         else if (input_valid) begin
             pixel_counter <= pixel_counter + 1;
             if (pixel_counter == (`Image_Size - 1)) begin
-                done_reg <= 1;                            // All pixels have been processed through the ALE module
+                done_reg <= 1;    // All pixels have been processed through the ALE module
             end
         end
     end
