@@ -20,6 +20,6 @@ module WindowFilter (
     assign mean_sum = sum >> 3;
 
     // Normalization
-    assign filtered_pixel = (w_center) ? (sum >> 4) : ((mean_sum) - (mean_sum >> 3));
+    assign filtered_pixel = (w_center) ? (mean_sum >> 1) : ((mean_sum) - (mean_sum >> 3));
 
 endmodule
