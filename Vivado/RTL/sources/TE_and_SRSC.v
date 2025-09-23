@@ -162,7 +162,7 @@ module TE_and_SRSC (
             stage_5_valid <= 0;
         end
         else begin
-            // Apply the scaling factor ? = 15/16 to the Inverse Atmospheric Light vValues
+            // Apply the scaling factor ? = 63/64 to the Inverse Atmospheric Light values
             Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> OMEGA_D);
             Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> OMEGA_D);
             Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> OMEGA_D);
@@ -190,7 +190,7 @@ module TE_and_SRSC (
     
     wire [13:0] min_Ac;
         
-    wire [9:0] product;
+    wire [7:0] product;
         
     // Compute (Ic - Ac)
     wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
@@ -310,7 +310,7 @@ module TE_and_SRSC (
     // STAGE 7 LOGIC
     //==========================================================================
     
-    wire [9:0] inverse_transmission;
+    wire [7:0] inverse_transmission;
     
     // Compute (|Ic-Ac|)*(1/T)
     wire [7:0]  IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
