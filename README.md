@@ -68,15 +68,15 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 
 - Estimates pixel-wise haze using:  
   `t(x)=1 − ω min c∈{R,G,B} (Pc / Ac)`  
-- ω = 0.984375 is implemented as a constant  
-- All operations use Q0.16 fixed-point arithmetic
+- ω = 0.9375 is implemented as a constant  
+- All operations use fixed-point arithmetic
 
 ### 4. **SRSC (Scene Recovery and Saturation Correction)**
 
 - Computes:  
   `J(x) = {(I(x) - A) / max(t(x), t₀)} + A`  
 - Handles division using reciprocal lookup  
-- Ensures `t(x) ≥ t₀ = 0.35` (Q0.16)  
+- Ensures `t(x) ≥ t₀ = 0.35`  
 - Produces a sharp output image with the haze eliminated
 
 ---
@@ -118,7 +118,7 @@ WindowGenerator → ALE → TE → SRSC
 - Dark channel estimation with comparator trees  
 - Fixed-point multiplication and shifting operations to reduce hardware and execution time
 - Transmission floor control (`t₀ = 0.35`)  
-- Fully pipelined 11-stage architecture
+- Fully pipelined 10-stage architecture
 - Clock Gating for the ALE and TE_SRSC modules to reduce power consumption
 - Synthesizable on ZedBoard FPGA  
 - Modular, reusable Verilog architecture  
@@ -221,5 +221,5 @@ You are free to fork, contribute, and build upon this project under the terms of
 
 ## About
 
-**Hardware Accelerator Design | February–July 2025**  
+**Hardware Accelerator Design | March–September 2025**  
 Designed a complete image dehazing pipeline based on the Dark Channel Prior algorithm using pipelined Verilog modules, optimized for fixed-point hardware on FPGA.
