@@ -40,40 +40,56 @@ def guided_filter(I, p, r, eps):
     return mean_a * I + mean_b
 
 
-def dehaze_image(hazy_img, patch_size=15, omega=0.9, t0=0.1, r=60, eps=0.001):
+def dehaze_image(hazy_img, patch_size=15, omega=0.9375, t0=0.1, r=60, eps=0.003):
     dark_channel = get_dark_channel(hazy_img, patch_size)
     A = estimate_atmospheric_light(hazy_img, dark_channel)
 
     raw_transmission = 1 - omega * dark_channel
-    gray_img = cv2.cvtColor(hazy_img, cv2.COLOR_BGR2GRAY) / 255.0
+    gray_img = cv2.cvtColor((hazy_img*255).astype(np.uint8), cv2.COLOR_RGB2GRAY) / 255.0
     refined_transmission = guided_filter(gray_img, raw_transmission, r, eps)
 
     refined_transmission = np.maximum(refined_transmission, t0)
+
     dehazed_img = (hazy_img - A) / refined_transmission[..., None] + A
     dehazed_img = np.clip(dehazed_img, 0, 1)
 
-    return dehazed_img
+    return dehazed_img, refined_transmission
 
 
 # Load the hazy image
-hazy_img = cv2.imread("path_to/image.jpg")
-hazy_img = cv2.cvtColor(hazy_img, cv2.COLOR_BGR2RGB)  # Convert color first
-hazy_img = hazy_img.astype(np.float32) / 255.0  # Convert to float32 (not float64)
+# r"C:\Users\Rohan\Downloads\archive\RESIDE-6K\training\hazy\4.jpg"
+# r"C:\Users\Rohan\Documents\Images\newyork.jpg"
+hazy_img = cv2.imread(r"C:\Users\Rohan\Documents\Images\canyon.jpg")
+hazy_img = cv2.cvtColor(hazy_img, cv2.COLOR_BGR2RGB)
+hazy_img = hazy_img.astype(np.float32) / 255.0
 
-
-dehaized_img = dehaze_image(hazy_img)
+# Dehaze
+dehazed_img, transmission_map = dehaze_image(hazy_img)
 
 # Display results
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(40,18))
+
 plt.subplot(1, 3, 1)
 plt.imshow(hazy_img)
 plt.title("Hazy Image")
 plt.axis("off")
 
 plt.subplot(1, 3, 2)
-plt.imshow(dehaized_img)
+plt.imshow(dehazed_img)
 plt.title("Dehazed Image")
 plt.axis("off")
 
+plt.subplot(1, 3, 3)
+plt.imshow(transmission_map, cmap='gray')
+plt.title("Transmission Map")
+plt.axis("off")
 
 plt.show()
+
+# Convert back to 0–255 uint8
+output_img = (dehazed_img * 255).astype(np.uint8)
+
+# Save as JPG using OpenCV
+# cv2.imwrite(r"C:\Users\Rohan\Documents\Images\dehazed_town.jpg", cv2.cvtColor(output_img, cv2.COLOR_RGB2BGR))
+
+
