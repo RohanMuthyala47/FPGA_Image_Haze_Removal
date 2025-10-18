@@ -15,10 +15,10 @@ endmodule
 
 // Multiplexer to choose minimum Atmospheric Light Value
 module Inv_Ac_Multiplexer (
-    input  [13:0] Inv_AR, Inv_AG, Inv_AB,
+    input  [9:0] Inv_AR, Inv_AG, Inv_AB,
     input  [1:0]  sel,
     
-    output [13:0] Inv_Ac
+    output [9:0] Inv_Ac
 );
     
     assign Inv_Ac = (sel == 2'b00) ? Inv_AR : 
