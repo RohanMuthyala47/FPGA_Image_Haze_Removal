@@ -2,9 +2,9 @@
  * @file Image_HazeRemoval.v
  * @brief Top-level module for real-time image haze removal processing
  * @description This module implements a complete haze removal pipeline using atmospheric
- *              scattering models. The system processes streaming data through AXI4-Stream
+ *              scattering models. The system processes streaming video data through AXI4-Stream
  *              interfaces and performs atmospheric light estimation, transmission map calculation,
- *              and scene recovery with saturation correction.
+ *              and scene radiance recovery with saturation correction.
  * 
  * @author Rohan M.
  * @date 15th July 2025
@@ -118,8 +118,8 @@ module Image_HazeRemoval (
     // Global atmospheric light values for each RGB channel
     // Used in atmospheric scattering model: I = J*t + A*(1-t)
     //==================================================================================
-    wire [7:0] A_R, A_G, A_B;           /**< Atmospheric light RGB values (0-255) */
-    wire [15:0] Inv_AR, Inv_AG, Inv_AB; /**< Inverse atmospheric light values
+    wire [7:0] A_R, A_G, A_B;    /**< Atmospheric light RGB values (0-255) */
+    wire [9:0] Inv_AR, Inv_AG, Inv_AB; /**< Inverse atmospheric light values
                                               Pre-calculated for division optimization
                                               Fixed-point format for hardware efficiency */
 
@@ -130,7 +130,7 @@ module Image_HazeRemoval (
     //==================================================================================
     ALE ALE (
         .clk(ALE_clk),                          // Dedicated gated clock
-        .rst(~ARESETn),                         // Active-high reset
+        .rst(~ARESETn),                         // Active-low reset
         
         // Input: 3x3 pixel windows for analysis
         .input_valid(window_valid),
@@ -149,7 +149,7 @@ module Image_HazeRemoval (
     // Transmission Estimation and Scene Recovery Control Signals  
     // TE_SRSC runs after ALE completion using estimated atmospheric parameters
     //==================================================================================
-    wire TE_SRSC_clk;               /**< Gated clock for TE_SRSC module */
+    wire TE_SRSC_clk;            /**< Gated clock for TE_SRSC module */
     wire TE_SRSC_enable = ALE_done; /**< Enable TE_SRSC only after ALE completes */
     
     //==================================================================================
@@ -160,7 +160,7 @@ module Image_HazeRemoval (
     wire output_valid;           /**< Output validity signal */
     
     // Pack output RGB into AXI4-Stream format (upper 8 bits unused)
-    assign M_AXIS_TDATA = {8'd0, J_R, J_G, J_B};
+    assign M_AXIS_TDATA = {8'd0000_0000, J_R, J_G, J_B};
     
     //==================================================================================
     // Transmission Estimation, Scene Recovery and Saturation Correction Instance
@@ -169,7 +169,7 @@ module Image_HazeRemoval (
     //==================================================================================
     TE_and_SRSC TE_SRSC (
         .clk(TE_SRSC_clk),                      // Dedicated gated clock
-        .rst(~ARESETn),                         // Active-high reset
+        .rst(~ARESETn),                         // Active-low reset
         
         // Input: 3x3 pixel windows for processing
         .input_valid(window_valid),
@@ -178,11 +178,11 @@ module Image_HazeRemoval (
         .input_pixel_7(Pixel_20), .input_pixel_8(Pixel_21), .input_pixel_9(Pixel_22),
         
         // Atmospheric light parameters from ALE
-        .A_R(A_R), .A_G(A_G), .A_B(A_B),                   // Direct values for computation
+        .A_R(A_R), .A_G(A_G), .A_B(A_B),       // Direct values for computation
         .Inv_AR(Inv_AR), .Inv_AG(Inv_AG), .Inv_AB(Inv_AB), // Inverse values for optimization
         
         // Output: Processed pixel data
-        .J_R(J_R), .J_G(J_G), .J_B(J_B),        // Dehazed RGB values
+        .J_R(J_R), .J_G(J_G), .J_B(J_B),       // Dehazed RGB values
         .output_valid(M_AXIS_TVALID)            // Output validity (connected to AXI)
     );
 
