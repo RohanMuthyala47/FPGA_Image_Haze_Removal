@@ -1,39 +1,39 @@
 // Atmospheric Light Estimation Module
 `define Image_Size (512 * 512)
 module ALE (
-    input        clk,
-    input        rst,
+    input wire        clk, rst,
     
-    input        input_valid,    // Input data valid signal
-    input [23:0] input_pixel_1, input_pixel_2, input_pixel_3,
-                 input_pixel_4, input_pixel_5, input_pixel_6,
-                 input_pixel_7, input_pixel_8, input_pixel_9,  // 3x3 window input
+    input wire        input_valid,                                 // Input data valid signal
+    input wire [23:0] input_pixel_1, input_pixel_2, input_pixel_3,
+                      input_pixel_4, input_pixel_5, input_pixel_6,
+                      input_pixel_7, input_pixel_8, input_pixel_9, // 3x3 window input
     
-    output [7:0] A_R,
-    output [7:0] A_G,
-    output [7:0] A_B,            // Atmospheric Light Values
+    output reg [7:0]  A_R,
+    output reg [7:0]  A_G,
+    output reg [7:0]  A_B,            // Atmospheric Light Values
     
-    output [9:0] Inv_A_R,
-    output [9:0] Inv_A_G,
-    output [9:0] Inv_A_B,        // Inverse Atmospheric Light Values (Fixed Point Q0.10)
+    output reg [9:0]  Inv_A_R,
+    output reg [9:0]  Inv_A_G,
+    output reg [9:0]  Inv_A_B,        // Inverse Atmospheric Light Values (Q0.14)
     
-    output       ALE_done        // Signal to indicate entire image has been processed
+    output reg        ALE_done            // Signal to indicate entire image has been processed
 );
 
-    reg [17:0]   pixel_counter;
-    reg          done_reg;
-
+    reg [17:0] PixelCounter;
+    
     // Keep track of the number of pixels processed through the module
     always @(posedge clk) begin
-        if (rst) begin
-            pixel_counter <= 0;
-            done_reg <= 0;
-        end
-        if (input_valid) begin
-            pixel_counter <= pixel_counter + 1;
-            if (pixel_counter == (`Image_Size - 1))
-                done_reg <= 1;                     // All pixels have been processed through the ALE module
-        end
+        if (rst)
+            PixelCounter <= 0;
+        if (input_valid)
+            PixelCounter <= PixelCounter + 1;
+    end
+    
+    always @(posedge clk) begin
+        if (rst)
+            ALE_done <= 0;
+        if(PixelCounter == (`Image_Size - 1))
+            ALE_done <= 1;    // All pixels have been processed through the ALE module
     end
     
     // Minimum of 9 - R/G/B channels
@@ -52,45 +52,33 @@ module ALE (
     wire [7:0] Dark_channel;
     
     // Pipeline Registers (Stage 2)
-    reg [7:0]  Dark_channel_P = 0;
-    reg [7:0]  AR_P, AG_P, AB_P;
-    reg [9:0] Inv_AR_P, Inv_AG_P, Inv_AB_P;
+    reg [7:0]  Dark_channel_P;
     
     wire [7:0] Dark_channel_Red, Dark_channel_Green, Dark_channel_Blue;
     
-    assign Dark_channel_Red = (Dark_channel > Dark_channel_P) ? minimum_red_P : AR_P;
-    assign Dark_channel_Green = (Dark_channel > Dark_channel_P) ? minimum_green_P : AG_P;
-    assign Dark_channel_Blue = (Dark_channel > Dark_channel_P) ? minimum_blue_P : AB_P;
+    assign Dark_channel_Red = (Dark_channel > Dark_channel_P) ? minimum_red_P : A_R;
+    assign Dark_channel_Green = (Dark_channel > Dark_channel_P) ? minimum_green_P : A_G;
+    assign Dark_channel_Blue = (Dark_channel > Dark_channel_P) ? minimum_blue_P : A_B;
     
     // LUT outputs
     wire [9:0] LUT_Inv_AR, LUT_Inv_AG, LUT_Inv_AB;
     
     always @(posedge clk) begin
         if(rst)
-            Dark_channel_P <= 8'd0;
-        else begin
+            Dark_channel_P <= 0;
+        else
             Dark_channel_P <= (Dark_channel > Dark_channel_P) ? Dark_channel : Dark_channel_P;
-            
-            AR_P <= Dark_channel_Red;
-            AG_P <= Dark_channel_Green;
-            AB_P <= Dark_channel_Blue;
-            
-            Inv_AR_P <= LUT_Inv_AR;
-            Inv_AG_P <= LUT_Inv_AG;
-            Inv_AB_P <= LUT_Inv_AB;
-        end
     end
     
-    // Output wire assignments
-    assign A_R = AR_P;
-    assign A_G = AG_P;
-    assign A_B = AB_P;
-    
-    assign Inv_A_R = Inv_AR_P;
-    assign Inv_A_G = Inv_AG_P;
-    assign Inv_A_B = Inv_AB_P;
-    
-    assign ALE_done = done_reg;
+    always @(posedge clk) begin
+        A_R <= Dark_channel_Red;
+        A_G <= Dark_channel_Green;
+        A_B <= Dark_channel_Blue;
+            
+        Inv_A_R <= LUT_Inv_AR;
+        Inv_A_G <= LUT_Inv_AG;
+        Inv_A_B <= LUT_Inv_AB;
+    end
 
     /////////////////////////////////////////////////////////////////////////////////
     // BLOCK INSTANCES
@@ -130,7 +118,7 @@ module ALE (
         .minimum(Dark_channel)
     );
     
-    // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.10 format
+    // Look-Up Tables to output the reciprocal of the Atmospheric Light values in Q0.12 format
     Atmospheric_Light_Reciprocal_LUT Red_Atmospheric_Light_ReciprocalLUT (
         .in(Dark_channel_Red),
         
