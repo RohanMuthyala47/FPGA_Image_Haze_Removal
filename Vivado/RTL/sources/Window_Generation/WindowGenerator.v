@@ -1,75 +1,48 @@
 module WindowGenerator (
-    input             clk,
-    input             rst,
+    input             clk, rst,
     
-    input [23:0]      input_pixel_1,
-    input [23:0]      input_pixel_2,
-    input [23:0]      input_pixel_3,
+    input [23:0]      input_pixel_1, input_pixel_2, input_pixel_3,
     input             input_is_valid,
 
-    output reg [23:0] output_pixel_1,
-    output reg [23:0] output_pixel_2,
-    output reg [23:0] output_pixel_3,
-    output reg [23:0] output_pixel_4,
-    output reg [23:0] output_pixel_5,
-    output reg [23:0] output_pixel_6,
-    output reg [23:0] output_pixel_7,
-    output reg [23:0] output_pixel_8,
-    output reg [23:0] output_pixel_9,
+    output reg [23:0] output_pixel_1, output_pixel_2, output_pixel_3,
+                      output_pixel_4, output_pixel_5, output_pixel_6,
+                      output_pixel_7, output_pixel_8, output_pixel_9,
+    
     output            output_is_valid
 );
 
     localparam Rows = 512, Columns = 512;
     
-    reg [7:0]  PixelCounter;
+    reg [1:0]  PixelCounter;
     reg [23:0] p1, p2, p3, p4, p5, p6, p7, p8, p9;
     
-    reg [9:0] Row_counter, Column_counter;
+    reg [9:0]  Row_counter, Column_counter;
     
-    always @(posedge clk)
-    begin
+    always @(posedge clk) begin
         if(rst)
             PixelCounter <= 0;
-        else
-        begin
-            if(input_is_valid) begin
-                PixelCounter <= (PixelCounter == 2) ? PixelCounter : PixelCounter + 1;
-            end
+        else if(input_is_valid) begin
+            PixelCounter <= (PixelCounter[1]) ? PixelCounter : PixelCounter + 1;
         end
     end
     
-    always @(posedge clk)
-    begin
-        if(rst)
-        begin
-            Row_counter <= 0;
+    always @(posedge clk) begin
+        if(rst) begin
+            Row_counter    <= 0;
             Column_counter <= 0;
-        end else
-        begin
-            if(output_is_valid) begin
-                Column_counter <= (Column_counter == Columns - 1) ? 0 : Column_counter + 1;
-                        
-                if(Column_counter == Columns - 1) begin
-                    Row_counter <= (Row_counter == Rows - 1) ? 0 : Row_counter + 1;
-                end
-            end
+        end
+        else if(output_is_valid) begin
+            Column_counter  <= (Column_counter == Columns - 1) ? 0 : Column_counter + 1;
+            if(Column_counter == Columns - 1)
+                Row_counter <= (Row_counter == Rows - 1) ? 0 : Row_counter + 1;
         end
     end
     
-    always @(posedge clk)
-    begin
-        if(rst)
-        begin
-            p1 <= 0; p2 <= 0; p3 <= 0;
-            p4 <= 0; p5 <= 0; p6 <= 0;
-            p7 <= 0; p8 <= 0; p9 <= 0;
-        end else
-        begin
-            if(input_is_valid) begin
-                p1 <= p2; p2 <= p3; p3 <= input_pixel_3;
-                p4 <= p5; p5 <= p6; p6 <= input_pixel_2;
-                p7 <= p8; p8 <= p9; p9 <= input_pixel_1;
-            end
+    always @(posedge clk) begin
+        if(input_is_valid) begin
+            p1 <= p2; p2 <= p3; p3 <= input_pixel_3;
+            p4 <= p5; p5 <= p6; p6 <= input_pixel_2;
+            p7 <= p8; p8 <= p9; p9 <= input_pixel_1;
         end
     end
     
