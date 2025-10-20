@@ -26,7 +26,7 @@ def generate_verilog_lut_module(power, int_bits, frac_bits, module_name, filenam
         f.write("        endcase\n")
         f.write("    end\n")
         f.write("endmodule\n")
-    print(f"✅ Generated {filename} for {module_name} (x^{power}, Q{int_bits}.{frac_bits})")
+    print(f"Generated {filename} for {module_name} (x^{power}, Q{int_bits}.{frac_bits})")
 
 # Generate LUT for x^0.35 in Q3.9 (12 bits)
 generate_verilog_lut_module(0.35, 3, 9, "LUT_035", "LUT_035_Q3_9.v")
