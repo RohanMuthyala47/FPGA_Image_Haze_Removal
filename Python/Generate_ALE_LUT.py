@@ -1,5 +1,5 @@
 def generate_reciprocal_lut_q0_10():
-    print("module ReciprocalLUT_Q0_10 (")
+    print("module Atmospheric_Light_Reciprocal_LUT (")
     print("    input  [7:0] in,")
     print("    output reg [9:0] out")
     print(");")
@@ -12,7 +12,7 @@ def generate_reciprocal_lut_q0_10():
         fixed_point = int(round(reciprocal * (1 << 10)))  # Q0.10 format
         print(f"            8'd{i:3}: out = 10'd{fixed_point:4};  // 1/{i} ≈ {reciprocal:.8f}")
 
-    print("            default: out = 10'd0;  // undefined for 0")
+    print("            default: out = 10'd1023; // undefined for 0")
     print("        endcase")
     print("    end")
     print()
