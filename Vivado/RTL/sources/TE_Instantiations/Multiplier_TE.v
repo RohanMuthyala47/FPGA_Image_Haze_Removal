@@ -1,27 +1,21 @@
-// Compute ω * Pc / Ac
+// Compute Pc * 1/Ac
+(* use_dsp = "yes" *)
 module Multiplier_TE (
     input        clk,
     
-    input  [7:0] Fc,     // Filter result
-    input  [9:0] Inv_Ac, // Scaled Inverted Atmospheric Light value in Q0.10 format (ω * 1/Ac) 
+    input  [7:0] Fc,     // Filtered Pixel Value
+    input  [9:0] Inv_Ac, // Scaled Inverted Atmospheric Light value in Fixed Point Q0.10
     
-    output [9:0] product // ω * min(Pc / Ac) ; c ∈ {R, G, B} in Q0.10 format
+    output [9:0] product // min(Pc / Ac) ; c ∈ {R, G, B} in Fixed Point Q0.10
 );
-    
-    // Pipeline registers
-    reg [7:0] Fc_P;
-    reg [9:0] Inv_Ac_P;
-    
-    (* use_dsp = "yes" *)
-    wire [17:0] result;
+
+    reg [12:0] result_upper_P, result_lower_P;
     
     always @(posedge clk) begin
-        Fc_P <= Fc;
-        Inv_Ac_P <= Inv_Ac;
+        result_lower_P  <= Fc * Inv_Ac[4:0];
+        result_upper_P  <= Fc * Inv_Ac[9:5];
     end
     
-    assign result = Fc_P * Inv_Ac_P;    //Q8.10
-    // Scale down to Fixed Point Q0.10
-    assign product = result[9:0];
+    assign product = (result_upper_P[4:0] << 5) + result_lower_P;
             
 endmodule
