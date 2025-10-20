@@ -1,11 +1,11 @@
 module Transmission_Reciprocal_LUT (
-    input      [9:0] in,  // Q0.10 input (ranges from 0 to 0.65)
-    output reg [7:0] out  // Q2.6 reciprocal output (ranges from 1 to 2.857)
+    input  [9:0] in,      // Q0.10 transmission value (ranges from 0 to 0.65)
+    output reg [7:0] out  // Q2.6 reciprocal
 );
 
-    always @(*) begin
-        casez(in)
-            10'd   0: out = 8'h40;
+    always @(*) begin 
+        casez (in) 
+            10'd   0: out = 8'h40; 
             10'd   1: out = 8'h40;
             10'd   2: out = 8'h40;
             10'd   3: out = 8'h40;
@@ -675,5 +675,4 @@ module Transmission_Reciprocal_LUT (
             default:  out = 8'hB8;
         endcase
     end
-    
 endmodule
