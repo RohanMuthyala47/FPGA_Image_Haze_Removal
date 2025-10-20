@@ -2,29 +2,28 @@
 `define Image_Size (512 * 512)
 module TE_and_SRSC (
     input        clk,
-    input        rst,
     
     input        input_valid,                                 // Input data valid signal
     input [23:0] input_pixel_1, input_pixel_2, input_pixel_3,
                  input_pixel_4, input_pixel_5, input_pixel_6,
                  input_pixel_7, input_pixel_8, input_pixel_9, // 3x3 window input
     
-    input  [7:0] A_R, A_G, A_B,                               // Atmospheric Light Values
-    input  [9:0] Inv_AR, Inv_AG, Inv_AB,                      // Inverse Atmospheric Light Values(Fixed Point Q0.10)
+    input [7:0]  A_R, A_G, A_B,                               // Atmospheric Light Values
+    input [9:0]  Inv_AR, Inv_AG, Inv_AB,                      // Inverse Atmospheric Light Values(Q0.10)
 
     output [7:0] J_R, J_G, J_B,                               // Output corrected pixels
-    output reg   output_valid                                 // Output data valid signal
+    output       output_valid                                 // Output data valid signal
 );
 
     // Pipeline the Center Pixel for SRSC
     reg [23:0] I_P, I_P1, I_P2, I_P3, I_P4;
     
     // Pipeline Atmospheric Light values for SRSC
-    reg [7:0] A_R_P, A_G_P, A_B_P;
-    reg [7:0] A_R_P1, A_G_P1, A_B_P1;
-    reg [7:0] A_R_P2, A_G_P2, A_B_P2;
-    reg [7:0] A_R_P3, A_G_P3, A_B_P3;
-    reg [7:0] A_R_P4, A_G_P4, A_B_P4;
+    reg [7:0]  A_R_P, A_G_P, A_B_P;
+    reg [7:0]  A_R_P1, A_G_P1, A_B_P1;
+    reg [7:0]  A_R_P2, A_G_P2, A_B_P2;
+    reg [7:0]  A_R_P3, A_G_P3, A_B_P3;
+    reg [7:0]  A_R_P4, A_G_P4, A_B_P4;
     
     //==================================================================================
     // STAGE 4 LOGIC
@@ -45,7 +44,7 @@ module TE_and_SRSC (
     reg        stage_4_valid;
     
     //===========================================
-    // COMPUTE THE KERNEL WEIGHTS FOR CONVOLUTION
+    // Detect the type of edge in the 3x3 window
     FilterWeights_Estimation_Top Estimate_FilterWeights (
         .input_pixel_1(input_pixel_1), .input_pixel_2(input_pixel_2), .input_pixel_3(input_pixel_3),
         .input_pixel_4(input_pixel_4),                                .input_pixel_6(input_pixel_6), 
@@ -67,9 +66,7 @@ module TE_and_SRSC (
         I4_P <= input_pixel_4; I5_P <= input_pixel_5; I6_P <= input_pixel_6;
         I7_P <= input_pixel_7; I8_P <= input_pixel_8; I9_P <= input_pixel_9;
                     
-        Inv_AR_P <= Inv_AR;
-        Inv_AG_P <= Inv_AG;
-        Inv_AB_P <= Inv_AB;
+        Inv_AR_P <= Inv_AR; Inv_AG_P <= Inv_AG; Inv_AB_P <= Inv_AB;
 
         I_P <= input_pixel_5;
         
@@ -84,20 +81,17 @@ module TE_and_SRSC (
     // STAGE 5 LOGIC
     //==================================================================================
     
-    // ω = 15/16
-    parameter OMEGA_D = 4;
-    
     wire [7:0] filtered_pixel_red, filtered_pixel_green, filtered_pixel_blue;
     
     // Pipeline Registers
-    reg [9:0] Inv_AR_P1, Inv_AG_P1, Inv_AB_P1;
+    reg [9:0]  Inv_AR_P1, Inv_AG_P1, Inv_AB_P1;
     
-    reg [7:0] filtered_pixel_red_P, filtered_pixel_green_P, filtered_pixel_blue_P;
+    reg [7:0]  filtered_pixel_red_P, filtered_pixel_green_P, filtered_pixel_blue_P;
     
-    reg stage_5_valid;
+    reg        stage_5_valid;
     
     //===========================================
-    // FILTER BLOCKS TO FOR CONVOLUTION
+    // Filter blocks to apply Gaussian Filter or Mean Filter based on the edge detected
     WindowFilter Red_WindowFilter (
         .w_corner(corner_pixels_weight_P),
         .w_edge(edge_pixels_weight_P),
@@ -137,21 +131,21 @@ module TE_and_SRSC (
     
     // Update Stage 5 Pipeline Registers 
     always @(posedge clk) begin
-        // Apply the scaling factor ω = 15/16 to the Inverse Atmospheric Light values
-        Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> OMEGA_D);
-        Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> OMEGA_D);
-        Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> OMEGA_D);
-        
+        // Apply the scaling factor 15/16 to the Inverse Atmospheric Light values
+        Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> 4);
+        Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> 4);
+        Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> 4);
+            
         filtered_pixel_red_P   <= filtered_pixel_red;
         filtered_pixel_green_P <= filtered_pixel_green;
         filtered_pixel_blue_P  <= filtered_pixel_blue;
-        
+                                
         I_P1 <= I_P;
-        
-        A_R_P1 <= A_R_P; 
-        A_G_P1 <= A_G_P;
+                                
+        A_R_P1 <= A_R_P;
+        A_G_P1 <= A_G_P; 
         A_B_P1 <= A_B_P;
-        
+                                
         stage_5_valid <= stage_4_valid;
     end
     
@@ -160,34 +154,35 @@ module TE_and_SRSC (
     //==========================================================================
     
     // Select signal for minimum filter result
-    wire  [1:0] min_val_sel;
+    wire [1:0] min_val_sel;
     
-    wire [7:0]  min_Fc;
+    wire [7:0] min_Fc;
     
-    wire [9:0]  min_Ac;
+    wire [9:0] min_Ac;
+        
+    wire [9:0] product;
+        
+    // (Ic - Ac) Result
+    wire [7:0] IR_minus_AR, IG_minus_AG, IB_minus_AB;
+    wire       add_or_sub_R, add_or_sub_G, add_or_sub_B;
     
-    wire [9:0]  product;
-    
-    // Compute (Ic - Ac)
-    wire [7:0]  IR_minus_AR, IG_minus_AG, IB_minus_AB;
-    wire        add_or_sub_R, add_or_sub_G, add_or_sub_B;
-    wire [7:0]  I_R = I_P1[23:16], I_G = I_P1[15:8], I_B = I_P1[7:0];
-    
+    wire [7:0] I_R = I_P1[23:16], I_G = I_P1[15:8], I_B = I_P1[7:0];
+        
     // Pipeline Registers for stage 6
-    reg  [7:0]  IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
-    reg         add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
+    reg  [7:0] IR_minus_AR_P, IG_minus_AG_P, IB_minus_AB_P;
+    reg        add_or_sub_R_P, add_or_sub_G_P, add_or_sub_B_P;
     
-    reg         stage_6_valid;
+    reg        stage_6_valid;
     
     //===========================================
-    // COMPARATOR TO DETERMINE THE SMALLEST VALUE OF THE FILTER RESULTS
+    // Comparator to determine the minimum value of the filter results
     Comparator_Minimum Minimum_Filter_Select (
         .red(filtered_pixel_red_P), .green(filtered_pixel_green_P), .blue(filtered_pixel_blue_P),
         
         .min_val_sel(min_val_sel)
     );
     
-    // MULTIPLEXER TO CHOOSE THE SMALLEST FILTER RESULT
+    // Multiplexer to choose minimum of the filter results
     Fc_Multiplexer Minimum_Filtered_Pixel_Value (
         .F_R(filtered_pixel_red_P), .F_G(filtered_pixel_green_P), .F_B(filtered_pixel_blue_P),
         
@@ -196,7 +191,7 @@ module TE_and_SRSC (
         .Fc(min_Fc)
     );
     
-    // MULTIPLEXER TO CHOOSE THE SMALLEST ATMOSPHERIC LIGHT VALUE
+    // Multiplexer to choose minimum of Atmospheric Light values
     Inv_Ac_Multiplexer Minimum_Inv_ALE_Value (
         .Inv_AR(Inv_AR_P1), .Inv_AG(Inv_AG_P1), .Inv_AB(Inv_AB_P1),
         
@@ -205,12 +200,11 @@ module TE_and_SRSC (
         .Inv_Ac(min_Ac)
     );
     
-    // COMPUTE Fc * ω/Ac
+    // Multiplier modules to compute Fc * Ac (Scaled)
     Multiplier_TE Multiplier_TE (
         .clk(clk),
         
-        .Fc(min_Fc),
-        .Inv_Ac(min_Ac),
+        .Fc(min_Fc), .Inv_Ac(min_Ac),
         
         .product(product)
     );
@@ -267,9 +261,9 @@ module TE_and_SRSC (
     // STAGE 7 LOGIC
     //==========================================================================
     
-    wire [7:0] inverse_transmission;
+    wire [7:0] transmission_reciprocal;
     
-    // Compute (|Ic-Ac|)*(1/T)
+    // (|Ic-Ac|)*(1/T) Result
     wire [7:0] IR_minus_AR_x_T, IG_minus_AG_x_T, IB_minus_AB_x_T;
     
     // Pipeline Registers for stage 7
@@ -280,37 +274,37 @@ module TE_and_SRSC (
     //===========================================
     // TRANSMISSION RECIPROCAL LOOKUP TABLE
     Transmission_Reciprocal_LUT Transmission_Reciprocal_LUT (
-      .in(product),
+        .in(product),
                             
-      .out(inverse_transmission)
+        .out(transmission_reciprocal)
     );
                     
     // MULTIPLIER MODULES TO COMPUTE (|Ic-Ac|)*(1/T)
     Multiplier_SRSC Multiplier_SRSC_Red (
-      .clk(clk),
+        .clk(clk), 
             
-      .Inv_Trans(inverse_transmission),
-      .Ic_minus_Ac(IR_minus_AR_P),
+        .Inv_Trans(transmission_reciprocal), 
+        .Ic_minus_Ac(IR_minus_AR_P), 
             
-      .result(IR_minus_AR_x_T)
+        .product(IR_minus_AR_x_T) 
     );
                             
     Multiplier_SRSC Multiplier_SRSC_Green (
-      .clk(clk),
+        .clk(clk), 
+             
+        .Inv_Trans(transmission_reciprocal), 
+        .Ic_minus_Ac(IG_minus_AG_P), 
             
-      .Inv_Trans(inverse_transmission),
-      .Ic_minus_Ac(IG_minus_AG_P),
-            
-      .result(IG_minus_AG_x_T)
-    );
+        .product(IG_minus_AG_x_T) 
+    ); 
                         
     Multiplier_SRSC Multiplier_SRSC_Blue (
-      .clk(clk),
+        .clk(clk), 
             
-      .Inv_Trans(inverse_transmission),
-      .Ic_minus_Ac(IB_minus_AB_P),
+        .Inv_Trans(transmission_reciprocal), 
+        .Ic_minus_Ac(IB_minus_AB_P), 
             
-      .result(IB_minus_AB_x_T)
+        .product(IB_minus_AB_x_T) 
     );
     //===========================================
         
@@ -334,27 +328,23 @@ module TE_and_SRSC (
     //==========================================================================
     
     // Pipeline Registers for stage 8
-    reg [7:0]  Mult_Red_P, Mult_Green_P, Mult_Blue_P;
+    reg [7:0] Mult_Red_P, Mult_Green_P, Mult_Blue_P;
     
-    reg        add_or_sub_R_P2, add_or_sub_G_P2, add_or_sub_B_P2;
+    reg       add_or_sub_R_P2, add_or_sub_G_P2, add_or_sub_B_P2;
     
-    reg        stage_8_valid;
+    reg       stage_8_valid;
         
     // Update stage 8 pipeline registers
     always @(posedge clk) begin
         A_R_P4 <= A_R_P3;
         A_G_P4 <= A_G_P3;
         A_B_P4 <= A_B_P3;
-                
+        
         I_P4 <= I_P3;
-                
+        
         add_or_sub_R_P2 <= add_or_sub_R_P1;
         add_or_sub_G_P2 <= add_or_sub_G_P1;
         add_or_sub_B_P2 <= add_or_sub_B_P1;
-                
-        Mult_Red_P   <= IR_minus_AR_x_T;
-        Mult_Green_P <= IG_minus_AG_x_T;
-        Mult_Blue_P  <= IB_minus_AB_x_T;
                 
         stage_8_valid <= stage_7_valid;
     end
@@ -362,108 +352,111 @@ module TE_and_SRSC (
     //==========================================================================
     // STAGE 9 LOGIC
     //==========================================================================
-    
+        
+    // Compute Ac +/- (|Ic-Ac|/T)
     wire [7:0] Sum_Red, Sum_Green, Sum_Blue;
         
     // Outputs of Look-Up Tables for Saturation Corection
     wire [9:0] J_R_Corrected, J_G_Corrected, J_B_Corrected;
     wire [9:0] A_R_Corrected, A_G_Corrected, A_B_Corrected;
+    
+    // Pipeline Registers for stage 9
+    reg        stage_9_valid;
         
     //===========================================
-    // ADDER BLOCKS TO COMPUTE Jc = Ac +/- (|Ic-Ac|/T)
+    // ADDER BLOCKS TO COMPUTE Ac +/- (|Ic-Ac|/T)
     Adder_SRSC Add_Red (
-      .Ac(A_R_P4),
-      .Ic(I_P4[23:16]),
-      .Multiplier_out(Mult_Red_P),
+        .Ac(A_R_P4), 
+        .Ic(I_P4[23:16]), 
+        .Multiplier_out(IR_minus_AR_x_T), 
              
-      .add_or_sub(add_or_sub_R_P2),
+        .add_or_sub(add_or_sub_R_P2), 
              
-      .sum(Sum_Red)
+        .sum(Sum_Red) 
     );
                              
     Adder_SRSC Add_Green (
-      .Ac(A_G_P4),
-      .Ic(I_P4[15:8]),
-      .Multiplier_out(Mult_Green_P),
+        .Ac(A_G_P4), 
+        .Ic(I_P4[15:8]), 
+        .Multiplier_out(IG_minus_AG_x_T), 
       
-      .add_or_sub(add_or_sub_G_P2),
+        .add_or_sub(add_or_sub_G_P2), 
              
-      .sum(Sum_Green)
+        .sum(Sum_Green) 
     );
                              
     Adder_SRSC Add_Blue (
-      .Ac(A_B_P4),
-      .Ic(I_P4[7:0]),
-      .Multiplier_out(Mult_Blue_P),
+        .Ac(A_B_P4), 
+        .Ic(I_P4[7:0]), 
+        .Multiplier_out(IB_minus_AB_x_T), 
       
-      .add_or_sub(add_or_sub_B_P2),
-             
-      .sum(Sum_Blue)
+        .add_or_sub(add_or_sub_B_P2), 
+              
+        .sum(Sum_Blue) 
     );
         
-    // LOOK-UP TABLES TO COMPUTE Ac^β AND Jc^(1-β) (β = 0.3)
+    // LOOK-UP TABLES TO COMPUTE Ac ^ 0.3 AND Jc ^ 0.7
     LUT_03 A_R_Correction (
-      .in(A_R_P4),
-      .out(A_R_Corrected)
+        .in(A_R_P4), 
+        .out(A_R_Corrected) 
     );
         
     LUT_03 A_G_Correction (
-      .in(A_G_P4),
-      .out(A_G_Corrected)
+        .in(A_G_P4), 
+        .out(A_G_Corrected) 
     );
         
     LUT_03 A_B_Correction (
-      .in(A_B_P4),
-      .out(A_B_Corrected)
-    );
+        .in(A_B_P4), 
+        .out(A_B_Corrected) 
+    ); 
     
     LUT_07 J_R_Correction (
-      .in(Sum_Red),
-      .out(J_R_Corrected)
+        .in(Sum_Red), 
+        .out(J_R_Corrected) 
     );
         
     LUT_07 J_G_Correction (
-      .in(Sum_Green),
-      .out(J_G_Corrected)
+        .in(Sum_Green), 
+        .out(J_G_Corrected) 
     );
         
     LUT_07 J_B_Correction (
-      .in(Sum_Blue),
-      .out(J_B_Corrected)
+        .in(Sum_Blue), 
+        .out(J_B_Corrected) 
     );
     
-    // MULTIPLIER MODULES TO COMPUTE Ac^β * Jc^(1-β)
+    // MULTIPLIER MODULES TO COMPUTE Ac^0.3 * Jc^0.7
     Saturation_Correction_Multiplier Saturation_Correction_Red (
-      .clk(clk),
+        .clk(clk), 
       
-      .Ac(A_R_Corrected),
-      .Jc(J_R_Corrected),
+        .Ac(A_R_Corrected), .Jc(J_R_Corrected), 
       
-      .Corrected_Pixel(J_R)
+        .Corrected_Pixel(J_R) 
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Green (
-      .clk(clk),
+        .clk(clk), 
             
-      .Ac(A_G_Corrected), 
-      .Jc(J_G_Corrected),
+        .Ac(A_G_Corrected), .Jc(J_G_Corrected), 
             
-      .Corrected_Pixel(J_G)
+        .Corrected_Pixel(J_G) 
     );
     
     Saturation_Correction_Multiplier Saturation_Correction_Blue (
-      .clk(clk),
+        .clk(clk), 
     
-      .Ac(A_B_Corrected),
-      .Jc(J_B_Corrected),
+        .Ac(A_B_Corrected), .Jc(J_B_Corrected), 
             
-      .Corrected_Pixel(J_B)
+        .Corrected_Pixel(J_B) 
     );
     //===========================================
         
-    // Update output valid signal
+    // Update stage 9 pipeline registers
     always @(posedge clk) begin
-        output_valid <= stage_8_valid;
+        stage_9_valid <= stage_8_valid; 
     end
+    
+    assign output_valid = stage_9_valid; 
 
 endmodule
