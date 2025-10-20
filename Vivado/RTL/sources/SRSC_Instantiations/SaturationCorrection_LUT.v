@@ -1,11 +1,11 @@
 // LUT for x^0.3 in Q3.7 format
 module LUT_03 (
-    input  [7:0] in, // Q8.0 input
+    input      [7:0] in, // Q8.0 input
     output reg [9:0] out // Q3.7 output
 );
 
     always @(*) begin
-        case (in)
+        casez (in)
             8'd0  : out = 10'd0;  // 0^0.30 ~= 0.000000
             8'd1  : out = 10'd128;  // 1^0.30 ~= 1.000000
             8'd2  : out = 10'd158;  // 2^0.30 ~= 1.231144
@@ -270,13 +270,13 @@ endmodule
 
 // LUT for x^0.7 in Q6.4 format
 module LUT_07 (
-    input  [7:0] in, // Q8.0 input
+    input      [7:0] in, // Q8.0 input
     output reg [9:0] out // Q6.4 output
 );
 
     always @(*) begin
-        case (in)
-            8'd0  : out = 10'd0;  // 0^0.70 ~= 0.000000
+        casez (in)
+            8'd0  : out = 10'd0;   // 0^0.70 ~= 0.000000
             8'd1  : out = 10'd16;  // 1^0.70 ~= 1.000000
             8'd2  : out = 10'd26;  // 2^0.70 ~= 1.624505
             8'd3  : out = 10'd35;  // 3^0.70 ~= 2.157669
