@@ -1,0 +1,6 @@
+vcs -full64 -debug_access+all -kdb -f design_files.f Haze_Removal_TB.v -v2005 -l compile.log
+
+
+./simv +vcs+lic+wait -l sim.log
+
+./simv -gui &
