@@ -182,5 +182,10 @@ module Haze_Removal_TB;
             j <= j + 1;
         end
     end
+
+    initial begin
+        $dumpfile("waveform.vcd");
+        $dumpvars(0, ImageHazeRemoval_TB);
+    end
     
 endmodule
