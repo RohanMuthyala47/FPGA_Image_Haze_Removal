@@ -19,6 +19,6 @@ module Saturation_Correction_Multiplier (
     
     assign product = Ac_P * Jc_P; //Q9.9
     // Scale down to 8 bit value
-    assign Corrected_Pixel = (product[17]) ? 8'd255 : product[16:9];
+    assign Corrected_Pixel = product[16:9];
     
 endmodule
