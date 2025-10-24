@@ -131,10 +131,9 @@ module TE_and_SRSC (
     
     // Update Stage 5 Pipeline Registers 
     always @(posedge clk) begin
-        // Apply the scaling factor 15/16 to the Inverse Atmospheric Light values
-        Inv_AR_P1 <= Inv_AR_P - (Inv_AR_P >> 4);
-        Inv_AG_P1 <= Inv_AG_P - (Inv_AG_P >> 4);
-        Inv_AB_P1 <= Inv_AB_P - (Inv_AB_P >> 4);
+        Inv_AR_P1 <= Inv_AR_P;
+        Inv_AG_P1 <= Inv_AG_P;
+        Inv_AB_P1 <= Inv_AB_P;
             
         filtered_pixel_red_P   <= filtered_pixel_red;
         filtered_pixel_green_P <= filtered_pixel_green;
@@ -328,8 +327,6 @@ module TE_and_SRSC (
     //==========================================================================
     
     // Pipeline Registers for stage 8
-    reg [7:0] Mult_Red_P, Mult_Green_P, Mult_Blue_P;
-    
     reg       add_or_sub_R_P2, add_or_sub_G_P2, add_or_sub_B_P2;
     
     reg       stage_8_valid;
