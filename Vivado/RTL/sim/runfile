@@ -1,3 +1,5 @@
+Image_HazeRemoval_TB.v
+
 Image_HazeRemoval.v
 WindowGeneratorTop.v
 ALE.v
@@ -23,5 +25,3 @@ Multiplier_SRSC.v
 Adder_SRSC.v
 SaturationCorrection_LUT.v
 Saturation_Correction_Multiplier.v
-
-Image_HazeRemoval_TB.v
