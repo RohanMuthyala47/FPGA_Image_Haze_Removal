@@ -1,5 +1,4 @@
-vcs -full64 -debug_access+all -kdb -f runfile -v2005 -l compile.log -sverilog
-
+vcs -full64 -debug_access+all -kdb -f runfile -v2005 -l compile.log
 
 ./simv Image_HazeRemoval_TB.v -l sim.log
 
