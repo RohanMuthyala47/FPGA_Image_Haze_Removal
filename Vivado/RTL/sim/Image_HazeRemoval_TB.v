@@ -12,13 +12,13 @@ module Haze_Removal_TB;
     // AXI4-Stream Slave Interface
     reg [31:0]  S_AXIS_TDATA;
     reg         S_AXIS_TVALID;
-    reg         S_AXIS_TLAST;
+    // reg         S_AXIS_TLAST;
     wire        S_AXIS_TREADY;
     
     // AXI4-Stream Master Interface
     wire [31:0] M_AXIS_TDATA;
     wire        M_AXIS_TVALID;
-    wire        M_AXIS_TLAST;
+    // wire        M_AXIS_TLAST;
     reg         M_AXIS_TREADY;
 
     // Top module Instance
