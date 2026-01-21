@@ -22,7 +22,7 @@ module Haze_Removal_TB;
     reg         M_AXIS_TREADY;
 
     // Top module Instance
-    DCP_HazeRemoval DUT(
+    Image_HazeRemoval DUT(
         .ACLK(ACLK),
         .ARESETn(ARESETn),
         
