@@ -1,5 +1,12 @@
 # Real-Time Image Haze Removal on FPGA (ZedBoard)    ![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-00008B.svg)
 
+© 2026 Rohan M.
+
+This repository is made public solely for academic evaluation and review.
+All rights are reserved. No permission is granted to copy, modify, distribute,
+publish, or use this code or accompanying materials, in whole or in part,
+for any purpose without the explicit written consent of the author.
+
 ---
 
 ## Overview
