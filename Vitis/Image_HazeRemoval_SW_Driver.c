@@ -279,7 +279,7 @@ int main() {
         while (XUartPs_IsSending(&UART_Instance)) {
             // Busy wait to prevent buffer overflow
         }
-      
+
     }
 
     //==================================================================================
@@ -294,8 +294,6 @@ int main() {
      * - Includes: DMA setup, IP processing time, DMA completion
      * - Excludes: Data format conversion and UART transmission
      */
-
-    printf("Processing Successful \n\r");
 
     printf("Execution Time = %f ms \n\r",
            ((EndTime - StartTime) * 1000.0) / COUNTS_PER_SECOND);
