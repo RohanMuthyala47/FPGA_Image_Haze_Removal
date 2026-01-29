@@ -159,40 +159,38 @@ WindowGenerator → ALE → TE → SRSC
 
 ## Results
 
-## Hardware Architecture
-
-<img width="1887" height="769" alt="image" src="https://github.com/user-attachments/assets/9a1d54d4-8bb3-4a11-8547-68d973de808f" />
-
-## IP
-
-<img width="1231" height="778" alt="image" src="https://github.com/user-attachments/assets/f477af0c-9ea9-4c48-bc85-22c2b13b2800" />
-
-## Block Diagram
-
-<img width="1887" height="615" alt="image" src="https://github.com/user-attachments/assets/cf990cbf-254f-4ba3-98dd-f6400e60d3cb" />
-
-## FPGA Resource Utilization
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/b6759f65-5a27-4555-a706-3aeb8aec3d35" width="697"><br>
-  <em>Figure: System overview</em>
-</p>
-
 ## Example Results
 
-| Input Image | Result Image |
-|-------------|--------------|
-| <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/686fdd41-1f7d-4924-ade4-9e13a56ac051" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/78bbd8ae-8242-4b1c-991e-69e86ef1c9ad" /> |
-
-
-| Input Image | Result Image | 
-|-------------|--------------|
-| <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/1f1d7ffb-0e20-48e5-b44c-37625c225596" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/4b550c72-df07-40b6-a252-7a83b9b4a296" /> |
-
-| Input Image | Result Image | 
-|-------------|--------------|
-| <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/22734018-3548-40a8-84a5-0c475cd9eb2f" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/050d9a7f-7c9b-45d1-b505-b3fe052c203b" /> |
-
+<table align="center">
+  <tr>
+    <th>Input Image</th>
+    <th>Result Image</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/686fdd41-1f7d-4924-ade4-9e13a56ac051" width="350">
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/78bbd8ae-8242-4b1c-991e-69e86ef1c9ad" width="350">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/1f1d7ffb-0e20-48e5-b44c-37625c225596" width="350">
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/4b550c72-df07-40b6-a252-7a83b9b4a296" width="350">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/22734018-3548-40a8-84a5-0c475cd9eb2f" width="350">
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/050d9a7f-7c9b-45d1-b505-b3fe052c203b" width="350">
+    </td>
+  </tr>
+</table>
 
 ---
 
