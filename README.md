@@ -1,4 +1,4 @@
-# Real-Time Image Haze Removal on FPGA (ZedBoard)    ![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-00008B.svg)
+# Real-Time Image Haze Removal on FPGA (ZedBoard)
 
 © 2026 Rohan M.
 
@@ -46,10 +46,11 @@ Real-time haze removal is computationally expensive on general-purpose CPUs. To 
 
 ### Key Steps:
 
-1. **Atmospheric Light Estimation**  
-2. **Transmission Estimation**  
-3. **Scene Recovery and Saturation Correction**
-
+1. **Window Generation**
+2. **Atmospheric Light Estimation**  
+3. **Transmission Estimation**  
+4. **Scene Recovery and Saturation Correction**
+   
 ---
 
 ## Hardware Architecture
@@ -74,7 +75,7 @@ The complete hardware pipeline is organized into modular Verilog blocks as follo
 ### 3. **TE (Transmission Estimation)**
 
 - Estimates pixel-wise haze using:  
-  `t(x)=1 − ω min c∈{R,G,B} (Pc / Ac)`  
+  `t(x)=1 − ω min c∈{R,G,B} (Fc / Ac)`  
 - ω = 0.9375 is implemented as a constant  
 - All operations use fixed-point arithmetic
 
@@ -135,7 +136,7 @@ WindowGenerator → ALE → TE → SRSC
 
 ## Testing and Simulation
 
-- **Tools Used:** Vivado, Vitis, MATLAB, Pycharm
+- **Tools Used:** Xilinx Vivado & Vitis 2021.2, MATLAB, Pycharm
 - **BMP I/O:**  
   - Header parsed and preserved  
   - Input and output streams verified  
@@ -190,13 +191,13 @@ WindowGenerator → ALE → TE → SRSC
 
 ## Tools & Technologies
 
-- Xilinx Vivado 2023.2 (Synthesis & Implementation)
-- Xilinx Vitis 2023.2 for Software coding and FPGA programming
-- ZedBoard FPGA (Zynq-7000)  
-- Python for algorithm analysis and Look-Up Table Generation
-- MATLAB for algorithm analysis
-- MATLAB Simulink, HDL Coder
-- Tera Term for Serial Communication with PC via UART
+- Xilinx Vivado 2021.2 (Synthesis & Implementation)
+- Xilinx Vitis 2021.2 for Software Driver Development and FPGA programming
+- Hardware used - ZedBoard FPGA (Zynq-7000)  
+- Python for algorithm analysis and Look-Up Table Generation (CPU Intel Core i5 - 13450HX)
+- MATLAB for algorithm analysis (CPU Intel Core i5 - 13450HX)
+- MATLAB Simulink, HDL Coder (CPU Intel Core i5 - 13450HX)
+- Putty for Seria C0mmunication with PC via UART
   
 ---
 
@@ -216,14 +217,6 @@ WindowGenerator → ALE → TE → SRSC
 - **FPGA Image Processing**  
   *Udemy Course by Hui Hu*
   
----
-
-## License
-
-**BSD 3-Clause License**  
-You are free to fork, contribute, and build upon this project under the terms of the [BSD 3-Clause License](https://opensource.org/licenses/BSD-3-Clause).
-
-
 ---
 
 ## About
