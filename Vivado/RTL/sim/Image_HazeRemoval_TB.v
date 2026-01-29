@@ -30,12 +30,12 @@ module Haze_Removal_TB;
     
         .S_AXIS_TDATA(S_AXIS_TDATA),
         .S_AXIS_TVALID(S_AXIS_TVALID),
-        .S_AXIS_TLAST(S_AXIS_TLAST),
+        // .S_AXIS_TLAST(S_AXIS_TLAST),
         .S_AXIS_TREADY(S_AXIS_TREADY),
 
         .M_AXIS_TDATA(M_AXIS_TDATA),
         .M_AXIS_TVALID(M_AXIS_TVALID),
-        .M_AXIS_TLAST(M_AXIS_TLAST),
+        // .M_AXIS_TLAST(M_AXIS_TLAST),
         .M_AXIS_TREADY(M_AXIS_TREADY)
     );
 
@@ -122,7 +122,6 @@ module Haze_Removal_TB;
         
         S_AXIS_TDATA = 0;
         S_AXIS_TVALID = 0;
-        S_AXIS_TLAST = 0;
         M_AXIS_TREADY = 1;
         
         READ_FILE;
