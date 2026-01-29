@@ -174,13 +174,9 @@ WindowGenerator → ALE → TE → SRSC
 ## FPGA Resource Utilization
 
 <p align="center">
-  <img
-    src="https://github.com/user-attachments/assets/b6759f65-5a27-4555-a706-3aeb8aec3d35"
-    alt="image"
-    width="697"
-  />
+  <img src="https://github.com/user-attachments/assets/b6759f65-5a27-4555-a706-3aeb8aec3d35" width="697"><br>
+  <em>Figure: System overview</em>
 </p>
-
 
 ## Example Results
 
