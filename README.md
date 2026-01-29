@@ -159,6 +159,35 @@ WindowGenerator → ALE → TE → SRSC
 
 ## Results
 
+## Hardware Architecture
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9a1d54d4-8bb3-4a11-8547-68d973de808f" width="900"><br>
+  <em>Figure 1: Hardware Architecture of the Proposed System</em>
+</p>
+
+## IP
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f477af0c-9ea9-4c48-bc85-22c2b13b2800" width="900"><br>
+  <em>Figure 2: IP-Level Design</em>
+</p>
+
+## Block Diagram
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/cf990cbf-254f-4ba3-98dd-f6400e60d3cb" width="900"><br>
+  <em>Figure 3: System Block Diagram</em>
+</p>
+
+## FPGA Resource Utilization
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/b6759f65-5a27-4555-a706-3aeb8aec3d35" width="700"><br>
+  <em>Figure 4: FPGA Resource Utilization of the System</em>
+</p>
+
+
 ## Example Results
 
 <table align="center">
