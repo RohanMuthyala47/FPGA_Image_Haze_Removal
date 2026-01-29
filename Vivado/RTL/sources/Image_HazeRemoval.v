@@ -169,7 +169,6 @@ module Image_HazeRemoval (
     //==================================================================================
     TE_and_SRSC TE_SRSC (
         .clk(TE_SRSC_clk),                      // Dedicated gated clock
-        .rst(~ARESETn),                         // Active-low reset
         
         // Input: 3x3 pixel windows for processing
         .input_valid(window_valid),
