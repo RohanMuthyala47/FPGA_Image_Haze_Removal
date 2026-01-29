@@ -1,5 +1,9 @@
 # Real-Time Image Haze Removal on FPGA (ZedBoard)
 
+Paper status: Accepted and presented at the IFIP IoT Conference, November 2025.
+Manuscript accepted for publication in Springer proceedings.
+Published in Springer IFIP IoT 2025 Proceedings. DOI: xxxx
+
 © 2026 Rohan M.
 
 This repository is made public solely for academic evaluation and review.
@@ -153,11 +157,14 @@ WindowGenerator → ALE → TE → SRSC
 - Transferred Image Data from DDR to IP using DMA and AXI-4 Stream Interface 
 - Transferred the corrected pixel stream back to DDR using DMA and AXI-4 Stream Interface
 - Sent the pixel stream to PC via UART
-- Interrupt Service Routine indicates when the entire operation in complete
+- Interrupt Service Routine (ISR) indicates when the entire operation is complete.
 
 ---
 
 ## Results
+
+The proposed hardware accelerator achieves real-time image dehazing with fully
+streamed processing and consistent visual improvement across multiple test images.
 
 ## Hardware Architecture
 
