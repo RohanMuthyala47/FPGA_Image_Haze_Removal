@@ -179,7 +179,7 @@ WindowGenerator → ALE → TE → SRSC
 
 | Input Image | Result Image |
 |-------------|--------------|
-| <img width="688" height="691" alt="image" src="https://github.com/user-attachments/assets/732b026b-2018-4b39-af9f-b45e189c6a5e" /> | <img width="609" height="615" alt="image" src="https://github.com/user-attachments/assets/02f5f06b-06d4-49cb-951b-cf6e691e243a" /> |
+| <img width="688" height="691" alt="image" src="https://github.com/user-attachments/assets/732b026b-2018-4b39-af9f-b45e189c6a5e" /> | <img width="689" height="688" alt="image" src="https://github.com/user-attachments/assets/02f5f06b-06d4-49cb-951b-cf6e691e243a" /> |
 
 
 | Input Image | Result Image | 
