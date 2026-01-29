@@ -159,32 +159,36 @@ WindowGenerator → ALE → TE → SRSC
 
 ## Results
 
+## Hardware Architecture
+
+<img width="1887" height="769" alt="image" src="https://github.com/user-attachments/assets/9a1d54d4-8bb3-4a11-8547-68d973de808f" />
+
 ## IP
 
-<img width="1216" height="675" alt="Screenshot 2025-08-09 135758" src="https://github.com/user-attachments/assets/9e84e90f-8107-4c9b-b478-23ad2da632cb" />
+<img width="1231" height="778" alt="image" src="https://github.com/user-attachments/assets/f477af0c-9ea9-4c48-bc85-22c2b13b2800" />
 
 ## Block Diagram
 
-<img width="1893" height="903" alt="Screenshot 2025-08-09 140851" src="https://github.com/user-attachments/assets/f43d95a3-38f9-4d19-a1f0-9dacdc62bb1d" />
+<img width="1887" height="615" alt="image" src="https://github.com/user-attachments/assets/cf990cbf-254f-4ba3-98dd-f6400e60d3cb" />
 
-## Utilization
+## FPGA Resource Utilization
 
-<img width="632" height="269" alt="Screenshot 2025-08-11 191619" src="https://github.com/user-attachments/assets/3acc05e7-c78b-4b4a-ad9e-64d12bd71f1e" />
+<img width="697" height="262" alt="image" src="https://github.com/user-attachments/assets/b6759f65-5a27-4555-a706-3aeb8aec3d35" />
 
 ## Example Results
 
 | Input Image | Result Image |
 |-------------|--------------|
-| ![canyon_512](https://github.com/user-attachments/assets/b0f36204-ad30-4f53-a093-c8c53ff24914) | ![result_image](https://github.com/user-attachments/assets/2a35c13e-4176-4630-ad66-9814118e3f8d) |
+| <img width="688" height="691" alt="image" src="https://github.com/user-attachments/assets/732b026b-2018-4b39-af9f-b45e189c6a5e" /> | <img width="609" height="615" alt="image" src="https://github.com/user-attachments/assets/02f5f06b-06d4-49cb-951b-cf6e691e243a" /> |
 
 
 | Input Image | Result Image | 
 |-------------|--------------|
-| ![building_512](https://github.com/user-attachments/assets/c60748cc-11c5-4420-9a95-2a84e2fb2239) | ![result_image (1)](https://github.com/user-attachments/assets/d428269b-8e91-46e9-8f49-f52b891cd594) |
+| <img width="691" height="691" alt="image" src="https://github.com/user-attachments/assets/85c274da-8cf4-4c9a-a672-9605a79d861e" /> | <img width="690" height="689" alt="image" src="https://github.com/user-attachments/assets/33fae1cd-68b7-43d9-b6e8-000f82724f1d" /> |
 
 | Input Image | Result Image | 
 |-------------|--------------|
-| ![town_bmp](https://github.com/user-attachments/assets/7a467f76-a99e-4641-a100-4847a4cb1220) | ![result_image (1)](https://github.com/user-attachments/assets/b0853c65-79c9-4d1b-a0ca-2deb3dcbce8c) |
+| <img width="689" height="688" alt="image" src="https://github.com/user-attachments/assets/712408a9-1d17-4eed-aa07-739040f410a3" /> | <img width="689" height="691" alt="image" src="https://github.com/user-attachments/assets/9b3adf6c-9d93-49f1-a2ef-ca75a6f59d5c" /> |
 
 
 ---
@@ -195,31 +199,31 @@ WindowGenerator → ALE → TE → SRSC
 - Xilinx Vitis 2021.2 for Software Driver Development and FPGA programming
 - Hardware used - ZedBoard FPGA (Zynq-7000)  
 - Python for algorithm analysis and Look-Up Table Generation (CPU Intel Core i5 - 13450HX)
-- MATLAB for algorithm analysis (CPU Intel Core i5 - 13450HX)
-- MATLAB Simulink, HDL Coder (CPU Intel Core i5 - 13450HX)
-- Putty for Seria C0mmunication with PC via UART
+- MATLAB for algorithm analysis (CPU - Intel Core i5-13450HX)
+- MATLAB Simulink, HDL Coder (CPU - Intel Core i5-13450HX)
+- Putty for Serial Communication with Host PC via UART
   
 ---
 
 ## References
 
-- **He, Kaiming**, **Jian Sun**, and **Xiaoou Tang**.  
-  *"Single Image Haze Removal Using Dark Channel Prior."*  
-  *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI), 2011.*
+- He, K., Sun, J., Tang, X.: Single image haze removal using dark channel prior. In:
+2009 IEEE Conference on Computer Vision and Pattern Recognition. pp. 1956
+1963 (2009). https://doi.org/10.1109/CVPR.2009.5206515
 
-- **IEEE TCSVT Paper**  
-  *"Hardware Implementation of a Fast and Efficient Haze Removal Method - "*
-  *Yeu-Horng Shiau, Hung-Yu Yang, Pei-Yin Chen, Member, IEEE, and Ya-Zhu Chuang*
+- Shiau, Y.H., Yang, H.Y., Chen, P.Y., Chuang, Y.Z.: Hardware implementation
+of a fast and efficient haze removal method. IEEE Transactions on Circuits and
+Systems for Video Technology 23(8), 1369–1374 (2013). https://doi.org/10.1109/
+TCSVT.2013.2243650
 
-- **Image Processing on Zynq**  
-  *Vipin Kizheppatt - https://www.youtube.com/@Vipinkmenon*
+- Hu, H.: Fpga image processing. Udemy online course, https://www.udemy.com/
+course/fpga-image-processing/
 
-- **FPGA Image Processing**  
-  *Udemy Course by Hui Hu*
+- Kizheppatt, V.: Image processing on zynq. YouTube playlist 
   
 ---
 
 ## About
 
-**Hardware Accelerator Design | March–September 2025**  
+**Hardware Accelerator Design | April–November 2025**  
 Designed a complete image dehazing pipeline based on the Dark Channel Prior algorithm using pipelined Verilog modules, optimized for fixed-point hardware on FPGA.
