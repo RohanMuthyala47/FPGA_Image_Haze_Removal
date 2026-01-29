@@ -136,6 +136,9 @@ module Haze_Removal_TB;
             S_AXIS_TDATA[7:0]   = bmpdata[i];       // Blue
             S_AXIS_TDATA[15:8]  = bmpdata[i + 1];   // Green
             S_AXIS_TDATA[23:16] = bmpdata[i + 2];   // Red
+
+            $fwrite(file3, "%0d, ", {8'h00, bmpdata[i], bmpdata[i + 1], bmpdata[i + 2]});
+            
             #10;
             S_AXIS_TVALID = 1;
         end
