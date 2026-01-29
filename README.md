@@ -179,16 +179,16 @@ WindowGenerator → ALE → TE → SRSC
 
 | Input Image | Result Image |
 |-------------|--------------|
-| <img width="688" height="691" alt="image" src="https://github.com/user-attachments/assets/732b026b-2018-4b39-af9f-b45e189c6a5e" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/78bbd8ae-8242-4b1c-991e-69e86ef1c9ad" /> |
+| <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/686fdd41-1f7d-4924-ade4-9e13a56ac051" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/78bbd8ae-8242-4b1c-991e-69e86ef1c9ad" /> |
 
 
 | Input Image | Result Image | 
 |-------------|--------------|
-| <img width="691" height="691" alt="image" src="https://github.com/user-attachments/assets/85c274da-8cf4-4c9a-a672-9605a79d861e" /> | <img width="690" height="689" alt="image" src="https://github.com/user-attachments/assets/33fae1cd-68b7-43d9-b6e8-000f82724f1d" /> |
+| <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/1f1d7ffb-0e20-48e5-b44c-37625c225596" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/4b550c72-df07-40b6-a252-7a83b9b4a296" /> |
 
 | Input Image | Result Image | 
 |-------------|--------------|
-| <img width="689" height="688" alt="image" src="https://github.com/user-attachments/assets/712408a9-1d17-4eed-aa07-739040f410a3" /> | <img width="689" height="691" alt="image" src="https://github.com/user-attachments/assets/9b3adf6c-9d93-49f1-a2ef-ca75a6f59d5c" /> |
+| <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/22734018-3548-40a8-84a5-0c475cd9eb2f" /> | <img width="827" height="827" alt="image" src="https://github.com/user-attachments/assets/050d9a7f-7c9b-45d1-b505-b3fe052c203b" /> |
 
 
 ---
