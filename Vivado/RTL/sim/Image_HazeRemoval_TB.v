@@ -182,9 +182,11 @@ module Haze_Removal_TB;
         end
     end
 
-    initial begin
-        $dumpfile("waveform.vcd");
-        $dumpvars(0, ImageHazeRemoval_TB);
-    end
+    // initial begin
+        // $fsdbDumpfile("dump.fsdb");  // Record the waveform, waveform name testname.fsdb
+        // $fsdbDumpvars("+all");    // + all parameters, Struct structures in Dump SV
+        // $fsdbDumpSVA();      // Present the result of Assertion in FSDB
+        // $fsdbDumpMDA(); 
+    // end
     
 endmodule
