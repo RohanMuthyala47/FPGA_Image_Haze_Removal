@@ -170,7 +170,7 @@ WindowGenerator → ALE → TE → SRSC
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/f477af0c-9ea9-4c48-bc85-22c2b13b2800" width="900"><br>
-  <em>Figure 2: IP-Level Design</em>
+  <em>Figure 2: Custom IP for the Hardware Core</em>
 </p>
 
 ## Block Diagram
